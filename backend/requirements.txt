@@ -1,0 +1,12 @@
+fastapi>=0.141.0
+email-validator
+uvicorn==0.34.0
+jinja2==3.1.6
+python-multipart==0.0.32
+pyjwt==2.10.1
+bcrypt>=4.0.1
+pypdf
+python-docx
+reportlab==4.2.5
+pandas==3.0.3
+numpy==2.5.1

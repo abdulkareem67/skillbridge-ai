@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}AI Career Advisor — SkillBridge AI{% endblock %}
+
+{% block content %}
+<div class="page container">
+  <div class="page-header fade-in">
+    <h1>AI Career Advisor</h1>
+    <p>Ask about career fit, what to learn next, CV tips, interview prep, or certifications.</p>
+  </div>
+
+  <div class="glass card" style="padding:0; overflow:hidden">
+    <div class="chat-header">
+      <div class="chat-avatar">🤖</div>
+      <div class="chat-header-meta">
+        <strong>SkillBridge Advisor</strong>
+        <span class="chat-status">Online · replies instantly</span>
+      </div>
+    </div>
+    <div class="chat-window" id="chat-window"></div>
+    <div style="padding:16px; border-top:1px solid var(--card-border)">
+      <div class="suggestion-row">
+        <button class="btn btn-sm" onclick="ask(&quot;I don't know where to start&quot;)">🧭 Where to start</button>
+        <button class="btn btn-sm" onclick="ask('Which career is best for me?')">🎯 Best career for me</button>
+        <button class="btn btn-sm" onclick="ask('What should I learn next?')">📚 What to learn next</button>
+        <button class="btn btn-sm" onclick="ask('How can I improve my CV?')">📄 Improve my CV</button>
+        <button class="btn btn-sm" onclick="ask('How do I apply for jobs?')">💼 How to apply</button>
+        <button class="btn btn-sm" onclick="ask('How do I prepare for interviews?')">🎤 Interview prep</button>
+        <button class="btn btn-sm" onclick="ask('Which certifications are valuable?')">🏅 Certifications</button>
+      </div>
+      <form id="chat-form" class="chat-composer">
+        <input type="text" id="chat-input" placeholder="Ask about careers, skills, CV, interviews..." autocomplete="off" />
+        <button class="btn btn-primary chat-send-btn" type="submit" title="Send" aria-label="Send">➤</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/advisor.js"></script>
+{% endblock %}

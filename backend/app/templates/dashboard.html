@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SkillBridge AI{% endblock %}
+
+{% block content %}
+<div class="page container">
+  <div class="page-header fade-in">
+    <h1>Your Dashboard</h1>
+    <p>A quick snapshot of your skills, match score, and progress.</p>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:24px">
+    <div class="glass card">
+      <div class="stat-value" id="stat-match">--%</div>
+      <div class="stat-label">Skill Match Score</div>
+    </div>
+    <div class="glass card">
+      <div class="stat-value" id="stat-total-skills">0</div>
+      <div class="stat-label">Total Skills Logged</div>
+    </div>
+    <div class="glass card">
+      <div class="stat-value" id="stat-missing">0</div>
+      <div class="stat-label">Missing Skills</div>
+    </div>
+    <div class="glass card">
+      <div class="stat-value" id="stat-opportunities">0</div>
+      <div class="stat-label">Matched Opportunities</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:24px">
+    <div class="glass card">
+      <h3 style="margin-top:0">Skill Match Score</h3>
+      <canvas id="chart-match" height="220"></canvas>
+    </div>
+    <div class="glass card">
+      <h3 style="margin-top:0">Skills by Category</h3>
+      <canvas id="chart-category" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="glass card" style="margin-bottom:24px">
+    <h3 style="margin-top:0">Learning Progress</h3>
+    <p style="color:var(--text-muted)" id="learning-progress-text">Set a target role to start tracking roadmap progress.</p>
+    <div class="progress-track">
+      <div class="progress-fill" id="learning-progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="glass card" style="margin-bottom:24px">
+    <h3 style="margin-top:0">Target Role</h3>
+    <p style="color:var(--text-muted)" id="current-role-text">No target role selected yet.</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap">
+      <select id="discipline-select" style="max-width:240px"></select>
+      <select id="role-select" style="max-width:280px"></select>
+      <button class="btn btn-primary" onclick="saveRole()">Set Target Role</button>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <a href="/cv-upload" class="glass feature-card">
+      <div class="feature-icon">📄</div>
+      <h3>Upload CV</h3>
+      <p style="color:var(--text-muted)">Add skills from your resume.</p>
+    </a>
+    <a href="/skill-analysis" class="glass feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Skill Analysis</h3>
+      <p style="color:var(--text-muted)">See your gap analysis in detail.</p>
+    </a>
+    <a href="/roadmap" class="glass feature-card">
+      <div class="feature-icon">🗺️</div>
+      <h3>Learning Roadmap</h3>
+      <p style="color:var(--text-muted)">Follow your personalized plan.</p>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

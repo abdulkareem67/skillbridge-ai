@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Learning Roadmap — SkillBridge AI{% endblock %}
+
+{% block content %}
+<div class="page container">
+  <div class="page-header fade-in" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px">
+    <div>
+      <h1>Personalized Learning Roadmap</h1>
+      <p id="roadmap-role-text">Loading your roadmap...</p>
+    </div>
+    <a class="btn btn-primary" id="download-pdf" href="#" target="_blank">⬇ Download PDF Report</a>
+  </div>
+
+  <div class="phase-tabs">
+    <div class="phase-tab active" data-phase="beginner" onclick="switchPhase('beginner')">Beginner</div>
+    <div class="phase-tab" data-phase="intermediate" onclick="switchPhase('intermediate')">Intermediate (Projects)</div>
+    <div class="phase-tab" data-phase="advanced" onclick="switchPhase('advanced')">Advanced (Interview Prep)</div>
+  </div>
+
+  <div class="glass card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+      <h3 style="margin:0" id="phase-title">Beginner Phase</h3>
+      <span style="color:var(--text-muted); font-size:0.85rem" id="phase-duration"></span>
+    </div>
+    <div id="topics-list"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/roadmap.js"></script>
+{% endblock %}

@@ -1,0 +1,9 @@
+# Optional ML dependencies for the trainable AI advisor (DistilBERT intent model).
+# The website runs fine WITHOUT these — install them only when you want to train
+# and use the model. Install with:  pip install -r requirements-ml.txt
+#
+# Note: torch is a large download (hundreds of MB). The CPU build is enough here.
+transformers>=4.44.0
+torch>=2.2.0
+scikit-learn>=1.4.0
+accelerate>=0.30.0

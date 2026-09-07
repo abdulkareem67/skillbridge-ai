@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Register — SkillBridge AI{% endblock %}
+
+{% block nav %}
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="brand">⚡ SkillBridge AI</a>
+    <div class="nav-actions">
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme">☾</button>
+      <a href="/login" class="btn btn-ghost">Login</a>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="glass auth-card fade-in">
+    <h1>Create your account</h1>
+    <p style="color:var(--text-muted); margin-top:-8px">Start mapping your career path today.</p>
+    <form id="register-form">
+      <label>Full Name</label>
+      <input type="text" name="name" required />
+      <label>Email</label>
+      <input type="email" name="email" required />
+      <label>City / Location</label>
+      <input type="text" name="location" placeholder="e.g. Lahore" value="Pakistan" />
+      <label>Password</label>
+      <input type="password" name="password" minlength="6" required />
+      <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="/login">Login here</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("register-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  try {
+    const user = await api("/api/auth/register", { method: "POST", body: JSON.stringify({
+      name: fd.get("name"), email: fd.get("email"), password: fd.get("password"), location: fd.get("location") || "Pakistan"
+    })});
+    claimAccountInThisTab(user.id);
+    window.location.href = "/dashboard";
+  } catch (err) {
+    toast(err.message, "error");
+  }
+});
+</script>
+{% endblock %}

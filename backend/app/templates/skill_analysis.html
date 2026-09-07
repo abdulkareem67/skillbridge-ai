@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Skill Analysis — SkillBridge AI{% endblock %}
+
+{% block content %}
+<div class="page container">
+  <div class="page-header fade-in">
+    <h1>AI Skill Gap Analysis</h1>
+    <p>Select a target role to compare your skills against real job requirements.</p>
+  </div>
+
+  <div class="glass card" style="margin-bottom:24px">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end">
+      <div style="flex:1; min-width:200px">
+        <label>Field of Study</label>
+        <select id="discipline-select"></select>
+      </div>
+      <div style="flex:1; min-width:200px">
+        <label>Target Role</label>
+        <select id="role-select"></select>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:16px" onclick="runAnalysis()">Analyze Skill Gap</button>
+    </div>
+    <p style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted)">Pick your field first (e.g. Civil Engineering, Business &amp; Finance) — then choose a role within it.</p>
+  </div>
+
+  <div id="results" style="display:none">
+    <div class="grid grid-2" style="margin-bottom:24px">
+      <div class="glass card" style="text-align:center">
+        <h3 style="margin-top:0">Match Score</h3>
+        <canvas id="chart-gap" height="220"></canvas>
+        <div class="stat-value" id="match-percent" style="margin-top:10px">0%</div>
+      </div>
+      <div class="glass card">
+        <h3 style="margin-top:0">Progress Overview</h3>
+        <p style="color:var(--text-muted)" id="progress-summary"></p>
+        <div class="progress-track" style="margin-bottom:20px">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <a class="btn btn-primary btn-block" href="/roadmap">View Learning Roadmap →</a>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:24px">
+      <div class="glass card">
+        <h3 style="margin-top:0">✅ Strengths (Matched Skills)</h3>
+        <div id="matched-list"></div>
+      </div>
+      <div class="glass card">
+        <h3 style="margin-top:0">⚠️ Missing Skills</h3>
+        <div id="missing-list"></div>
+      </div>
+    </div>
+
+    <div class="glass card">
+      <h3 style="margin-top:0">🎓 Recommended Certifications</h3>
+      <div id="cert-list"></div>
+    </div>
+  </div>
+
+  <div id="no-results" class="empty-state">Choose a target role and click "Analyze Skill Gap" to see your results.</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/analysis.js"></script>
+{% endblock %}

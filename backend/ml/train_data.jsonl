@@ -1,0 +1,120 @@
+{"text": "hi", "intent": "greeting"}
+{"text": "hello", "intent": "greeting"}
+{"text": "hey there", "intent": "greeting"}
+{"text": "salam", "intent": "greeting"}
+{"text": "assalam o alaikum", "intent": "greeting"}
+{"text": "good morning", "intent": "greeting"}
+{"text": "helo", "intent": "greeting"}
+{"text": "hi there advisor", "intent": "greeting"}
+{"text": "yo", "intent": "greeting"}
+{"text": "hey", "intent": "greeting"}
+{"text": "thank you", "intent": "thanks"}
+{"text": "thanks a lot", "intent": "thanks"}
+{"text": "shukriya", "intent": "thanks"}
+{"text": "thanks for the help", "intent": "thanks"}
+{"text": "thank u", "intent": "thanks"}
+{"text": "appreciate it", "intent": "thanks"}
+{"text": "that really helps thanks", "intent": "thanks"}
+{"text": "thankyou so much", "intent": "thanks"}
+{"text": "many thanks", "intent": "thanks"}
+{"text": "what is skillbridge", "intent": "about"}
+{"text": "how does this work", "intent": "about"}
+{"text": "what can you do", "intent": "about"}
+{"text": "tell me about this platform", "intent": "about"}
+{"text": "what do you do", "intent": "about"}
+{"text": "how can you help me", "intent": "about"}
+{"text": "what features does this app have", "intent": "about"}
+{"text": "explain what this website is", "intent": "about"}
+{"text": "what is this tool for", "intent": "about"}
+{"text": "i dont know where to start", "intent": "getting_started"}
+{"text": "where do i start", "intent": "getting_started"}
+{"text": "i am new to this", "intent": "getting_started"}
+{"text": "i am confused about my career", "intent": "getting_started"}
+{"text": "no idea what to do", "intent": "getting_started"}
+{"text": "how do i start", "intent": "getting_started"}
+{"text": "just starting out and feeling lost", "intent": "getting_started"}
+{"text": "i have no experience where do i begin", "intent": "getting_started"}
+{"text": "help me get started", "intent": "getting_started"}
+{"text": "im a fresh graduate where to begin", "intent": "getting_started"}
+{"text": "how do i apply for jobs", "intent": "how_to_apply"}
+{"text": "how to apply", "intent": "how_to_apply"}
+{"text": "how can i apply for a job", "intent": "how_to_apply"}
+{"text": "where can i apply for these roles", "intent": "how_to_apply"}
+{"text": "how do i submit job applications", "intent": "how_to_apply"}
+{"text": "how to apply for an internship", "intent": "how_to_apply"}
+{"text": "how i will aply for job", "intent": "how_to_apply"}
+{"text": "how do i apply online", "intent": "how_to_apply"}
+{"text": "what are the steps to apply for a job", "intent": "how_to_apply"}
+{"text": "applying for jobs how", "intent": "how_to_apply"}
+{"text": "what skills do i need for data analyst", "intent": "skills_for_role"}
+{"text": "skills required for web developer", "intent": "skills_for_role"}
+{"text": "what skills for cybersecurity analyst", "intent": "skills_for_role"}
+{"text": "skills needed for cloud engineer", "intent": "skills_for_role"}
+{"text": "what do i need to learn for ui ux designer", "intent": "skills_for_role"}
+{"text": "which skills for backend developer", "intent": "skills_for_role"}
+{"text": "skills for software engineer", "intent": "skills_for_role"}
+{"text": "what does a data scientist need to know", "intent": "skills_for_role"}
+{"text": "requirements for a devops engineer role", "intent": "skills_for_role"}
+{"text": "what is my match score", "intent": "match_score"}
+{"text": "how am i doing", "intent": "match_score"}
+{"text": "whats my score", "intent": "match_score"}
+{"text": "how good is my match for this role", "intent": "match_score"}
+{"text": "my current match percentage", "intent": "match_score"}
+{"text": "how well do i match the job", "intent": "match_score"}
+{"text": "am i qualified for this role", "intent": "match_score"}
+{"text": "how close am i to being ready", "intent": "match_score"}
+{"text": "which career is best for me", "intent": "career_fit"}
+{"text": "what career suits me", "intent": "career_fit"}
+{"text": "best career for my skills", "intent": "career_fit"}
+{"text": "which role fits me best", "intent": "career_fit"}
+{"text": "what job should i pursue", "intent": "career_fit"}
+{"text": "which field is right for me", "intent": "career_fit"}
+{"text": "recommend a career path for me", "intent": "career_fit"}
+{"text": "what career matches my skills", "intent": "career_fit"}
+{"text": "what should i learn next", "intent": "next_skill"}
+{"text": "what to study next", "intent": "next_skill"}
+{"text": "next skill to learn", "intent": "next_skill"}
+{"text": "what do i learn now", "intent": "next_skill"}
+{"text": "whats my next step in learning", "intent": "next_skill"}
+{"text": "what should i focus on learning", "intent": "next_skill"}
+{"text": "which skill should i learn now", "intent": "next_skill"}
+{"text": "what to learn to improve my match", "intent": "next_skill"}
+{"text": "how can i improve my cv", "intent": "cv_tips"}
+{"text": "resume tips", "intent": "cv_tips"}
+{"text": "improve my resume", "intent": "cv_tips"}
+{"text": "make my cv better", "intent": "cv_tips"}
+{"text": "cv improvement suggestions", "intent": "cv_tips"}
+{"text": "how to make a good cv", "intent": "cv_tips"}
+{"text": "tips for my resume", "intent": "cv_tips"}
+{"text": "help me fix my cv", "intent": "cv_tips"}
+{"text": "how can i improv my cv", "intent": "cv_tips"}
+{"text": "how do i prepare for interviews", "intent": "interview_prep"}
+{"text": "interview tips", "intent": "interview_prep"}
+{"text": "help me prep for an interview", "intent": "interview_prep"}
+{"text": "how to crack an interview", "intent": "interview_prep"}
+{"text": "interview preparation advice", "intent": "interview_prep"}
+{"text": "prepare me for a job interview", "intent": "interview_prep"}
+{"text": "what interview questions should i expect", "intent": "interview_prep"}
+{"text": "technical interview prep", "intent": "interview_prep"}
+{"text": "prepair me for the intervew", "intent": "interview_prep"}
+{"text": "which certifications should i get", "intent": "certifications"}
+{"text": "valuable certificates for my field", "intent": "certifications"}
+{"text": "recommend certifications", "intent": "certifications"}
+{"text": "what certification is good for me", "intent": "certifications"}
+{"text": "best certs for data analytics", "intent": "certifications"}
+{"text": "should i get aws certified", "intent": "certifications"}
+{"text": "certification suggestions please", "intent": "certifications"}
+{"text": "which certificate helps my career", "intent": "certifications"}
+{"text": "what certificaton should i do", "intent": "certifications"}
+{"text": "what is the weather today", "intent": "fallback"}
+{"text": "tell me a joke", "intent": "fallback"}
+{"text": "what time is it", "intent": "fallback"}
+{"text": "who won the cricket match yesterday", "intent": "fallback"}
+{"text": "i like pizza", "intent": "fallback"}
+{"text": "what is the capital of france", "intent": "fallback"}
+{"text": "play some music", "intent": "fallback"}
+{"text": "how old are you", "intent": "fallback"}
+{"text": "tell me about the stock market", "intent": "fallback"}
+{"text": "what is your favorite color", "intent": "fallback"}
+{"text": "can you order food for me", "intent": "fallback"}
+{"text": "translate this sentence to urdu", "intent": "fallback"}

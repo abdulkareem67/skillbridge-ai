@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-ml/
+venv/
+env/
+
+# SkillBridge data — created automatically, never commit user data or uploads
+backend/data/*.db
+backend/data/*.db-journal
+backend/data/*.db-wal
+backend/data/*.db-shm
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ML training artifacts — checkpoints are throwaway. model/ (256MB) is excluded
+# too: it's over GitHub's 100MB file limit, and the Dockerfile doesn't ship it
+# anyway (the chatbot falls back to rule-based matching when it's absent).
+backend/ml/_checkpoints/
+backend/ml/model/
+
+# Secrets
+.env
+*.env.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
