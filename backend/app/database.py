@@ -1,8 +1,13 @@
+import os
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "skillbridge.db"
-DB_PATH.parent.mkdir(exist_ok=True)
+# The database file location can be overridden with the SKILLBRIDGE_DB_PATH env
+# var. This is required on hosts with a read-only filesystem (e.g. Vercel), where
+# only /tmp is writable.
+_default_db = Path(__file__).resolve().parent.parent / "data" / "skillbridge.db"
+DB_PATH = Path(os.environ.get("SKILLBRIDGE_DB_PATH", str(_default_db)))
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def get_db():
