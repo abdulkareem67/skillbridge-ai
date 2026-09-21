@@ -2,12 +2,12 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .auth import DEFAULT_DEV_SECRET, IS_PRODUCTION, SECRET_KEY, get_active_session, list_sessions
-from .database import connect, init_db
+from .auth import ENV_SECRET, IS_PRODUCTION, get_active_session, list_sessions
+from .database import USE_POSTGRES, connect, init_db
 from .routers import (
     auth_router,
     chatbot_router,
@@ -23,21 +23,57 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title="SkillBridge AI")
 
-init_db()
+# In production the app signs sessions with a secret kept in the database. With
+# no database there is nowhere durable to keep it (the local SQLite file is wiped
+# on every cold start), so rather than run insecurely — or crash with an opaque
+# 500 — we serve a page explaining how to finish the setup.
+NEEDS_SETUP = IS_PRODUCTION and not ENV_SECRET and not USE_POSTGRES
 
-if SECRET_KEY == DEFAULT_DEV_SECRET:
-    if IS_PRODUCTION:
-        # Fail closed: refuse to run publicly with the well-known repo secret,
-        # which anyone could use to forge login sessions.
-        raise RuntimeError(
-            "SKILLBRIDGE_SECRET is not set. Add it in your Vercel project settings "
-            "(Settings -> Environment Variables) with a strong random value, e.g. "
-            "`python -c \"import secrets; print(secrets.token_urlsafe(48))\"`, then redeploy."
-        )
-    logger.warning(
-        "SKILLBRIDGE_SECRET is not set — using the built-in development secret. "
-        "Fine for local development, but set SKILLBRIDGE_SECRET before deploying publicly."
-    )
+if not NEEDS_SETUP:
+    init_db()
+elif not ENV_SECRET:
+    logger.warning("No database connected — serving the setup page until one is added.")
+
+SETUP_PAGE = """<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finish setup — SkillBridge AI</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#0b0f1c;color:#eef0fb;font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:24px}
+  .card{max-width:560px;width:100%;background:#151a2e;border:1px solid #2a3150;
+        border-radius:18px;padding:32px}
+  h1{margin:0 0 6px;font-size:1.5rem}
+  .sub{color:#9aa3c7;margin:0 0 24px}
+  ol{line-height:1.8;padding-left:20px;margin:0}
+  li{margin-bottom:10px}
+  b{color:#7dd3fc}
+  .note{margin-top:24px;padding:14px 16px;background:#101528;border-radius:12px;
+        color:#9aa3c7;font-size:0.92rem;line-height:1.6}
+</style></head><body>
+<div class="card">
+  <h1>&#9889; Almost there</h1>
+  <p class="sub">SkillBridge AI needs a database before it can start.</p>
+  <ol>
+    <li>Open this project on <b>vercel.com</b></li>
+    <li>Click the <b>Storage</b> tab</li>
+    <li>Click <b>Create Database</b> and choose <b>Neon &mdash; Serverless Postgres</b></li>
+    <li>Pick the <b>Free</b> plan, then click <b>Connect</b> to link it to this project</li>
+    <li>Go to <b>Deployments</b>, click the <b>&#8943;</b> menu on the newest one, and choose <b>Redeploy</b></li>
+  </ol>
+  <div class="note">
+    That&rsquo;s the only step left. Once the database is connected, this page
+    disappears and your site starts working &mdash; logins will stay signed in and
+    your data will be saved permanently. No other settings are needed.
+  </div>
+</div></body></html>"""
+
+
+@app.middleware("http")
+async def setup_gate(request: Request, call_next):
+    if NEEDS_SETUP and request.url.path != "/health":
+        return HTMLResponse(SETUP_PAGE, status_code=503)
+    return await call_next(request)
 
 
 @app.middleware("http")

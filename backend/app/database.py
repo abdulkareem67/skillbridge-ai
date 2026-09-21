@@ -14,6 +14,7 @@ plus ``conn.commit()`` and ``conn.close()``. The routers keep their SQLite-style
 """
 import os
 import re
+import secrets
 import sqlite3
 from pathlib import Path
 
@@ -176,6 +177,12 @@ CREATE TABLE IF NOT EXISTS chat_history (
     message TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS app_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_key TEXT UNIQUE NOT NULL,
+    config_value TEXT NOT NULL
+);
 """
 
 _POSTGRES_SCHEMA = """
@@ -213,7 +220,49 @@ CREATE TABLE IF NOT EXISTS chat_history (
     message TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS app_config (
+    id SERIAL PRIMARY KEY,
+    config_key TEXT UNIQUE NOT NULL,
+    config_value TEXT NOT NULL
+);
 """
+
+
+SECRET_CONFIG_KEY = "session_secret"
+
+
+def get_or_create_secret() -> str:
+    """Return the session-signing secret held in the database.
+
+    On first use a strong random secret is generated and stored, so the app is
+    secure out of the box without anyone having to set an environment variable.
+    Because it lives in the database it survives cold starts, which keeps users
+    logged in — and it stays private, unlike a secret committed to the repo.
+    """
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT config_value FROM app_config WHERE config_key = ?",
+            (SECRET_CONFIG_KEY,),
+        ).fetchone()
+        if row:
+            return row["config_value"]
+
+        # Another cold start may be doing this at the same moment; whoever
+        # inserts first wins and we both read back the same value.
+        conn.execute(
+            "INSERT OR IGNORE INTO app_config (config_key, config_value) VALUES (?, ?)",
+            (SECRET_CONFIG_KEY, secrets.token_urlsafe(48)),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT config_value FROM app_config WHERE config_key = ?",
+            (SECRET_CONFIG_KEY,),
+        ).fetchone()
+        return row["config_value"]
+    finally:
+        conn.close()
 
 
 def init_db():

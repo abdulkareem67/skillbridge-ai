@@ -7,7 +7,7 @@ import jwt
 from fastapi import HTTPException, Request, Response, status
 
 DEFAULT_DEV_SECRET = "skillbridge-ai-dev-secret-change-me"
-SECRET_KEY = os.environ.get("SKILLBRIDGE_SECRET", DEFAULT_DEV_SECRET)
+ENV_SECRET = os.environ.get("SKILLBRIDGE_SECRET")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24 * 7
 TOKEN_MAX_AGE_SECONDS = 60 * 60 * TOKEN_EXPIRE_HOURS
@@ -28,6 +28,35 @@ ACTIVE_COOKIE = "active_uid"
 MAX_ACCOUNTS = 5
 
 
+_secret_cache: str | None = None
+
+
+def get_secret_key() -> str:
+    """Resolve the secret used to sign session tokens.
+
+    Order of preference:
+      1. SKILLBRIDGE_SECRET, if someone set it explicitly.
+      2. A random secret generated once and kept in the database. This keeps the
+         app secure with no manual configuration, and it persists across cold
+         starts so people stay logged in.
+      3. The built-in development secret — local use only, never in production.
+    """
+    global _secret_cache
+    if ENV_SECRET:
+        return ENV_SECRET
+    if _secret_cache:
+        return _secret_cache
+    try:
+        from .database import get_or_create_secret
+
+        _secret_cache = get_or_create_secret()
+        return _secret_cache
+    except Exception:
+        if IS_PRODUCTION:
+            raise
+        return DEFAULT_DEV_SECRET
+
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
@@ -42,12 +71,12 @@ def create_token(user_id: int, email: str) -> str:
         "email": email,
         "exp": datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS),
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, get_secret_key(), algorithm=ALGORITHM)
 
 
 def decode_token(token: str) -> dict:
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired session")
 
@@ -104,7 +133,9 @@ def list_sessions(request: Request) -> list[dict]:
     for s in _read_raw_sessions(request):
         try:
             decode_token(s.get("token", ""))
-        except HTTPException:
+        except Exception:
+            # Expired/forged token, or the secret store is briefly unreachable —
+            # either way treat this account as signed out rather than erroring.
             continue
         valid.append(s)
     return valid
