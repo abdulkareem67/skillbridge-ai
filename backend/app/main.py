@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from .auth import ENV_SECRET, IS_PRODUCTION, get_active_session, list_sessions
 from .database import USE_POSTGRES, connect, init_db
+from .skills_data import platform_stats
 from .routers import (
     auth_router,
     chatbot_router,
@@ -104,6 +105,31 @@ app.include_router(reports_router.router)
 
 MAIN_JS_PATH = BASE_DIR / "static" / "js" / "main.js"
 
+SITE_NAME = "SkillBridge AI"
+
+# One description per page, used for the meta description and the social cards.
+# Search results and shared links show these, so each one names what the page
+# actually does rather than repeating the site tagline.
+PAGE_DESCRIPTIONS = {
+    "landing.html": (
+        "Upload your CV, see which skills you're missing for your target role, "
+        "and get a free step-by-step roadmap to close the gap."
+    ),
+    "login.html": "Sign in to SkillBridge AI to continue your career roadmap.",
+    "register.html": (
+        "Create a free SkillBridge AI account to analyse your CV and build a "
+        "personalised learning roadmap."
+    ),
+    "dashboard.html": "Your skill-match score, progress and next steps at a glance.",
+    "cv_upload.html": "Upload a PDF or DOCX CV and we'll extract and categorise your skills.",
+    "skill_analysis.html": "Compare your skills against a target role and see exactly what's missing.",
+    "roadmap.html": "A phased learning roadmap with free courses and practice for your missing skills.",
+    "opportunities.html": "Roles matched to your skills, with job-board searches for your country.",
+    "advisor.html": "Ask the career advisor what to learn next, how to improve your CV, and more.",
+    "privacy.html": "How SkillBridge AI handles your CV, what we store, and how to delete it.",
+    "terms.html": "The terms that apply when you use SkillBridge AI.",
+}
+
 
 def render(request: Request, template: str, **ctx):
     accounts = list_sessions(request)
@@ -111,6 +137,11 @@ def render(request: Request, template: str, **ctx):
     ctx.setdefault("accounts", accounts)
     ctx.setdefault("active_uid", active["uid"] if active else None)
     ctx.setdefault("asset_v", int(MAIN_JS_PATH.stat().st_mtime))
+    ctx.setdefault("site_name", SITE_NAME)
+    ctx.setdefault("page_description", PAGE_DESCRIPTIONS.get(template, ""))
+    # Canonical/social URLs must be absolute and must not carry query strings,
+    # which would otherwise fragment how a shared link is indexed.
+    ctx.setdefault("canonical_url", str(request.url.replace(query=None, fragment=None)))
     return templates.TemplateResponse(request, template, ctx)
 
 
@@ -142,7 +173,17 @@ def health():
 
 @app.get("/")
 def landing(request: Request):
-    return render(request, "landing.html")
+    return render(request, "landing.html", stats=platform_stats())
+
+
+@app.get("/privacy")
+def privacy_page(request: Request):
+    return render(request, "privacy.html")
+
+
+@app.get("/terms")
+def terms_page(request: Request):
+    return render(request, "terms.html")
 
 
 @app.get("/login")

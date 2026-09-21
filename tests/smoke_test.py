@@ -60,6 +60,65 @@ def test_protected_pages_redirect_when_signed_out(client):
         assert response.status_code in (302, 307), f"{path} was reachable signed out"
 
 
+def test_legal_pages_are_public(client):
+    for path in ("/privacy", "/terms"):
+        response = client.get(path)
+        assert response.status_code == 200, path
+        assert "PLACEHOLDER" in response.text, f"{path} lost its to-fill markers"
+
+
+def test_pages_carry_meta_and_social_tags(client):
+    for path in ("/", "/login", "/register", "/privacy"):
+        body = client.get(path).text
+        assert 'name="description"' in body, path
+        assert 'property="og:image"' in body, path
+        assert 'name="twitter:card"' in body, path
+        assert 'rel="canonical"' in body, path
+
+
+def test_every_page_has_exactly_one_h1(client):
+    for path in ("/", "/login", "/register", "/privacy", "/terms"):
+        assert client.get(path).text.count("<h1") == 1, path
+
+
+def test_icon_only_buttons_are_labelled(client):
+    """An icon with no text needs an accessible name or it is unusable by screen reader."""
+    body = client.get("/").text
+    assert 'id="theme-toggle"' in body
+    assert body.count("aria-label") >= 1
+    theme_button = body[body.index('id="theme-toggle"') - 200: body.index('id="theme-toggle"') + 300]
+    assert "aria-label" in theme_button
+
+
+def test_skip_link_present(client):
+    assert 'class="skip-link"' in client.get("/").text
+
+
+def test_landing_stats_come_from_the_data(client):
+    """The headline figures must be counted, not typed in — and must not say 'sample'."""
+    from app.skills_data import platform_stats
+
+    body = client.get("/").text
+    stats = platform_stats()
+    assert str(stats["career_tracks"]) in body
+    assert str(stats["skills_tracked"]) in body
+    assert "sample" not in body.lower()
+
+
+def test_no_real_employer_names_in_example_roles():
+    """Invented vacancies must never be attributed to real companies."""
+    from app.skills_data import OPPORTUNITIES
+
+    real_companies = {
+        "daraz", "careem", "jazz", "nestlé", "nestle", "hbl", "pwc", "siemens pakistan",
+        "bykea", "10pearls", "arbisoft", "k-electric", "nespak", "upwork", "fiverr",
+        "systems limited", "techlogix", "netsol", "afiniti", "ptcl", "ufone", "devsinc",
+        "folio3", "rewterz", "contour software", "millat", "atlas honda", "nrtc",
+    }
+    for opportunity in OPPORTUNITIES:
+        assert opportunity["company"].lower() not in real_companies, opportunity["company"]
+
+
 # --------------------------------------------------------------------------- #
 # Auth
 # --------------------------------------------------------------------------- #
@@ -203,3 +262,51 @@ def test_sign_out_then_sign_in_again(client, account):
     )
     assert again.status_code == 200
     assert client.get("/dashboard").status_code == 200
+
+
+# --------------------------------------------------------------------------- #
+# Market neutrality
+# --------------------------------------------------------------------------- #
+def test_job_boards_follow_the_candidates_market():
+    """A job hunter in London must not be sent to Pakistani job boards."""
+    from app.markets import job_board_links, market_for_location
+
+    assert market_for_location("Lahore") == "PK"
+    assert market_for_location("London") == "GB"
+    assert market_for_location("Dubai") == "AE"
+    assert market_for_location(None) == "GLOBAL"
+    assert market_for_location("Nairobi") == "GLOBAL"
+
+    uk = " ".join(link["url"] for link in job_board_links("Data Analyst", "Job", "GB"))
+    assert "reed.co.uk" in uk
+    assert "rozee.pk" not in uk
+
+    pk = " ".join(link["url"] for link in job_board_links("Data Analyst", "Job", "PK"))
+    assert "rozee.pk" in pk
+
+    # The fallback must still be usable on its own.
+    assert job_board_links("Data Analyst", "Job", None)
+
+
+def test_engineering_licence_is_localised():
+    from app.skills_engine import recommend_certifications
+
+    pk = recommend_certifications("Structural Engineer", "Lahore")
+    us = recommend_certifications("Structural Engineer", "Austin")
+    assert any("Pakistan Engineering Council" in c for c in pk)
+    assert any("Professional Engineer" in c for c in us)
+    # The placeholder must always be resolved, never shown raw.
+    assert not any("{" in c for c in pk + us)
+
+
+def test_signup_does_not_assume_a_country(client):
+    """Registering without a location must not silently place you in one."""
+    import uuid
+
+    email = f"nolocation-{uuid.uuid4().hex[:10]}@example.com"
+    response = client.post(
+        "/api/auth/register",
+        json={"name": "No Location", "email": email, "password": "another-good-pw-1"},
+    )
+    assert response.status_code == 200, response.text
+    assert client.get("/api/profile/me").json()["location"] is None

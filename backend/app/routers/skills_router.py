@@ -87,6 +87,7 @@ def get_resume_tips(user_id: int = Depends(get_current_user_id), db: sqlite3.Con
 
 @router.get("/certifications")
 def get_certifications(role: str | None = None, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
-    user = db.execute("SELECT target_role FROM users WHERE id = ?", (user_id,)).fetchone()
+    user = db.execute("SELECT target_role, location FROM users WHERE id = ?", (user_id,)).fetchone()
     target = role or (user["target_role"] if user else None)
-    return {"role": target, "certifications": recommend_certifications(target)}
+    location = user["location"] if user else None
+    return {"role": target, "certifications": recommend_certifications(target, location)}

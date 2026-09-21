@@ -5,7 +5,7 @@
 <div class="page container">
   <div class="page-header fade-in">
     <h1>Opportunity Finder</h1>
-    <p>Jobs, internships, freelance gigs, and remote roles matched to your skills — Pakistani market focus.</p>
+    <p>Example roles matched to your skills, each linking to live searches on the job boards used where you are.</p>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
@@ -25,11 +25,14 @@
     <p id="field-note" style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted); display:none"></p>
   </div>
 
+  <!-- Cards are injected here with level-3 headings, so the list needs a
+       level-2 heading above them to keep the heading order unbroken. -->
+  <h2 class="visually-hidden">Matched roles</h2>
   <div class="grid grid-3" id="opp-list"></div>
   <div id="empty-opps" class="empty-state" style="display:none">No opportunities found for this filter yet — add more skills to unlock matches.</div>
 
   <div class="glass card" style="margin-top:24px">
-    <h3 style="margin-top:0">📋 How to Apply — Based on Your CV</h3>
+    <h2 style="margin-top:0">📋 How to Apply — Based on Your CV</h2>
     <ol id="apply-guide-list" style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8"></ol>
   </div>
 </div>

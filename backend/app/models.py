@@ -5,7 +5,9 @@ class RegisterRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    location: str = Field(default="Pakistan", max_length=100)
+    # No default country: guessing one puts every international signup in the
+    # wrong market. Collected during onboarding instead.
+    location: str | None = Field(default=None, max_length=100)
 
     @field_validator("name")
     @classmethod

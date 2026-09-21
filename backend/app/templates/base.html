@@ -4,11 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}SkillBridge AI{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
+  <meta name="description" content="{{ page_description }}" />
+  <link rel="canonical" href="{{ canonical_url }}" />
+
+  <!-- Social cards: what a shared link looks like on other platforms. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="{{ site_name }}" />
+  <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}" />
+  <meta property="og:description" content="{{ page_description }}" />
+  <meta property="og:url" content="{{ canonical_url }}" />
+  <meta property="og:image" content="{{ request.url_for('static', path='img/og-image.png') }}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="SkillBridge AI — find your skill gap and close it" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ self.og_title() }}" />
+  <meta name="twitter:description" content="{{ page_description }}" />
+  <meta name="twitter:image" content="{{ request.url_for('static', path='img/og-image.png') }}" />
+
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/static/img/favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f1c" />
+
+  <link rel="stylesheet" href="/static/css/style.css?v={{ asset_v }}" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   {% block head %}{% endblock %}
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   {% block nav %}
   <nav class="navbar">
     <div class="navbar-inner">
@@ -24,7 +48,9 @@
       <div class="nav-actions">
         {% if accounts and accounts|length > 1 %}
         <div class="account-switcher" id="account-switcher">
-          <button class="btn btn-sm btn-ghost" id="account-switcher-btn" type="button" title="Switch account">👤 {{ accounts|length }} ▾</button>
+          <button class="btn btn-sm btn-ghost" id="account-switcher-btn" type="button" title="Switch account"
+                  aria-label="Switch account ({{ accounts|length }} signed in)" aria-expanded="false" aria-haspopup="true"
+                  aria-controls="account-switcher-menu"><span aria-hidden="true">👤 {{ accounts|length }} ▾</span></button>
           <div class="account-switcher-menu" id="account-switcher-menu" hidden>
             {% for acc in accounts %}
             <a href="#" onclick="switchAccount({{ acc.uid }}); return false;" class="account-switcher-item{{ ' active' if acc.uid == active_uid else '' }}">{{ acc.email }}</a>
@@ -35,9 +61,9 @@
         </div>
         {% endif %}
         <span id="user-badge" style="font-size:0.85rem;color:var(--text-muted)"></span>
-        <button class="icon-btn" id="theme-toggle" title="Toggle theme">☾</button>
-        <button class="btn btn-sm" onclick="logout()">Logout</button>
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="icon-btn" id="theme-toggle" type="button" title="Switch between light and dark theme" aria-label="Switch between light and dark theme"><span aria-hidden="true">☾</span></button>
+        <button class="btn btn-sm" type="button" onclick="logout()">Logout</button>
+        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links"><span aria-hidden="true">☰</span></button>
       </div>
     </div>
   </nav>
@@ -45,10 +71,18 @@
 
   <script>window.__SB_ACTIVE_UID__ = {% if active_uid %}{{ active_uid }}{% else %}null{% endif %};</script>
 
-  {% block content %}{% endblock %}
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
 
   <footer class="footer">
-    <div class="container">SkillBridge AI &mdash; AI Career Navigator for Pakistani Youth</div>
+    <div class="container footer-inner">
+      <p class="footer-tagline">SkillBridge AI &mdash; Career Navigator for Students and Graduates</p>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </nav>
+    </div>
   </footer>
 
   <script src="/static/js/main.js?v={{ asset_v }}"></script>

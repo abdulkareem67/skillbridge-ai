@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — SkillBridge AI{% endblock %}
+
+{% block nav %}
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="brand">⚡ SkillBridge AI</a>
+    <div class="nav-actions">
+      <button class="icon-btn" id="theme-toggle" type="button" title="Switch between light and dark theme" aria-label="Switch between light and dark theme"><span aria-hidden="true">☾</span></button>
+      <a href="/login" class="btn btn-ghost">Login</a>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<article class="container legal-page">
+  <h1>Privacy Policy</h1>
+  <p class="legal-meta">Last updated: <strong>[PLACEHOLDER: date]</strong></p>
+
+  <div class="glass card legal-notice">
+    <p><strong>This is a draft.</strong> Every <strong>[PLACEHOLDER]</strong> below must be completed,
+    and the result reviewed by a qualified professional, before this is relied on as a legal document.
+    It describes how the software currently behaves — it is not legal advice.</p>
+  </div>
+
+  <h2>Who we are</h2>
+  <p>
+    SkillBridge AI ("we", "us") is operated by <strong>[PLACEHOLDER: legal entity or individual name]</strong>,
+    based in <strong>[PLACEHOLDER: country]</strong>. For any privacy question, contact
+    <strong>[PLACEHOLDER: contact email]</strong>.
+  </p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Account details</strong> — your name, email address and, once you provide it, the country or city you are job-hunting in.</li>
+    <li><strong>Your password</strong> — stored only as a bcrypt hash. We never store it in a readable form and cannot recover it.</li>
+    <li><strong>Skills extracted from your CV</strong> — the skill names we recognise, such as "Python" or "Project Management".</li>
+    <li><strong>Your activity in the product</strong> — your chosen target role, your progress against your roadmap, and your conversations with the career advisor.</li>
+  </ul>
+
+  <h2>Your CV file</h2>
+  <p>
+    <strong>We do not store your CV.</strong> When you upload a PDF or DOCX, it is held in memory only
+    for as long as it takes to read the text and match it against our list of known skills. The file is
+    never written to disk and is discarded as soon as that finishes. Only the extracted skill names are saved.
+  </p>
+
+  <h2>How your data is processed</h2>
+  <p>
+    Skill extraction, gap analysis, roadmaps and the career advisor all run on our own servers using a
+    fixed rule-based engine and a built-in knowledge base. <strong>Your CV and your messages are not sent
+    to any third-party AI service</strong>, and they are not used to train any model.
+  </p>
+
+  <h2>Where your data is stored</h2>
+  <p>
+    Account data is held in a hosted PostgreSQL database provided by
+    <strong>[PLACEHOLDER: database provider, e.g. Neon]</strong>, in the
+    <strong>[PLACEHOLDER: region]</strong> region. The application is hosted by
+    <strong>[PLACEHOLDER: hosting provider, e.g. Vercel]</strong>. Both may process data on our behalf
+    as sub-processors.
+  </p>
+
+  <h2>Cookies</h2>
+  <p>
+    We set one cookie to keep you signed in, and one to record which of your accounts is active in the
+    current tab. These are strictly necessary for the site to work. <strong>We use no advertising or
+    analytics cookies</strong> and do not track you across other websites.
+  </p>
+
+  <h2>How long we keep it</h2>
+  <p>
+    Your account and its data are kept until you delete your account, or after
+    <strong>[PLACEHOLDER: retention period, e.g. 24 months]</strong> of inactivity, whichever comes first.
+    Sign-in sessions expire after 7 days.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    Depending on where you live, you may have the right to access, correct, export or delete your data,
+    to object to processing, and to complain to your data-protection regulator. To exercise any of these,
+    email <strong>[PLACEHOLDER: contact email]</strong> and we will respond within
+    <strong>[PLACEHOLDER: response time, e.g. 30 days]</strong>.
+  </p>
+  <p class="legal-todo">
+    <strong>[PLACEHOLDER: planned]</strong> Self-service "Export my data" and "Delete my account" controls
+    are not built yet. Until they are, deletion requests must be handled by email.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    SkillBridge AI is not intended for anyone under <strong>[PLACEHOLDER: minimum age, e.g. 16]</strong>.
+    We do not knowingly collect data from children.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If we change this policy we will update the date above and, for significant changes, notify you by email.
+  </p>
+</article>
+{% endblock %}

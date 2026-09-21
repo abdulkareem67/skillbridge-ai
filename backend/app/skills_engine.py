@@ -4,8 +4,8 @@ is required — this runs fully offline using the knowledge base in skills_data.
 
 import difflib
 import re
-from urllib.parse import quote_plus
 
+from .markets import get_market, job_board_links, market_for_location
 from .skills_data import (
     ROLES,
     RESOURCES,
@@ -55,21 +55,9 @@ def build_roadmap(user_skills: list[str], role: str) -> dict:
     return roadmap
 
 
-def _apply_links(title: str, opp_type: str) -> list[dict]:
-    query = title.strip()
-    role_query = quote_plus(title)
-    links = [
-        {"label": "Search on Rozee.pk", "url": f"https://www.rozee.pk/job/jsearch/q/{quote_plus(query)}"},
-        {"label": "Search on LinkedIn", "url": f"https://www.linkedin.com/jobs/search/?keywords={quote_plus(query)}&location=Pakistan"},
-        {"label": "Search on Indeed", "url": f"https://pk.indeed.com/jobs?q={quote_plus(query)}"},
-        {"label": "Search on Bayt.com", "url": f"https://www.bayt.com/en/pakistan/jobs/{role_query}-jobs/"},
-        {"label": "Search on Mustakbil", "url": f"https://www.mustakbil.com/jobs/search?q={role_query}"},
-        {"label": "Search on BrightSpyre", "url": f"https://www.brightspyre.com/jobs/keyword/{role_query}"},
-        {"label": "Search on Glassdoor", "url": f"https://www.glassdoor.com/Job/pakistan-{role_query}-jobs-SRCH_IL.0,8_IN181_KO9.htm"},
-    ]
-    if opp_type == "Internship":
-        links.append({"label": "Search on Internee.pk", "url": f"https://internee.pk/?s={role_query}"})
-    return links
+def _apply_links(title: str, opp_type: str, market_code: str | None = None) -> list[dict]:
+    """Job-board searches for this role in the candidate's own market."""
+    return job_board_links(title, opp_type, market_code)
 
 
 def match_opportunities(
@@ -85,6 +73,7 @@ def match_opportunities(
     candidate's skill match is strong enough (40%+) to be worth surfacing anyway."""
     user_set = {s.lower() for s in user_skills}
     target_field = field_for_role(target_role)
+    market_code = market_for_location(location)
     results = []
     for opp in OPPORTUNITIES:
         req = opp["skills"]
@@ -98,11 +87,22 @@ def match_opportunities(
         entry["match_percent"] = pct
         entry["matched_skills"] = matched
         entry["in_target_field"] = (opp.get("field") == target_field) if target_field else True
-        entry["apply_links"] = _apply_links(opp["title"], opp["type"])
+        entry["apply_links"] = _apply_links(opp["title"], opp["type"], market_code)
         results.append(entry)
     results.sort(key=lambda x: (x["in_target_field"], x["match_percent"]), reverse=True)
-    if location and location.lower() != "pakistan":
-        results.sort(key=lambda x: (x["in_target_field"], x["location"].lower() == location.lower(), x["match_percent"]), reverse=True)
+    if location:
+        # Surface roles in the candidate's own place first, then anything in the
+        # same market, before falling back to the plain skill-match order.
+        needle = location.strip().lower()
+        results.sort(
+            key=lambda x: (
+                x["in_target_field"],
+                x["location"].lower() == needle,
+                market_for_location(x["location"]) == market_code,
+                x["match_percent"],
+            ),
+            reverse=True,
+        )
     return results[:limit]
 
 
@@ -127,7 +127,7 @@ def application_strategy(matched_opportunities: list[dict]) -> dict:
     lead_skills = top["matched_skills"][:3]
     steps.append(f"Before applying to {top['title']}, reorder your CV so {', '.join(lead_skills) or 'your strongest skills'} appear first — match the language in the posting.")
     steps.append("Write a 3-4 line cover message: (1) the role + where you found it, (2) one matched skill with a concrete example, (3) enthusiasm for the company, (4) a call to action to discuss further.")
-    steps.append("Apply within 1-3 days of a posting going live — Pakistani SMEs and startups often close roles fast once they get a few good applicants.")
+    steps.append("Apply within 1-3 days of a posting going live — smaller employers and startups often close a role as soon as they have a few good applicants.")
     steps.append("Track every application (company, date, status) in a simple spreadsheet so you can follow up after 5-7 days if you hear nothing.")
 
     return {"steps": steps, "priority": priority}
@@ -141,10 +141,18 @@ def categorize_all(user_skills: list[dict]) -> dict:
     return buckets
 
 
-def recommend_certifications(role: str | None) -> list[str]:
-    if role and role in ROLE_CERTIFICATIONS:
-        return ROLE_CERTIFICATIONS[role]
-    return ["AWS Certified Cloud Practitioner", "Google Data Analytics Certificate"]
+def recommend_certifications(role: str | None, location: str | None = None) -> list[str]:
+    """Certifications worth holding for this role, localised where it matters.
+
+    Most certifications are global, but an engineering licence is issued by the
+    country you practise in, so that one is resolved against the candidate's
+    market rather than being fixed to ours.
+    """
+    certs = ROLE_CERTIFICATIONS.get(role) if role else None
+    if certs is None:
+        certs = ["AWS Certified Cloud Practitioner", "Google Data Analytics Certificate"]
+    licence = get_market(market_for_location(location))["engineering_licence"]
+    return [c.format(engineering_licence=licence) if "{" in c else c for c in certs]
 
 
 def resume_tips(categorized: dict, gap: dict | None) -> list[str]:
@@ -156,7 +164,7 @@ def resume_tips(categorized: dict, gap: dict | None) -> list[str]:
         return ["Upload your CV or add skills manually so we can generate tailored resume tips."]
 
     if not categorized.get("soft"):
-        tips.append("Add soft skills (e.g. Communication, Teamwork, Problem Solving) — recruiters in Pakistan screen for these alongside technical ability.")
+        tips.append("Add soft skills (e.g. Communication, Teamwork, Problem Solving) — recruiters screen for these alongside technical ability.")
     if not categorized.get("certification"):
         tips.append("List at least one certification, even an in-progress one — it signals commitment and is an easy CV differentiator for entry-level roles.")
     if len(categorized.get("technical", [])) + len(categorized.get("tool", [])) < 4:
@@ -328,7 +336,8 @@ def chatbot_reply(message: str, user_skills: list[str], role: str | None, gap: d
         return (f"SkillBridge AI compares your skills against real job-market requirements for {len(ROLES)} career tracks "
                 "across Computer Science, Civil, Mechanical & Electrical Engineering, and Business & Finance — "
                 "it shows your match score and missing skills, builds a phased learning roadmap with free resources, "
-                "and matches you to Pakistani job/internship/freelance opportunities. Try the Skill Analysis and Roadmap pages.")
+                "and matches you to job, internship and freelance roles with search links for your country. "
+                "Try the Skill Analysis and Roadmap pages.")
 
     if intent == "skills_for_role":
         matched_role = next((r for r in ROLES if r.lower() in msg), None)

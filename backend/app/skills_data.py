@@ -601,51 +601,60 @@ def field_for_role(role: str | None) -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# Sample Pakistani-market opportunities (curated static demo data).
+# Illustrative example roles — NOT live vacancies.
+#
+# Every company here is fictional and every entry is hand-written. They exist so
+# the matcher has something to rank a candidate's skills against, and so the UI
+# can show what a match looks like. Each one links out to real job boards for the
+# candidate's own market (see markets.py), which is where actual openings live.
+#
+# Do not add real employer names: a made-up vacancy attributed to a real company
+# is a false claim about that company. Replace this whole list with a real jobs
+# API when one is wired up.
 # ---------------------------------------------------------------------------
 OPPORTUNITIES = [
-    {"title": "Junior Web Developer", "company": "Techlogix", "location": "Lahore", "type": "Job", "field": "Software Development", "skills": ["HTML", "CSS", "JavaScript", "React"]},
-    {"title": "Full Stack Developer Intern", "company": "Systems Limited", "location": "Lahore", "type": "Internship", "field": "Software Development", "skills": ["React", "Node.js", "MongoDB", "Git"]},
-    {"title": "Data Analyst", "company": "NetSol Technologies", "location": "Lahore", "type": "Job", "field": "Data & AI", "skills": ["SQL", "Excel", "Python", "Pandas", "Data Visualization"]},
-    {"title": "Remote Frontend Developer", "company": "Arbisoft", "location": "Remote", "type": "Remote", "field": "Software Development", "skills": ["HTML", "CSS", "JavaScript", "React"]},
-    {"title": "AI/ML Intern", "company": "Afiniti", "location": "Karachi", "type": "Internship", "field": "Data & AI", "skills": ["Python", "Machine Learning", "Pandas", "NumPy"]},
-    {"title": "Cybersecurity Analyst", "company": "TPS Pakistan", "location": "Karachi", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Cybersecurity Fundamentals", "Network Security", "Wireshark", "SIEM Tools"]},
-    {"title": "SOC Analyst Intern", "company": "Ufone", "location": "Islamabad", "type": "Internship", "field": "Cybersecurity & Networking", "skills": ["Cybersecurity Fundamentals", "SIEM Tools", "Network Security"]},
-    {"title": "Network Security Engineer", "company": "PTCL", "location": "Islamabad", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Networking Fundamentals", "Network Security", "Linux"]},
-    {"title": "Mobile App Developer", "company": "10Pearls", "location": "Lahore", "type": "Job", "field": "Software Development", "skills": ["Flutter", "REST APIs", "Git"]},
-    {"title": "UI/UX Design Intern", "company": "Folio3", "location": "Karachi", "type": "Internship", "field": "Design", "skills": ["Figma", "Wireframing", "Prototyping"]},
-    {"title": "Freelance React Developer", "company": "Upwork Client (PK)", "location": "Remote", "type": "Freelance", "field": "Software Development", "skills": ["React", "JavaScript", "REST APIs"]},
-    {"title": "Backend Developer (Python)", "company": "Careem", "location": "Islamabad", "type": "Job", "field": "Software Development", "skills": ["Python", "Django", "SQL", "Docker"]},
-    {"title": "Data Science Intern", "company": "Bykea", "location": "Karachi", "type": "Internship", "field": "Data & AI", "skills": ["Python", "Machine Learning", "Statistics", "SQL"]},
-    {"title": "Penetration Tester", "company": "Rewterz", "location": "Karachi", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Penetration Testing", "Nmap", "Metasploit", "Linux"]},
-    {"title": "Remote DevOps Engineer", "company": "Contour Software", "location": "Remote", "type": "Remote", "field": "Cloud & DevOps", "skills": ["Docker", "Kubernetes", "AWS", "Linux"]},
-    {"title": "Cloud Support Intern", "company": "Systems Limited", "location": "Lahore", "type": "Internship", "field": "Cloud & DevOps", "skills": ["AWS", "Linux", "Networking Fundamentals"]},
-    {"title": "Freelance UI/UX Designer", "company": "Fiverr Client (PK)", "location": "Remote", "type": "Freelance", "field": "Design", "skills": ["Figma", "Adobe XD", "Prototyping"]},
-    {"title": "Software Engineer", "company": "Devsinc", "location": "Lahore", "type": "Job", "field": "Software Development", "skills": ["Java", "Spring Boot", "SQL", "Git"]},
-    {"title": "QA Automation Engineer", "company": "Systems Limited", "location": "Lahore", "type": "Job", "field": "QA & Testing", "skills": ["Automation Testing", "Selenium", "SQL"]},
-    {"title": "Manual QA Intern", "company": "10Pearls", "location": "Karachi", "type": "Internship", "field": "QA & Testing", "skills": ["Manual Testing", "Communication", "Problem Solving"]},
-    {"title": "Digital Marketing Executive", "company": "Daraz", "location": "Lahore", "type": "Job", "field": "Business & Marketing", "skills": ["SEO", "Social Media Marketing", "Google Analytics"]},
-    {"title": "Business Analyst Intern", "company": "Jazz", "location": "Islamabad", "type": "Internship", "field": "Business & Marketing", "skills": ["Excel", "Communication", "Business Analysis"]},
+    {"title": "Junior Web Developer", "company": "Lumen Web Studio", "location": "Lahore", "type": "Job", "field": "Software Development", "skills": ["HTML", "CSS", "JavaScript", "React"]},
+    {"title": "Full Stack Developer Intern", "company": "Northgate Software", "location": "London", "type": "Internship", "field": "Software Development", "skills": ["React", "Node.js", "MongoDB", "Git"]},
+    {"title": "Data Analyst", "company": "Clearline Analytics", "location": "Dubai", "type": "Job", "field": "Data & AI", "skills": ["SQL", "Excel", "Python", "Pandas", "Data Visualization"]},
+    {"title": "Remote Frontend Developer", "company": "Orbit Interfaces", "location": "Remote", "type": "Remote", "field": "Software Development", "skills": ["HTML", "CSS", "JavaScript", "React"]},
+    {"title": "AI/ML Intern", "company": "Vantage AI Labs", "location": "Austin", "type": "Internship", "field": "Data & AI", "skills": ["Python", "Machine Learning", "Pandas", "NumPy"]},
+    {"title": "Cybersecurity Analyst", "company": "Irongate Security", "location": "Riyadh", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Cybersecurity Fundamentals", "Network Security", "Wireshark", "SIEM Tools"]},
+    {"title": "SOC Analyst Intern", "company": "Sentinel Defence", "location": "Karachi", "type": "Internship", "field": "Cybersecurity & Networking", "skills": ["Cybersecurity Fundamentals", "SIEM Tools", "Network Security"]},
+    {"title": "Network Security Engineer", "company": "Meridian Networks", "location": "London", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Networking Fundamentals", "Network Security", "Linux"]},
+    {"title": "Mobile App Developer", "company": "Pocketwave Apps", "location": "Lahore", "type": "Job", "field": "Software Development", "skills": ["Flutter", "REST APIs", "Git"]},
+    {"title": "UI/UX Design Intern", "company": "Fieldnote Design", "location": "Dubai", "type": "Internship", "field": "Design", "skills": ["Figma", "Wireframing", "Prototyping"]},
+    {"title": "Freelance React Developer", "company": "Independent client", "location": "Remote", "type": "Freelance", "field": "Software Development", "skills": ["React", "JavaScript", "REST APIs"]},
+    {"title": "Backend Developer (Python)", "company": "Harbourline Tech", "location": "Islamabad", "type": "Job", "field": "Software Development", "skills": ["Python", "Django", "SQL", "Docker"]},
+    {"title": "Data Science Intern", "company": "Quantlys Research", "location": "New York", "type": "Internship", "field": "Data & AI", "skills": ["Python", "Machine Learning", "Statistics", "SQL"]},
+    {"title": "Penetration Tester", "company": "Redcliff Security", "location": "Karachi", "type": "Job", "field": "Cybersecurity & Networking", "skills": ["Penetration Testing", "Nmap", "Metasploit", "Linux"]},
+    {"title": "Remote DevOps Engineer", "company": "Stackforge Cloud", "location": "Remote", "type": "Remote", "field": "Cloud & DevOps", "skills": ["Docker", "Kubernetes", "AWS", "Linux"]},
+    {"title": "Cloud Support Intern", "company": "Skyhaven Systems", "location": "Dubai", "type": "Internship", "field": "Cloud & DevOps", "skills": ["AWS", "Linux", "Networking Fundamentals"]},
+    {"title": "Freelance UI/UX Designer", "company": "Independent client", "location": "Remote", "type": "Freelance", "field": "Design", "skills": ["Figma", "Adobe XD", "Prototyping"]},
+    {"title": "Software Engineer", "company": "Kestrel Software", "location": "Manchester", "type": "Job", "field": "Software Development", "skills": ["Java", "Spring Boot", "SQL", "Git"]},
+    {"title": "QA Automation Engineer", "company": "Provewell QA", "location": "Lahore", "type": "Job", "field": "QA & Testing", "skills": ["Automation Testing", "Selenium", "SQL"]},
+    {"title": "Manual QA Intern", "company": "Provewell QA", "location": "Karachi", "type": "Internship", "field": "QA & Testing", "skills": ["Manual Testing", "Communication", "Problem Solving"]},
+    {"title": "Digital Marketing Executive", "company": "Brightmark Commerce", "location": "Dubai", "type": "Job", "field": "Business & Marketing", "skills": ["SEO", "Social Media Marketing", "Google Analytics"]},
+    {"title": "Business Analyst Intern", "company": "Delta Consulting Group", "location": "Islamabad", "type": "Internship", "field": "Business & Marketing", "skills": ["Excel", "Communication", "Business Analysis"]},
 
     # --- Civil Engineering ---
-    {"title": "Site Engineer", "company": "Habib Construction Services", "location": "Lahore", "type": "Job", "field": "Civil Engineering", "skills": ["AutoCAD", "Construction Management", "Site Supervision", "Estimation & Costing"]},
-    {"title": "Structural Design Intern", "company": "NESPAK", "location": "Lahore", "type": "Internship", "field": "Civil Engineering", "skills": ["AutoCAD", "Structural Analysis", "ETABS"]},
-    {"title": "Junior Civil Engineer", "company": "Frontier Works Organization (FWO)", "location": "Islamabad", "type": "Job", "field": "Civil Engineering", "skills": ["Surveying", "AutoCAD", "Project Planning"]},
+    {"title": "Site Engineer", "company": "Stonebridge Contracting", "location": "Riyadh", "type": "Job", "field": "Civil Engineering", "skills": ["AutoCAD", "Construction Management", "Site Supervision", "Estimation & Costing"]},
+    {"title": "Structural Design Intern", "company": "Arcwell Engineering", "location": "Lahore", "type": "Internship", "field": "Civil Engineering", "skills": ["AutoCAD", "Structural Analysis", "ETABS"]},
+    {"title": "Junior Civil Engineer", "company": "Granite Infrastructure", "location": "Abu Dhabi", "type": "Job", "field": "Civil Engineering", "skills": ["Surveying", "AutoCAD", "Project Planning"]},
 
     # --- Mechanical Engineering ---
-    {"title": "Mechanical Design Engineer", "company": "Millat Tractors", "location": "Lahore", "type": "Job", "field": "Mechanical Engineering", "skills": ["SolidWorks", "Machine Design", "AutoCAD"]},
-    {"title": "HVAC Engineer", "company": "Pak Elektron (PEL)", "location": "Lahore", "type": "Job", "field": "Mechanical Engineering", "skills": ["HVAC Design", "Thermodynamics", "AutoCAD"]},
-    {"title": "Production Engineer Intern", "company": "Atlas Honda", "location": "Karachi", "type": "Internship", "field": "Mechanical Engineering", "skills": ["Manufacturing Processes", "Quality Control", "Material Science"]},
+    {"title": "Mechanical Design Engineer", "company": "Forgeline Industries", "location": "Manchester", "type": "Job", "field": "Mechanical Engineering", "skills": ["SolidWorks", "Machine Design", "AutoCAD"]},
+    {"title": "HVAC Engineer", "company": "Aircore Systems", "location": "Abu Dhabi", "type": "Job", "field": "Mechanical Engineering", "skills": ["HVAC Design", "Thermodynamics", "AutoCAD"]},
+    {"title": "Production Engineer Intern", "company": "Ironworks Manufacturing", "location": "Karachi", "type": "Internship", "field": "Mechanical Engineering", "skills": ["Manufacturing Processes", "Quality Control", "Material Science"]},
 
     # --- Electrical Engineering ---
-    {"title": "Electrical Engineer", "company": "K-Electric", "location": "Karachi", "type": "Job", "field": "Electrical Engineering", "skills": ["Power Systems", "Electrical Machines", "Circuit Analysis"]},
-    {"title": "Automation Engineer", "company": "Siemens Pakistan", "location": "Islamabad", "type": "Job", "field": "Electrical Engineering", "skills": ["PLC Programming", "SCADA", "Control Systems"]},
-    {"title": "Electronics Design Intern", "company": "NRTC", "location": "Haripur", "type": "Internship", "field": "Electrical Engineering", "skills": ["PCB Design", "Microcontrollers", "Embedded Systems"]},
+    {"title": "Electrical Engineer", "company": "Voltbridge Power", "location": "Riyadh", "type": "Job", "field": "Electrical Engineering", "skills": ["Power Systems", "Electrical Machines", "Circuit Analysis"]},
+    {"title": "Automation Engineer", "company": "Axis Control Systems", "location": "Seattle", "type": "Job", "field": "Electrical Engineering", "skills": ["PLC Programming", "SCADA", "Control Systems"]},
+    {"title": "Electronics Design Intern", "company": "Circuitworks Labs", "location": "Islamabad", "type": "Internship", "field": "Electrical Engineering", "skills": ["PCB Design", "Microcontrollers", "Embedded Systems"]},
 
     # --- Finance & Accounting / HR ---
-    {"title": "Junior Accountant", "company": "A.F. Ferguson & Co. (PwC)", "location": "Karachi", "type": "Job", "field": "Finance & Accounting", "skills": ["Accounting", "Bookkeeping", "Excel", "Taxation"]},
-    {"title": "Financial Analyst", "company": "Habib Bank Limited (HBL)", "location": "Karachi", "type": "Job", "field": "Finance & Accounting", "skills": ["Financial Analysis", "Financial Modeling", "Excel"]},
-    {"title": "HR Intern", "company": "Nestlé Pakistan", "location": "Lahore", "type": "Internship", "field": "Human Resources", "skills": ["Human Resource Management", "Recruitment", "Communication"]},
+    {"title": "Junior Accountant", "company": "Redwood Advisory", "location": "Chicago", "type": "Job", "field": "Finance & Accounting", "skills": ["Accounting", "Bookkeeping", "Excel", "Taxation"]},
+    {"title": "Financial Analyst", "company": "Meridian Capital Partners", "location": "London", "type": "Job", "field": "Finance & Accounting", "skills": ["Financial Analysis", "Financial Modeling", "Excel"]},
+    {"title": "HR Intern", "company": "Everhart Group", "location": "Lahore", "type": "Internship", "field": "Human Resources", "skills": ["Human Resource Management", "Recruitment", "Communication"]},
 ]
 
 
@@ -660,6 +669,10 @@ def is_valid_role(role: str | None) -> bool:
 # ---------------------------------------------------------------------------
 # Recommended certifications per role (shown in analysis/roadmap + advisor).
 # ---------------------------------------------------------------------------
+# Placeholder resolved per market at lookup time: which engineering body you
+# must register with depends on where you practise, not on where we are.
+ENGINEERING_LICENCE = "{engineering_licence}"
+
 ROLE_CERTIFICATIONS = {
     "Software Engineer": ["AWS Certified Cloud Practitioner"],
     "Web Developer": ["AWS Certified Cloud Practitioner"],
@@ -676,15 +689,15 @@ ROLE_CERTIFICATIONS = {
     "Business Analyst": ["PMP", "Google Data Analytics Certificate"],
     "Digital Marketing Specialist": ["Google Data Analytics Certificate"],
     # Civil
-    "Structural Engineer": ["PEC (Pakistan Engineering Council) Registration", "Autodesk AutoCAD Certified"],
+    "Structural Engineer": [ENGINEERING_LICENCE, "Autodesk AutoCAD Certified"],
     "Construction / Site Engineer": ["PMP", "Primavera P6 Certification"],
-    "Transportation Engineer": ["PEC (Pakistan Engineering Council) Registration"],
+    "Transportation Engineer": [ENGINEERING_LICENCE],
     # Mechanical
     "Mechanical Design Engineer": ["SolidWorks Certified Associate (CSWA)", "Autodesk AutoCAD Certified"],
     "HVAC Engineer": ["ASHRAE HVAC Design Certification"],
     "Manufacturing / Production Engineer": ["Six Sigma Green Belt", "Lean Manufacturing Certificate"],
     # Electrical
-    "Power Systems Engineer": ["PEC (Pakistan Engineering Council) Registration"],
+    "Power Systems Engineer": [ENGINEERING_LICENCE],
     "Electronics Engineer": ["Certified IoT Specialist"],
     "Control & Automation Engineer": ["Siemens PLC / TIA Portal Certification"],
     # Business & Finance
@@ -692,3 +705,16 @@ ROLE_CERTIFICATIONS = {
     "Financial Analyst": ["CFA (Chartered Financial Analyst)", "Financial Modeling & Valuation Analyst (FMVA)"],
     "Human Resource (HR) Manager": ["SHRM-CP", "CIPD Certification"],
 }
+
+
+def platform_stats() -> dict:
+    """Headline figures counted from the knowledge base itself.
+
+    Derived rather than written down so the landing page cannot drift into
+    claiming numbers the product doesn't actually have.
+    """
+    return {
+        "career_tracks": len(ROLES),
+        "skills_tracked": len(SKILL_DICTIONARY),
+        "fields_of_study": len(DISCIPLINES),
+    }

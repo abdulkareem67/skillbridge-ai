@@ -14,6 +14,18 @@
   --nav-bg: rgba(15, 18, 32, 0.7);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --radius: 16px;
+  --focus-ring: #22d3ee;
+
+  /* Text-safe variants. The brand colours above are tuned to glow on a dark
+     background, which is exactly what makes them illegible on a light one, so
+     anything used as *text* uses these instead. On the dark theme they are the
+     brand colours; the light theme overrides them with darker shades that clear
+     WCAG AA (4.5:1) against --bg. */
+  --accent-text: var(--accent);
+  --accent-2-text: var(--accent-2);
+  --success-text: var(--success);
+  --warning-text: var(--warning);
+  --danger-text: var(--danger);
 }
 
 [data-theme="light"] {
@@ -24,6 +36,14 @@
   --card-border: rgba(15, 18, 32, 0.08);
   --nav-bg: rgba(255, 255, 255, 0.7);
   --shadow: 0 8px 32px rgba(31, 41, 55, 0.12);
+  --focus-ring: #4338ca;
+
+  /* Measured against #f4f6fb: 5.8, 5.0, 5.1, 4.6 and 5.8 to 1. */
+  --accent-text: #4f46e5;
+  --accent-2-text: #0e7490;
+  --success-text: #047857;
+  --warning-text: #a16207;
+  --danger-text: #be123c;
 }
 
 * { box-sizing: border-box; }
@@ -220,7 +240,7 @@ select option {
   text-overflow: ellipsis;
 }
 .account-switcher-item:hover { background: var(--card-bg); }
-.account-switcher-item.active { color: var(--accent-2); font-weight: 600; }
+.account-switcher-item.active { color: var(--accent-2-text); font-weight: 600; }
 .account-switcher-divider { height: 1px; background: var(--card-border); margin: 4px 0; }
 
 /* Badges / chips */
@@ -235,9 +255,9 @@ select option {
   font-size: 0.82rem;
   margin: 4px 6px 0 0;
 }
-.chip-remove { cursor: pointer; color: var(--danger); font-weight: 700; }
-.chip-matched { border-color: var(--success); color: var(--success); }
-.chip-missing { border-color: var(--danger); color: var(--danger); }
+.chip-remove { cursor: pointer; color: var(--danger-text); font-weight: 700; }
+.chip-matched { border-color: var(--success-text); color: var(--success-text); }
+.chip-missing { border-color: var(--danger-text); color: var(--danger-text); }
 
 /* Progress bar */
 .progress-track {
@@ -302,7 +322,7 @@ select option {
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
-.dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(109, 91, 248, 0.08); }
+.dropzone:hover, .dropzone.dragover { border-color: var(--accent-text); background: rgba(109, 91, 248, 0.08); }
 
 /* ============================================================
    AI Advisor chat — redesigned
@@ -385,7 +405,7 @@ select option {
 .chat-bubble p:last-child { margin-bottom: 0; }
 .chat-bubble strong { font-weight: 700; }
 .chat-bubble ol, .chat-bubble ul { margin: 6px 0 4px; padding-left: 20px; display: flex; flex-direction: column; gap: 5px; }
-.chat-bubble a { color: var(--accent-2); font-weight: 600; text-decoration: underline; }
+.chat-bubble a { color: var(--accent-2-text); font-weight: 600; text-decoration: underline; }
 .chat-bubble.user a { color: #fff; }
 .chat-time { font-size: 0.68rem; color: var(--text-muted); margin: 4px 4px 0; opacity: 0.75; }
 .chat-row.user .chat-time { text-align: right; }
@@ -440,7 +460,7 @@ select option {
   font-weight: 700;
   text-transform: uppercase;
   background: rgba(109, 91, 248, 0.2);
-  color: var(--accent-2);
+  color: var(--accent-2-text);
   margin-bottom: 10px;
 }
 
@@ -468,8 +488,8 @@ select option {
   z-index: 100;
   animation: slideIn 0.3s ease;
 }
-.toast.error { border-color: var(--danger); color: var(--danger); }
-.toast.success { border-color: var(--success); color: var(--success); }
+.toast.error { border-color: var(--danger-text); color: var(--danger-text); }
+.toast.success { border-color: var(--success-text); color: var(--success-text); }
 
 @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -485,7 +505,7 @@ select option {
 .auth-card { width: 100%; max-width: 420px; padding: 32px; }
 .auth-card h1 { margin-top: 0; font-size: 1.5rem; }
 .auth-switch { text-align: center; margin-top: 14px; color: var(--text-muted); font-size: 0.9rem; }
-.auth-switch a { color: var(--accent-2); font-weight: 600; }
+.auth-switch a { color: var(--accent-2-text); font-weight: 600; }
 
 .phase-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .phase-tab {
@@ -575,7 +595,7 @@ select option {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-2);
+  color: var(--accent-2-text);
   padding: 5px 12px;
   border-radius: 999px;
   background: rgba(109, 91, 248, 0.15);
@@ -710,4 +730,127 @@ select option {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ============================================================
+   Accessibility, footer and legal pages (Phase 1)
+   ============================================================ */
+
+/* Keyboard users land here first and can jump past the nav. It is visible only
+   while focused, so it costs pointer users nothing. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 200;
+  padding: 10px 16px;
+  border-radius: 0 0 10px 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 0; }
+
+/* A single visible focus style for everything interactive. :focus-visible keeps
+   it off for mouse clicks, so it never fires for the people who don't need it. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* The old rule painted a focus ring on every click, including mouse ones, and
+   at a colour that failed contrast in light mode. */
+input:focus, select:focus, textarea:focus { outline: none; }
+
+/* Icon-only controls must still be a comfortable target on touch. */
+.icon-btn, .hamburger, .slide-nav, .slide-dot {
+  min-width: 44px;
+  min-height: 44px;
+}
+.slide-dot {
+  /* The dot itself stays small; the tap area around it does not. */
+  background-clip: content-box;
+  padding: 17px 0;
+  min-width: 26px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Footer */
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.footer-tagline { margin: 0; }
+.footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.footer-links a { color: var(--text-muted); font-size: 0.9rem; }
+.footer-links a:hover { color: var(--text); text-decoration: underline; }
+
+/* Legal pages */
+.legal-page {
+  max-width: 760px;
+  padding-top: 40px;
+  padding-bottom: 80px;
+  line-height: 1.75;
+}
+.legal-page h1 { margin: 0 0 4px; font-size: 2rem; }
+.legal-page h2 {
+  margin: 36px 0 10px;
+  font-size: 1.15rem;
+  padding-top: 18px;
+  border-top: 1px solid var(--card-border);
+}
+.legal-page p, .legal-page li { color: var(--text-muted); }
+.legal-page strong { color: var(--text); }
+.legal-page a { color: var(--accent-2-text); text-decoration: underline; }
+.legal-page ul { padding-left: 22px; }
+.legal-page li { margin-bottom: 8px; }
+.legal-meta { margin-top: 0; font-size: 0.9rem; }
+.legal-notice { margin: 24px 0 8px; border-left: 3px solid var(--warning-text); }
+.legal-notice p { margin: 0; }
+.legal-todo {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+/* Form helpers */
+.field-hint {
+  margin: -10px 0 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.legal-consent { font-size: 0.85rem; }
+.legal-consent a { color: var(--accent-2-text); text-decoration: underline; }
+
+/* Available to screen readers, invisible on screen. Used for section headings
+   that the visual design conveys some other way, so the heading order stays
+   unbroken without adding visible clutter. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
