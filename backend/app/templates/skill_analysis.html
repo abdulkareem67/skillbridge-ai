@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_icons.html" as ui with context %}
 {% block title %}Skill Analysis — SkillBridge AI{% endblock %}
 
 {% block content %}
@@ -42,17 +43,17 @@
 
     <div class="grid grid-2" style="margin-bottom:24px">
       <div class="glass card">
-        <h2 style="margin-top:0">✅ Strengths (Matched Skills)</h2>
+        <h2 style="margin-top:0">{{ ui.icon("check-circle") }} Strengths (Matched Skills)</h2>
         <div id="matched-list"></div>
       </div>
       <div class="glass card">
-        <h2 style="margin-top:0">⚠️ Missing Skills</h2>
+        <h2 style="margin-top:0">{{ ui.icon("alert-triangle") }} Missing Skills</h2>
         <div id="missing-list"></div>
       </div>
     </div>
 
     <div class="glass card">
-      <h2 style="margin-top:0">🎓 Recommended Certifications</h2>
+      <h2 style="margin-top:0">{{ ui.icon("graduation-cap") }} Recommended Certifications</h2>
       <div id="cert-list"></div>
     </div>
   </div>

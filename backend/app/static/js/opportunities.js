@@ -25,7 +25,7 @@ function render() {
         <strong style="color:${badgeColor(o.match_percent)}">${o.match_percent}%</strong>
       </div>
       <div>${o.skills.map((s) => `<span class="chip ${o.matched_skills.includes(s) ? "chip-matched" : ""}" style="font-size:0.75rem">${s}</span>`).join("")}</div>
-      <div class="resource-links">${o.apply_links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">🔗 ${l.label}</a>`).join("")}</div>
+      <div class="resource-links">${o.apply_links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${icon("link")} ${l.label}</a>`).join("")}</div>
     </div>
   `).join("");
 }

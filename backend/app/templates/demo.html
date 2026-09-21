@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% import "_icons.html" as ui with context %}
+{% block title %}Example skill report — SkillBridge AI{% endblock %}
+
+{% block nav %}
+<nav class="navbar">
+  <div class="navbar-inner">
+    {{ ui.brand() }}
+    <div class="nav-actions">
+      {{ ui.theme_toggle() }}
+      <a href="/login" class="btn btn-ghost">Login</a>
+      <a href="/register" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page container">
+  <div class="page-header">
+    <h1>A finished report, before you sign up</h1>
+    <p>
+      Three made-up people, three real reports. The numbers below come from the same
+      engine that runs on your own CV — nothing here is mocked up.
+    </p>
+  </div>
+
+  <div class="demo-picker" role="tablist" aria-label="Choose an example profile">
+    {% for p in profiles %}
+    <a class="demo-tab{{ ' is-active' if p.slug == report.profile.slug else '' }}"
+       href="/demo?profile={{ p.slug }}"
+       role="tab" aria-selected="{{ 'true' if p.slug == report.profile.slug else 'false' }}">
+      <strong>{{ p.name }}</strong>
+      <span>{{ p.blurb }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="glass card demo-summary">
+    <div class="demo-summary-head">
+      <div>
+        <p class="mock-label">Target role</p>
+        <h2>{{ report.profile.target_role }}</h2>
+        <p class="demo-meta">Job-hunting in {{ report.profile.location }}</p>
+      </div>
+      <div class="mock-score demo-score">
+        <svg viewBox="0 0 120 120" class="mock-ring" aria-hidden="true">
+          <circle cx="60" cy="60" r="50" class="mock-ring-track"/>
+          <circle cx="60" cy="60" r="50" class="mock-ring-fill"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="{{ 314 - (314 * report.gap.match_percent / 100) }}"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="mock-score-text">
+          <strong>{{ report.gap.match_percent }}%</strong><span>match</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="glass card">
+      <h2>{{ ui.icon("check-circle") }} Already has ({{ report.gap.matched_skills|length }})</h2>
+      <div>
+        {% for skill in report.gap.matched_skills %}
+        <span class="chip chip-matched">{{ ui.icon("check", 14) }} {{ skill }}</span>
+        {% else %}
+        <p class="empty-state">No overlap with this role yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="glass card">
+      <h2>{{ ui.icon("alert-triangle") }} Still missing ({{ report.gap.missing_skills|length }})</h2>
+      <div>
+        {% for skill in report.gap.missing_skills %}
+        <span class="chip chip-missing">{{ skill }}</span>
+        {% else %}
+        <p class="empty-state">Nothing missing — ready to apply.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <h2 class="demo-section-title">{{ ui.icon("map") }} The roadmap this produces</h2>
+  <div class="grid grid-3">
+    {% for phase in ["beginner", "intermediate", "advanced"] %}
+    {% set block = report.roadmap[phase] %}
+    <div class="glass card">
+      <h3 class="demo-phase">{{ phase|capitalize }} phase</h3>
+      <p class="demo-duration">{{ block.duration }}</p>
+      {% if block.topics %}
+      <ul class="demo-phase-list">
+        {% for item in block.topics %}
+        <li class="{{ 'is-done' if item.already_have else '' }}">
+          <span class="demo-topic-mark">
+            {%- if item.already_have %}{{ ui.icon("check", 14) }}{% else %}{{ ui.icon("arrow-right", 14) }}{% endif -%}
+          </span>
+          <span class="demo-topic">
+            <strong>{{ item.skill }}</strong>
+            {% if not item.already_have and item.resource and item.resource.course %}
+            <span class="demo-resource">{{ item.resource.course }}</span>
+            {% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty-state">Nothing needed here.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="glass card cta-card" style="margin-top:32px">
+    <h2>Now do it with your own CV</h2>
+    <p>Upload a PDF or DOCX and get this report for your real skills, in about a minute.</p>
+    <div class="hero-actions cta-actions">
+      <a href="/register" class="btn btn-primary btn-lg">Create free account</a>
+      <a href="/" class="btn btn-ghost btn-lg">Back to home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -38,7 +38,7 @@ function appendBubble(role, text, animate = true) {
 
   const avatar = document.createElement("div");
   avatar.className = "chat-mini-avatar";
-  avatar.textContent = role === "user" ? "🧑" : "🤖";
+  avatar.innerHTML = icon(role === "user" ? "user" : "bot", 18);
 
   const stack = document.createElement("div");
   const bubble = document.createElement("div");
@@ -63,7 +63,7 @@ function showTyping() {
   const row = document.createElement("div");
   row.className = "chat-row assistant";
   row.innerHTML =
-    '<div class="chat-mini-avatar">🤖</div>' +
+    '<div class="chat-mini-avatar">' + icon("bot", 18) + '</div>' +
     '<div class="chat-bubble assistant"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
   chatWindow.appendChild(row);
   chatWindow.scrollTop = chatWindow.scrollHeight;

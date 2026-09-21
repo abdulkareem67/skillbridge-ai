@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_icons.html" as ui with context %}
 {% block title %}Dashboard — SkillBridge AI{% endblock %}
 
 {% block content %}
@@ -58,17 +59,17 @@
 
   <div class="grid grid-3">
     <a href="/cv-upload" class="glass feature-card">
-      <div class="feature-icon">📄</div>
+      <div class="feature-icon">{{ ui.icon("file-text") }}</div>
       <h2>Upload CV</h2>
       <p style="color:var(--text-muted)">Add skills from your resume.</p>
     </a>
     <a href="/skill-analysis" class="glass feature-card">
-      <div class="feature-icon">🎯</div>
+      <div class="feature-icon">{{ ui.icon("target") }}</div>
       <h2>Skill Analysis</h2>
       <p style="color:var(--text-muted)">See your gap analysis in detail.</p>
     </a>
     <a href="/roadmap" class="glass feature-card">
-      <div class="feature-icon">🗺️</div>
+      <div class="feature-icon">{{ ui.icon("map") }}</div>
       <h2>Learning Roadmap</h2>
       <p style="color:var(--text-muted)">Follow your personalized plan.</p>
     </a>

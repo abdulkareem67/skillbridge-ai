@@ -37,7 +37,7 @@ async function runAnalysis() {
     const gap = await api(`/api/skills/gap-analysis?role=${encodeURIComponent(role)}`);
     renderResults(gap);
     const { certifications } = await api(`/api/skills/certifications?role=${encodeURIComponent(role)}`);
-    document.getElementById("cert-list").innerHTML = certifications.map((c) => `<span class="chip">🎓 ${c}</span>`).join("");
+    document.getElementById("cert-list").innerHTML = certifications.map((c) => `<span class="chip">${icon("graduation-cap")} ${c}</span>`).join("");
   } catch (err) {
     toast(err.message, "error");
   }
@@ -52,7 +52,7 @@ function renderResults(gap) {
     `You match ${gap.matched_skills.length} of ${gap.required_skills.length} required skills for ${gap.role}.`;
 
   document.getElementById("matched-list").innerHTML = gap.matched_skills.length
-    ? gap.matched_skills.map((s) => `<span class="chip chip-matched">✓ ${s}</span>`).join("")
+    ? gap.matched_skills.map((s) => `<span class="chip chip-matched">${icon("check")} ${s}</span>`).join("")
     : '<p style="color:var(--text-muted)">No matched skills yet.</p>';
 
   document.getElementById("missing-list").innerHTML = gap.missing_skills.length

@@ -20,7 +20,7 @@ async function handleFile(file) {
   fd.append("file", file);
   try {
     const result = await api("/api/profile/cv-upload", { method: "POST", body: fd });
-    status.innerHTML = `<span style="color:var(--success)">✔ Extracted ${result.extracted_count} skill(s) from your CV (replaced any skills from a previous CV upload).</span>`;
+    status.innerHTML = `<span style="color:var(--success)">${icon("check")} Extracted ${result.extracted_count} skill(s) from your CV (replaced any skills from a previous CV upload).</span>`;
     toast(`${result.extracted_count} skills extracted from CV`);
     loadSkillProfile();
   } catch (err) {

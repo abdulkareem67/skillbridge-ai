@@ -48,7 +48,7 @@ function renderPhase() {
       <div style="color:var(--text-muted); font-size:0.88rem">${t.resource.course}</div>
       <div class="resource-links">
         <a href="${t.resource.youtube}" target="_blank">▶ YouTube Tutorials</a>
-        <a href="${t.resource.practice}" target="_blank">💻 Practice Platform</a>
+        <a href="${t.resource.practice}" target="_blank">${icon("laptop")} Practice Platform</a>
       </div>
     </div>`;
   }).join("");

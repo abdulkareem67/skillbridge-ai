@@ -30,20 +30,33 @@ function toast(message, type = "success") {
   setTimeout(() => el.remove(), 3200);
 }
 
-function initTheme() {
-  const saved = localStorage.getItem("sb-theme") || "dark";
-  document.documentElement.setAttribute("data-theme", saved);
+// Mirrors the Jinja `icon()` macro so markup built in JS pulls from the same
+// sprite as markup built server-side, instead of drifting back to emoji.
+function icon(name, size = 16) {
+  return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-${name}"></use></svg>`;
+}
+
+// The button holds both a sun and a moon icon; CSS shows whichever one offers
+// the theme you'd switch *to*. Setting textContent here would delete them both.
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
   const toggle = document.getElementById("theme-toggle");
-  if (toggle) toggle.textContent = saved === "dark" ? "☀" : "☽";
+  if (!toggle) return;
+  const next = theme === "dark" ? "light" : "dark";
+  const label = `Switch to ${next} theme`;
+  toggle.setAttribute("aria-label", label);
+  toggle.setAttribute("title", label);
+}
+
+function initTheme() {
+  applyTheme(localStorage.getItem("sb-theme") || "dark");
 }
 
 function toggleTheme() {
   const current = document.documentElement.getAttribute("data-theme") || "dark";
   const next = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem("sb-theme", next);
-  const toggle = document.getElementById("theme-toggle");
-  if (toggle) toggle.textContent = next === "dark" ? "☀" : "☽";
+  applyTheme(next);
 }
 
 function initNav() {

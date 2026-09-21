@@ -31,12 +31,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   {% block head %}{% endblock %}
 </head>
+{% import "_icons.html" as ui with context %}
 <body>
+  {% include "_icons.html" %}
   <a class="skip-link" href="#main">Skip to main content</a>
   {% block nav %}
   <nav class="navbar">
     <div class="navbar-inner">
-      <a href="/" class="brand">⚡ SkillBridge AI</a>
+      <a href="/" class="brand">{{ ui.logo() }}<span class="brand-text">SkillBridge AI</span></a>
       <div class="nav-links" id="nav-links">
         <a href="/dashboard">Dashboard</a>
         <a href="/cv-upload">CV Upload</a>
@@ -50,7 +52,7 @@
         <div class="account-switcher" id="account-switcher">
           <button class="btn btn-sm btn-ghost" id="account-switcher-btn" type="button" title="Switch account"
                   aria-label="Switch account ({{ accounts|length }} signed in)" aria-expanded="false" aria-haspopup="true"
-                  aria-controls="account-switcher-menu"><span aria-hidden="true">👤 {{ accounts|length }} ▾</span></button>
+                  aria-controls="account-switcher-menu">{{ ui.icon("user", 16) }}<span>{{ accounts|length }}</span></button>
           <div class="account-switcher-menu" id="account-switcher-menu" hidden>
             {% for acc in accounts %}
             <a href="#" onclick="switchAccount({{ acc.uid }}); return false;" class="account-switcher-item{{ ' active' if acc.uid == active_uid else '' }}">{{ acc.email }}</a>
@@ -61,9 +63,9 @@
         </div>
         {% endif %}
         <span id="user-badge" style="font-size:0.85rem;color:var(--text-muted)"></span>
-        <button class="icon-btn" id="theme-toggle" type="button" title="Switch between light and dark theme" aria-label="Switch between light and dark theme"><span aria-hidden="true">☾</span></button>
+        <button class="icon-btn" id="theme-toggle" type="button" title="Switch between light and dark theme" aria-label="Switch between light and dark theme">{{ ui.icon("moon", 18, cls="theme-icon-dark") }}{{ ui.icon("sun", 18, cls="theme-icon-light") }}</button>
         <button class="btn btn-sm" type="button" onclick="logout()">Logout</button>
-        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links"><span aria-hidden="true">☰</span></button>
+        <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links">{{ ui.icon("menu", 20) }}</button>
       </div>
     </div>
   </nav>
@@ -77,10 +79,19 @@
 
   <footer class="footer">
     <div class="container footer-inner">
-      <p class="footer-tagline">SkillBridge AI &mdash; Career Navigator for Students and Graduates</p>
+      <div class="footer-brand">
+        {{ ui.brand() }}
+        <p class="footer-tagline">AI Career Navigator for Students and Graduates</p>
+      </div>
       <nav class="footer-links" aria-label="Footer">
+        <a href="/demo">Example report</a>
+        <a href="/#features">About</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
+        {# TODO: replace with your real contact address and profile links. #}
+        <a href="mailto:hello@example.com">Contact</a>
+        <a href="https://github.com/" rel="noopener me" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/" rel="noopener me" target="_blank">LinkedIn</a>
       </nav>
     </div>
   </footer>
