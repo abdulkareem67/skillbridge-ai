@@ -18,14 +18,37 @@ import secrets
 import sqlite3
 from pathlib import Path
 
-# A Postgres connection string, if the host provides one. Vercel Storage / Neon
-# expose it under one of these names.
-DATABASE_URL = (
-    os.environ.get("POSTGRES_URL")
-    or os.environ.get("DATABASE_URL")
-    or os.environ.get("POSTGRES_URL_NON_POOLING")
-    or os.environ.get("POSTGRES_PRISMA_URL")
-)
+_PG_SCHEMES = ("postgres://", "postgresql://")
+_POOLED_LAST = ("UNPOOLED", "NON_POOLING", "NONPOOLING")
+
+
+def _discover_database_url() -> str | None:
+    """Find the Postgres connection string the host gave us, if any.
+
+    Vercel lets you choose the environment-variable prefix when connecting a
+    database, so the name isn't predictable (DATABASE_URL, POSTGRES_URL,
+    STORAGE_URL, ...). We check the usual names first, then fall back to any
+    variable that simply holds a Postgres URL, preferring a pooled connection.
+    """
+    for name in ("POSTGRES_URL", "DATABASE_URL", "POSTGRES_PRISMA_URL"):
+        value = os.environ.get(name)
+        if value and value.startswith(_PG_SCHEMES):
+            return value
+
+    candidates = [
+        (key, value)
+        for key, value in os.environ.items()
+        if isinstance(value, str) and value.startswith(_PG_SCHEMES)
+    ]
+    if not candidates:
+        return None
+    # A direct (unpooled) connection works but is the weaker choice on
+    # serverless, so only use one if nothing else is offered.
+    candidates.sort(key=lambda kv: any(p in kv[0].upper() for p in _POOLED_LAST))
+    return candidates[0][1]
+
+
+DATABASE_URL = _discover_database_url()
 USE_POSTGRES = bool(DATABASE_URL)
 
 # SQLite fallback for local development. The path can be overridden with
