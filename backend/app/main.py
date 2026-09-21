@@ -1,4 +1,5 @@
 import logging
+import sqlite3
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -6,8 +7,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .auth import SECRET_KEY, get_active_session, list_sessions
-from .database import init_db
+from .auth import DEFAULT_DEV_SECRET, IS_PRODUCTION, SECRET_KEY, get_active_session, list_sessions
+from .database import DB_PATH, init_db
 from .routers import (
     auth_router,
     chatbot_router,
@@ -25,12 +26,35 @@ app = FastAPI(title="SkillBridge AI")
 
 init_db()
 
-if SECRET_KEY == "skillbridge-ai-dev-secret-change-me":
+if SECRET_KEY == DEFAULT_DEV_SECRET:
+    if IS_PRODUCTION:
+        # Fail closed: refuse to run publicly with the well-known repo secret,
+        # which anyone could use to forge login sessions.
+        raise RuntimeError(
+            "SKILLBRIDGE_SECRET is not set. Add it in your Vercel project settings "
+            "(Settings -> Environment Variables) with a strong random value, e.g. "
+            "`python -c \"import secrets; print(secrets.token_urlsafe(48))\"`, then redeploy."
+        )
     logger.warning(
         "SKILLBRIDGE_SECRET is not set — using the built-in development secret. "
-        "Set the SKILLBRIDGE_SECRET environment variable to a strong random value before deploying "
-        "publicly, otherwise anyone can forge login sessions."
+        "Fine for local development, but set SKILLBRIDGE_SECRET before deploying publicly."
     )
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault(
+        "Permissions-Policy", "geolocation=(), microphone=(), camera=()"
+    )
+    if IS_PRODUCTION:
+        response.headers.setdefault(
+            "Strict-Transport-Security", "max-age=63072000; includeSubDomains"
+        )
+    return response
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
@@ -56,7 +80,24 @@ def render(request: Request, template: str, **ctx):
 
 
 def is_authenticated(request: Request) -> bool:
-    return get_active_session(request) is not None
+    """A valid session cookie is not enough — the account it names must still
+    exist in the database. On an ephemeral SQLite host the users table can be
+    wiped while an old cookie lives on, and without this check that stale
+    cookie would wave someone straight into the dashboard."""
+    session = get_active_session(request)
+    if session is None:
+        return False
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        try:
+            row = conn.execute(
+                "SELECT 1 FROM users WHERE id = ?", (int(session["uid"]),)
+            ).fetchone()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return False
+    return row is not None
 
 
 @app.get("/health")

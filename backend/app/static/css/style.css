@@ -665,10 +665,27 @@ select option {
 @keyframes slideProgress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 @media (max-width: 720px) {
-  .slide { padding: 20px; }
-  .slide-inner { grid-template-columns: 1fr; gap: 16px; text-align: center; }
-  .slide-art { max-width: 70%; margin: 0 auto; order: -1; }
+  /* Drop the fixed 16:9 box on phones and let the deck size to its content.
+     Stacking every slide in the same grid cell keeps the crossfade working
+     while the viewport grows to fit the tallest slide, so text no longer
+     overflows onto the dots. */
+  .slideshow-viewport {
+    aspect-ratio: auto;
+    display: grid;
+  }
+  .slide {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    padding: 22px 20px 48px;
+  }
+  .slide-inner { grid-template-columns: 1fr; gap: 14px; text-align: center; }
+  .slide-art { max-width: 150px; margin: 0 auto; order: -1; }
   .slide-copy .slide-kicker { margin-bottom: 8px; }
+  .slide-copy h3 { font-size: 1.25rem; }
+  .slide-copy p { font-size: 0.92rem; }
+  .slide-nav { display: none; }
+  .slide-dots { bottom: 16px; }
 }
 
 /* Card sheen on hover for feature/stat cards */

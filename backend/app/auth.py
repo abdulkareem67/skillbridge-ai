@@ -6,11 +6,19 @@ import bcrypt
 import jwt
 from fastapi import HTTPException, Request, Response, status
 
-SECRET_KEY = os.environ.get("SKILLBRIDGE_SECRET", "skillbridge-ai-dev-secret-change-me")
+DEFAULT_DEV_SECRET = "skillbridge-ai-dev-secret-change-me"
+SECRET_KEY = os.environ.get("SKILLBRIDGE_SECRET", DEFAULT_DEV_SECRET)
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24 * 7
 TOKEN_MAX_AGE_SECONDS = 60 * 60 * TOKEN_EXPIRE_HOURS
-SECURE_COOKIES = os.environ.get("SKILLBRIDGE_SECURE_COOKIES", "false").lower() == "true"
+
+# On a real host (Vercel sets the VERCEL env var) the site is served over HTTPS,
+# so send the session cookie only over an encrypted connection. Locally over
+# plain http it must stay off, otherwise the browser silently drops the cookie.
+IS_PRODUCTION = bool(os.environ.get("VERCEL"))
+SECURE_COOKIES = (
+    os.environ.get("SKILLBRIDGE_SECURE_COOKIES", "").lower() == "true" or IS_PRODUCTION
+)
 
 # Every account logged into this browser lives in one cookie, keyed by user id,
 # so a second login doesn't sign the first account out. ACTIVE_COOKIE just
