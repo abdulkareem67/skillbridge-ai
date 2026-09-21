@@ -1,5 +1,4 @@
 import logging
-import sqlite3
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -8,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .auth import DEFAULT_DEV_SECRET, IS_PRODUCTION, SECRET_KEY, get_active_session, list_sessions
-from .database import DB_PATH, init_db
+from .database import connect, init_db
 from .routers import (
     auth_router,
     chatbot_router,
@@ -88,14 +87,14 @@ def is_authenticated(request: Request) -> bool:
     if session is None:
         return False
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = connect()
         try:
             row = conn.execute(
                 "SELECT 1 FROM users WHERE id = ?", (int(session["uid"]),)
             ).fetchone()
         finally:
             conn.close()
-    except sqlite3.Error:
+    except Exception:
         return False
     return row is not None
 

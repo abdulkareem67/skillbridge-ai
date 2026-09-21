@@ -7,3 +7,4 @@ bcrypt>=4.0.1
 pypdf
 python-docx
 reportlab==4.2.5
+psycopg[binary]>=3.2
