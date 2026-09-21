@@ -12,7 +12,6 @@ from .skills_data import (
     DEFAULT_RESOURCE,
     OPPORTUNITIES,
     ROLE_CERTIFICATIONS,
-    SKILL_DICTIONARY,
     all_required_skills,
     field_for_role,
 )

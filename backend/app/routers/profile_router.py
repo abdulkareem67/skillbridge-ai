@@ -52,7 +52,7 @@ async def upload_cv(
     try:
         text = extract_text(file.filename, content)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     extracted = extract_skills_from_text(text)
     db.execute("DELETE FROM skills WHERE user_id = ? AND source = 'cv'", (user_id,))

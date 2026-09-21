@@ -78,7 +78,10 @@ def decode_token(token: str) -> dict:
     try:
         return jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
     except jwt.PyJWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired session")
+        # Deliberately opaque: which token check failed is not the caller's business.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired session"
+        ) from None
 
 
 def _read_raw_sessions(request: Request) -> list[dict]:

@@ -1,0 +1,10 @@
+# Development-only tooling. Not installed in production (Vercel uses
+# requirements.txt at the repo root).
+#
+#   python -m pip install -r requirements-dev.txt
+#   python -m ruff check .          # lint
+#   python -m pytest -q             # smoke tests
+
+ruff>=0.16
+pytest>=8.0
+httpx>=0.27          # required by fastapi.testclient

@@ -82,13 +82,29 @@ python -m uvicorn app.main:app --reload --port 8000
 
 Then open **http://localhost:8000** in your browser.
 
+## Development
+
+Install the dev tooling once, then lint and test from the repo root:
+
+```bash
+pip install -r requirements-dev.txt
+python -m ruff check .     # lint
+python -m pytest -q        # smoke tests
+```
+
+`tests/smoke_test.py` walks the whole product — sign-up, sign-in, CV upload and
+skill extraction, gap analysis, roadmap, progress, opportunities, the advisor and
+the PDF reports — against a throwaway SQLite database, so it never touches real
+data. Run both before committing.
+
 ## Deployment Notes
 
-* Any host that runs Python (Render, Railway, PythonAnywhere, Fly.io, a VPS) works — SQLite ships with the app, no external DB provisioning needed.
+* Any host that runs Python (Render, Railway, PythonAnywhere, Fly.io, a VPS) works. SQLite ships with the app for local use, but a host with an ephemeral filesystem (Vercel) needs a real database — set a Postgres connection string and the app uses it automatically.
 * A `backend/Dockerfile` is included for hosts that deploy from a container (Render, Railway, Fly.io, etc.). It binds to `$PORT`, which those platforms set automatically.
 * Before going live, copy `backend/.env.example` to `.env` (or set the equivalents in your host's dashboard):
-  * `SKILLBRIDGE_SECRET` — **required**. A strong random string used to sign session JWTs. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. The app logs a warning on startup and keeps running with a well-known dev secret if this isn't set — fine locally, unsafe in public.
-  * `SKILLBRIDGE_SECURE_COOKIES=true` — set once the app is served over HTTPS, so the login cookie is marked `Secure` and never sent over plain HTTP.
+  * `POSTGRES_URL` / `DATABASE_URL` — **required in production.** Any Postgres connection string; the app finds it whatever prefix the host uses. Without one, a deployed app serves a setup page instead of running on storage it would lose.
+  * `SKILLBRIDGE_SECRET` — *optional.* Signs session JWTs. If unset, the app generates a strong random secret on first run and stores it in the database, so sessions stay valid across restarts. Set it only to control the value yourself: `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
+  * `SKILLBRIDGE_SECURE_COOKIES=true` — only needed outside Vercel. Marks the login cookie `Secure` so it is never sent over plain HTTP; on Vercel this turns on automatically.
 * `GET /health` returns `{"status": "ok"}` — point your host's health check at it.
 * SQLite runs in WAL mode for better concurrent read/write behavior under multiple requests; for real horizontal scaling (multiple server instances), swap `sqlite3` in `database.py` for MongoDB/Postgres — the router layer only touches `database.py`, so the rest of the app is unaffected.
 * To add real generative AI (OpenAI/Gemini) for CV parsing or the chatbot, add your API key as an env var and call it inside `resume_parser.py` / `skills_engine.chatbot_reply()`.

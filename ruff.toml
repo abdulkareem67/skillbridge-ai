@@ -1,0 +1,21 @@
+# Lint settings tuned to the code that is already here rather than to a house
+# style: the FastAPI routers put dependencies in the signature, which makes long
+# lines normal, so the line limit is relaxed instead of reformatting working code.
+line-length = 140
+
+exclude = ["**/__pycache__", "backend/ml/model"]
+
+[lint]
+select = [
+    "E4",   # imports
+    "E7",   # statement style
+    "E9",   # syntax / runtime errors
+    "F",    # pyflakes: undefined names, unused imports
+    "B",    # bugbear: likely bugs
+    "UP",   # pyupgrade: outdated syntax
+]
+ignore = [
+    # `Depends(...)` / `File(...)` in an argument default is FastAPI's own
+    # idiom, not the mutable-default trap this rule is aimed at.
+    "B008",
+]
