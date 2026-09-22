@@ -82,7 +82,10 @@ def test_unknown_demo_profile_falls_back(client):
     assert client.get("/demo", params={"profile": "nope"}).status_code == 200
 
 
-def test_demo_needs_no_account(client):
-    """It must work signed out — that is the entire point of it."""
-    client.post("/api/auth/logout")
-    assert client.get("/demo", follow_redirects=False).status_code == 200
+def test_demo_needs_no_account(fresh_client):
+    """It must work signed out — that is the entire point of it.
+
+    Uses fresh_client so signing out doesn't disturb the shared session the
+    smoke tests rely on.
+    """
+    assert fresh_client.get("/demo", follow_redirects=False).status_code == 200

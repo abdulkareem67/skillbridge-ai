@@ -28,6 +28,12 @@ LOGIN_PER_IP = 50
 # Accounts created from one address in a window.
 REGISTER_PER_IP = 30
 
+# Per-user throttles on the heavier authenticated endpoints, so one signed-in
+# account can't hammer CV parsing or the advisor. Counted per user id, which is
+# already an opaque number, not personal data.
+CV_UPLOADS_PER_USER = 20
+ADVISOR_MESSAGES_PER_USER = 40
+
 
 def client_ip(request: Request) -> str:
     """The caller's address. On Vercel the platform sets x-forwarded-for."""
@@ -48,6 +54,18 @@ def _digest(value: str) -> str:
 
 def email_bucket(email: str) -> str:
     return "login-email:" + _digest(email)
+
+
+def user_bucket(action: str, user_id: int) -> str:
+    return f"{action}-user:{user_id}"
+
+
+def guard_user_action(db, action: str, user_id: int, limit: int, what: str) -> None:
+    """Enforce and then record one use of a per-user endpoint, in one call."""
+    bucket = user_bucket(action, user_id)
+    enforce(db, [(bucket, limit)], what)
+    record(db, bucket)
+    db.commit()
 
 
 def ip_bucket(action: str, request: Request) -> str:

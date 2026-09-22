@@ -64,6 +64,7 @@
         {% endif %}
         <span id="user-badge" style="font-size:0.85rem;color:var(--text-muted)"></span>
         <button class="icon-btn" id="theme-toggle" type="button" title="Switch between light and dark theme" aria-label="Switch between light and dark theme">{{ ui.icon("moon", 18, cls="theme-icon-dark") }}{{ ui.icon("sun", 18, cls="theme-icon-light") }}</button>
+        <a href="/settings" class="icon-btn" title="Settings" aria-label="Settings">{{ ui.icon("settings", 18) }}</a>
         <button class="btn btn-sm" type="button" onclick="logout()">Logout</button>
         <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links">{{ ui.icon("menu", 20) }}</button>
       </div>

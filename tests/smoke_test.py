@@ -54,9 +54,11 @@ def test_dark_mode_hooks_present(client):
     assert 'id="theme-toggle"' in body
 
 
-def test_protected_pages_redirect_when_signed_out(client):
+def test_protected_pages_redirect_when_signed_out(fresh_client):
+    # fresh_client is guaranteed to have no session, regardless of what the
+    # shared client did in other files.
     for path in PROTECTED_PAGES:
-        response = client.get(path, follow_redirects=False)
+        response = fresh_client.get(path, follow_redirects=False)
         assert response.status_code in (302, 307), f"{path} was reachable signed out"
 
 

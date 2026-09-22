@@ -132,6 +132,7 @@ PAGE_DESCRIPTIONS = {
     "advisor.html": "Ask the career advisor what to learn next, how to improve your CV, and more.",
     "privacy.html": "How SkillBridge AI handles your CV, what we store, and how to delete it.",
     "terms.html": "The terms that apply when you use SkillBridge AI.",
+    "settings.html": "Manage your SkillBridge AI account, export your data, or delete your account.",
     "onboarding.html": "Set up your SkillBridge AI profile: where you are, the role you want, and your CV.",
     "demo.html": (
         "See a finished SkillBridge AI skill-gap report and learning roadmap "
@@ -247,6 +248,13 @@ def onboarding_page(request: Request):
     if not is_authenticated(request):
         return RedirectResponse("/login")
     return render(request, "onboarding.html", markets=ONBOARDING_MARKETS)
+
+
+@app.get("/settings")
+def settings_page(request: Request):
+    if not is_authenticated(request):
+        return RedirectResponse("/login")
+    return render(request, "settings.html")
 
 
 @app.get("/dashboard")

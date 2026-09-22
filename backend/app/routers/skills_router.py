@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..auth import get_current_user_id
 from ..database import get_db
@@ -34,7 +34,7 @@ def categorized(user_id: int = Depends(get_current_user_id), db: sqlite3.Connect
 
 
 @router.get("/gap-analysis")
-def gap_analysis(role: str | None = None, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+def gap_analysis(role: str | None = Query(default=None, max_length=100), user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
     user = db.execute("SELECT target_role FROM users WHERE id = ?", (user_id,)).fetchone()
     target = role or (user["target_role"] if user else None)
     if not target:
@@ -46,7 +46,7 @@ def gap_analysis(role: str | None = None, user_id: int = Depends(get_current_use
 
 
 @router.get("/roadmap")
-def roadmap(role: str | None = None, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+def roadmap(role: str | None = Query(default=None, max_length=100), user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
     user = db.execute("SELECT target_role FROM users WHERE id = ?", (user_id,)).fetchone()
     target = role or (user["target_role"] if user else None)
     if not target:
@@ -86,7 +86,7 @@ def get_resume_tips(user_id: int = Depends(get_current_user_id), db: sqlite3.Con
 
 
 @router.get("/certifications")
-def get_certifications(role: str | None = None, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+def get_certifications(role: str | None = Query(default=None, max_length=100), user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
     user = db.execute("SELECT target_role, location FROM users WHERE id = ?", (user_id,)).fetchone()
     target = role or (user["target_role"] if user else None)
     location = user["location"] if user else None

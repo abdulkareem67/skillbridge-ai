@@ -1,7 +1,7 @@
 import io
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -84,7 +84,7 @@ def improved_cv_pdf(user_id: int = Depends(get_current_user_id), db: sqlite3.Con
 
 
 @router.get("/roadmap-pdf")
-def roadmap_pdf(role: str | None = None, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+def roadmap_pdf(role: str | None = Query(default=None, max_length=100), user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
     user = db.execute("SELECT name, target_role FROM users WHERE id = ?", (user_id,)).fetchone()
     target = role or (user["target_role"] if user else None)
     if not target:

@@ -2,6 +2,7 @@ import sqlite3
 
 from fastapi import APIRouter, Depends
 
+from .. import rate_limit
 from ..auth import get_current_user_id
 from ..database import get_db
 from ..models import ChatRequest
@@ -12,6 +13,7 @@ router = APIRouter(prefix="/api/chatbot", tags=["chatbot"])
 
 @router.post("/message")
 def send_message(payload: ChatRequest, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+    rate_limit.guard_user_action(db, "advisor", user_id, rate_limit.ADVISOR_MESSAGES_PER_USER, "messages")
     user = db.execute("SELECT target_role FROM users WHERE id = ?", (user_id,)).fetchone()
     rows = db.execute("SELECT skill_name FROM skills WHERE user_id = ?", (user_id,)).fetchall()
     user_skills = [r["skill_name"] for r in rows]

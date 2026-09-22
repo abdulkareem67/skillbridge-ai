@@ -1494,3 +1494,45 @@ button.phase-tab { font: inherit; }
 .dropzone[aria-disabled="true"] { opacity: 0.6; pointer-events: none; }
 .chat-error .chat-bubble { border: 1px solid var(--danger-text); }
 .chat-error .chat-bubble .btn { margin-top: var(--space-2); }
+
+/* ============================================================
+   Settings, consent checkbox, danger actions (Phase 5)
+   ============================================================ */
+.settings-page { max-width: 720px; }
+.settings-page section { margin-bottom: var(--space-5); }
+.settings-page h2 { margin-top: 0; font-size: var(--text-xl); }
+.settings-help { color: var(--text-muted); line-height: var(--leading-normal); }
+
+.settings-account { margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
+.settings-account > div { display: grid; grid-template-columns: 130px 1fr; gap: var(--space-3); }
+.settings-account dt { color: var(--text-muted); font-size: var(--text-sm); }
+.settings-account dd { margin: 0; }
+
+.danger-zone { border-color: var(--danger-text); }
+.btn-danger { background: var(--danger-text); border: none; color: #fff; }
+.btn-danger:hover { filter: brightness(1.05); }
+
+/* A checkbox and its label share a row and a comfortable target; the box does
+   not shrink when the label wraps to a second line. */
+.checkbox-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  cursor: pointer;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 20px; height: 20px;
+  flex: none;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.checkbox-row a { color: var(--accent-2-text); text-decoration: underline; }
+
+@media (max-width: 520px) {
+  .settings-account > div { grid-template-columns: 1fr; gap: 2px; }
+}

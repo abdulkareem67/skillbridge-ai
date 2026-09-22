@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% import "_icons.html" as ui with context %}
+{% block title %}Settings — SkillBridge AI{% endblock %}
+
+{% block content %}
+<div class="page container settings-page">
+  <div class="page-header">
+    <h1>Settings</h1>
+    <p>Your account, and what happens to your data.</p>
+  </div>
+
+  <section class="glass card" aria-labelledby="account-h">
+    <h2 id="account-h">Account</h2>
+    <dl class="settings-account" id="account-summary">
+      <div><dt>Name</dt><dd data-field="name">…</dd></div>
+      <div><dt>Email</dt><dd data-field="email">…</dd></div>
+      <div><dt>Location</dt><dd data-field="location">…</dd></div>
+      <div><dt>Target role</dt><dd data-field="target_role">…</dd></div>
+    </dl>
+    <a href="/onboarding" class="btn btn-sm">Edit in setup</a>
+  </section>
+
+  <section class="glass card" aria-labelledby="data-h">
+    <h2 id="data-h">{{ ui.icon("download") }} Your data</h2>
+    <p class="settings-help">
+      Download everything we hold about you — your profile, skills, progress and
+      advisor messages — as a JSON file. Your password is never included; we only
+      keep a one-way hash of it.
+    </p>
+    <a href="/api/profile/export" class="btn btn-primary" download>Export my data</a>
+  </section>
+
+  <section class="glass card danger-zone" aria-labelledby="delete-h">
+    <h2 id="delete-h">{{ ui.icon("alert-triangle") }} Delete account</h2>
+    <p class="settings-help">
+      This permanently removes your account and all of your data — profile, skills,
+      progress and advisor history. <strong>It cannot be undone.</strong>
+    </p>
+
+    <p class="form-alert" id="delete-alert" role="alert" hidden></p>
+
+    <form id="delete-form" novalidate>
+      <label for="delete-confirm">Type your email address to confirm</label>
+      <input type="email" id="delete-confirm" autocomplete="off" placeholder="you@example.com" />
+      <button type="submit" class="btn btn-danger" id="delete-btn" aria-disabled="true">
+        Permanently delete my account
+      </button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const summary = document.getElementById("account-summary");
+  const form = document.getElementById("delete-form");
+  const input = document.getElementById("delete-confirm");
+  const button = document.getElementById("delete-btn");
+  const alertEl = document.getElementById("delete-alert");
+  let accountEmail = null;
+
+  async function loadAccount() {
+    try {
+      const me = await api("/api/profile/me");
+      accountEmail = me.email;
+      summary.querySelector('[data-field="name"]').textContent = me.name;
+      summary.querySelector('[data-field="email"]').textContent = me.email;
+      summary.querySelector('[data-field="location"]').textContent = me.location || "Not set";
+      summary.querySelector('[data-field="target_role"]').textContent = me.target_role || "Not set";
+    } catch (err) {
+      summary.innerHTML = "";
+      showError(summary, err.message, loadAccount);
+    }
+  }
+
+  // The delete button only wakes up once the typed email matches the account,
+  // so it can't be fired by a stray click or an autofill.
+  function refresh() {
+    const match = accountEmail && input.value.trim().toLowerCase() === accountEmail.toLowerCase();
+    button.setAttribute("aria-disabled", String(!match));
+    button.classList.toggle("is-disabled", !match);
+  }
+  input.addEventListener("input", refresh);
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    alertEl.hidden = true;
+    if (button.getAttribute("aria-disabled") === "true") return;
+    if (!confirm("Delete your account and all your data? This cannot be undone.")) return;
+
+    withBusy(button, async () => {
+      try {
+        await api("/api/profile/delete", { method: "POST", body: JSON.stringify({ confirm_email: input.value.trim() }) });
+        // The account is gone; this tab's claim must go too, or the reclaim
+        // logic would try to switch back to a user that no longer exists.
+        try { sessionStorage.removeItem("sb-tab-account"); } catch (e) {}
+        window.location.href = "/?deleted=1";
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.hidden = false;
+      }
+    }, "Deleting…");
+  });
+
+  loadAccount();
+})();
+</script>
+{% endblock %}

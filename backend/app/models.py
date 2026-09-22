@@ -69,3 +69,10 @@ class LocationRequest(BaseModel):
         if not v:
             raise ValueError("Location cannot be blank")
         return v
+
+
+class DeleteAccountRequest(BaseModel):
+    # Typing the account's own email is the confirmation. It guards against an
+    # accidental click, and against a cross-site request that has the session
+    # cookie but doesn't know the address.
+    confirm_email: EmailStr
