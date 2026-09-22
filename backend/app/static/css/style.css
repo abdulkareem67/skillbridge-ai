@@ -252,7 +252,7 @@ select option {
 .account-switcher-menu {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  inset-inline-end: 0;
   min-width: 220px;
   background: var(--bg);
   border: 1px solid var(--card-border);
@@ -436,11 +436,11 @@ select option {
 .chat-bubble p { margin: 0 0 8px; }
 .chat-bubble p:last-child { margin-bottom: 0; }
 .chat-bubble strong { font-weight: 700; }
-.chat-bubble ol, .chat-bubble ul { margin: 6px 0 4px; padding-left: 20px; display: flex; flex-direction: column; gap: 5px; }
+.chat-bubble ol, .chat-bubble ul { margin: 6px 0 4px; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 5px; }
 .chat-bubble a { color: var(--accent-2-text); font-weight: 600; text-decoration: underline; }
 .chat-bubble.user a { color: #fff; }
 .chat-time { font-size: 0.68rem; color: var(--text-muted); margin: 4px 4px 0; opacity: 0.75; }
-.chat-row.user .chat-time { text-align: right; }
+.chat-row.user .chat-time { text-align: end; }
 
 /* Typing indicator: three bouncing dots */
 .typing-dots { display: inline-flex; gap: 5px; padding: 4px 2px; }
@@ -510,7 +510,7 @@ select option {
 .toast {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  inset-inline-end: 24px;
   padding: 14px 20px;
   border-radius: 12px;
   background: var(--card-bg);
@@ -772,7 +772,7 @@ select option {
    while focused, so it costs pointer users nothing. */
 .skip-link {
   position: absolute;
-  left: 12px;
+  inset-inline-start: 12px;
   top: -60px;
   z-index: 200;
   padding: 10px 16px;
@@ -852,10 +852,10 @@ input:focus, select:focus, textarea:focus { outline: none; }
 .legal-page p, .legal-page li { color: var(--text-muted); }
 .legal-page strong { color: var(--text); }
 .legal-page a { color: var(--accent-2-text); text-decoration: underline; }
-.legal-page ul { padding-left: 22px; }
+.legal-page ul { padding-inline-start: 22px; }
 .legal-page li { margin-bottom: 8px; }
 .legal-meta { margin-top: 0; font-size: 0.9rem; }
-.legal-notice { margin: 24px 0 8px; border-left: 3px solid var(--warning-text); }
+.legal-notice { margin: 24px 0 8px; border-inline-start: 3px solid var(--warning-text); }
 .legal-notice p { margin: 0; }
 .legal-todo {
   padding: 12px 14px;
@@ -1115,7 +1115,7 @@ h1 .icon, h2 .icon, h3 .icon { vertical-align: -0.12em; margin-inline-end: var(-
   content: "";
   flex: 1;
   height: 2px;
-  margin-left: var(--space-2);
+  margin-inline-start: var(--space-2);
   background: linear-gradient(90deg, var(--card-border), transparent);
 }
 .timeline-icon {
@@ -1177,10 +1177,10 @@ h1 .icon, h2 .icon, h3 .icon { vertical-align: -0.12em; margin-inline-end: var(-
     position: absolute;
     top: 42px;
     bottom: 6px;
-    left: 16px;
+    inset-inline-start: 16px;
     width: 2px;
     height: auto;
-    margin-left: 0;
+    margin-inline-start: 0;
     background: linear-gradient(180deg, var(--card-border), transparent);
   }
   .timeline-icon { width: 36px; height: 36px; margin-bottom: var(--space-2); }
@@ -1372,7 +1372,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--da
 .optional { font-weight: 400; color: var(--text-muted); }
 
 .password-field { position: relative; }
-.password-field input { padding-right: 52px; }
+.password-field input { padding-inline-end: 52px; }
 .password-toggle {
   position: absolute;
   top: 0; right: 0;
@@ -1384,7 +1384,10 @@ input[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--da
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 0 10px 10px 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-start-end-radius: 10px;
+  border-end-end-radius: 10px;
 }
 .password-toggle:hover { color: var(--text); }
 
@@ -1536,3 +1539,39 @@ button.phase-tab { font: inherit; }
 @media (max-width: 520px) {
   .settings-account > div { grid-template-columns: 1fr; gap: 2px; }
 }
+
+/* ============================================================
+   Language switcher + RTL (Phase 4)
+   ============================================================ */
+.lang-switcher { position: relative; }
+.lang-switcher > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.lang-switcher > summary::-webkit-details-marker { display: none; }
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-end: 0;
+  min-width: 160px;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 6px;
+  z-index: 100;
+}
+.lang-item {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+.lang-item:hover { background: var(--card-bg); }
+.lang-item.is-active { color: var(--accent-2-text); font-weight: 600; }
+
+/* Right-to-left. Logical properties handle the layout mirroring on their own;
+   the one thing that must be flipped explicitly is a directional arrow, so any
+   icon marked .arrow-inline points the other way under RTL. */
+[dir="rtl"] .arrow-inline { transform: scaleX(-1); }

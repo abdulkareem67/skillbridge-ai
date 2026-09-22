@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Dashboard — SkillBridge AI{% endblock %}
+{% block title %}{{ t('dashboard.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>Your Dashboard</h1>
-    <p>A quick snapshot of your skills, match score, and progress.</p>
+    <h1>{{ t('dashboard.heading') }}</h1>
+    <p>{{ t('dashboard.subtitle') }}</p>
   </div>
 
   <div id="dash-status" class="page-status"></div>
@@ -14,66 +14,66 @@
   <div class="grid grid-4" style="margin-bottom:24px">
     <div class="glass card">
       <div class="stat-value" id="stat-match">…</div>
-      <div class="stat-label">Skill Match Score</div>
+      <div class="stat-label">{{ t('dashboard.stat_match') }}</div>
     </div>
     <div class="glass card">
       <div class="stat-value" id="stat-total-skills">…</div>
-      <div class="stat-label">Total Skills Logged</div>
+      <div class="stat-label">{{ t('dashboard.stat_total') }}</div>
     </div>
     <div class="glass card">
       <div class="stat-value" id="stat-missing">…</div>
-      <div class="stat-label">Missing Skills</div>
+      <div class="stat-label">{{ t('dashboard.stat_missing') }}</div>
     </div>
     <div class="glass card">
       <div class="stat-value" id="stat-opportunities">…</div>
-      <div class="stat-label">Matched Opportunities</div>
+      <div class="stat-label">{{ t('dashboard.stat_opps') }}</div>
     </div>
   </div>
 
   <div class="grid grid-2" style="margin-bottom:24px">
     <div class="glass card">
-      <h2 style="margin-top:0">Skill Match Score</h2>
+      <h2 style="margin-top:0">{{ t('dashboard.chart_match') }}</h2>
       <canvas id="chart-match" height="220"></canvas>
     </div>
     <div class="glass card">
-      <h2 style="margin-top:0">Skills by Category</h2>
+      <h2 style="margin-top:0">{{ t('dashboard.chart_category') }}</h2>
       <canvas id="chart-category" height="220"></canvas>
     </div>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
-    <h2 style="margin-top:0">Learning Progress</h2>
-    <p style="color:var(--text-muted)" id="learning-progress-text">Loading…</p>
+    <h2 style="margin-top:0">{{ t('dashboard.learning_progress') }}</h2>
+    <p style="color:var(--text-muted)" id="learning-progress-text">{{ t('common.loading') }}</p>
     <div class="progress-track">
       <div class="progress-fill" id="learning-progress-fill" style="width:0%"></div>
     </div>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
-    <h2 style="margin-top:0">Target Role</h2>
-    <p style="color:var(--text-muted)" id="current-role-text">Loading…</p>
+    <h2 style="margin-top:0">{{ t('dashboard.target_role') }}</h2>
+    <p style="color:var(--text-muted)" id="current-role-text">{{ t('common.loading') }}</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap">
       <select id="discipline-select" style="max-width:240px"></select>
       <select id="role-select" style="max-width:280px"></select>
-      <button class="btn btn-primary" id="save-role-btn" type="button" onclick="saveRole(this)">Set Target Role</button>
+      <button class="btn btn-primary" id="save-role-btn" type="button" onclick="saveRole(this)">{{ t('dashboard.set_role') }}</button>
     </div>
   </div>
 
   <div class="grid grid-3">
     <a href="/cv-upload" class="glass feature-card">
       <div class="feature-icon">{{ ui.icon("file-text") }}</div>
-      <h2>Upload CV</h2>
-      <p style="color:var(--text-muted)">Add skills from your resume.</p>
+      <h2>{{ t('dashboard.card_upload') }}</h2>
+      <p style="color:var(--text-muted)">{{ t('dashboard.card_upload_sub') }}</p>
     </a>
     <a href="/skill-analysis" class="glass feature-card">
       <div class="feature-icon">{{ ui.icon("target") }}</div>
-      <h2>Skill Analysis</h2>
-      <p style="color:var(--text-muted)">See your gap analysis in detail.</p>
+      <h2>{{ t('dashboard.card_analysis') }}</h2>
+      <p style="color:var(--text-muted)">{{ t('dashboard.card_analysis_sub') }}</p>
     </a>
     <a href="/roadmap" class="glass feature-card">
       <div class="feature-icon">{{ ui.icon("map") }}</div>
-      <h2>Learning Roadmap</h2>
-      <p style="color:var(--text-muted)">Follow your personalized plan.</p>
+      <h2>{{ t('dashboard.card_roadmap') }}</h2>
+      <p style="color:var(--text-muted)">{{ t('dashboard.card_roadmap_sub') }}</p>
     </a>
   </div>
 </div>

@@ -2,7 +2,7 @@ let allOpportunities = [];
 let currentFilter = "All";
 let includeOtherFields = false;
 
-const FILTER_LABELS = { Job: "jobs", Internship: "internships", Freelance: "freelance roles", Remote: "remote roles" };
+const FILTER_LABELS = () => ({ Job: t("opp_word_jobs", "jobs"), Internship: t("opp_word_internships", "internships"), Freelance: t("opp_word_freelance", "freelance roles"), Remote: t("opp_word_remote", "remote roles") });
 
 function badgeColor(pct) {
   if (pct >= 70) return "var(--success-text)";
@@ -20,13 +20,13 @@ function render() {
 
   if (!list.length) {
     container.classList.remove("grid", "grid-3");
-    const what = currentFilter === "All" ? "roles" : FILTER_LABELS[currentFilter] || "roles";
+    const what = currentFilter === "All" ? t("opp_word_roles", "roles") : FILTER_LABELS()[currentFilter] || t("opp_word_roles", "roles");
     showEmpty(
       container,
       allOpportunities.length
-        ? `No ${what} match your skills yet. Try another filter, or add more skills to widen your matches.`
-        : "No roles match your skills yet. Add more skills to unlock matches.",
-      '<a class="btn btn-sm" href="/cv-upload">Add skills</a>'
+        ? t("opp_none_filter", "No {what} match your skills yet. Try another filter, or add more skills to widen your matches.").replace("{what}", what)
+        : t("opp_none", "No roles match your skills yet. Add more skills to unlock matches."),
+      `<a class="btn btn-sm" href="/cv-upload">${escapeHtml(t("opp_add_skills", "Add skills"))}</a>`
     );
     return;
   }
@@ -39,7 +39,7 @@ function render() {
       <h3 style="margin:8px 0 4px">${escapeHtml(o.title)}</h3>
       <p style="margin:0 0 4px; color:var(--text-muted)">${escapeHtml(o.company)} • ${escapeHtml(o.location)}</p>
       <div style="display:flex; align-items:center; gap:10px; margin:12px 0">
-        <div class="progress-track" style="flex:1" role="img" aria-label="${o.match_percent}% skill match">
+        <div class="progress-track" style="flex:1" role="img" aria-label="${escapeHtml(t("opp_match_aria", "{pct}% skill match").replace("{pct}", o.match_percent))}">
           <div class="progress-fill" style="width:${Number(o.match_percent)}%; background:${badgeColor(o.match_percent)}"></div>
         </div>
         <strong style="color:${badgeColor(o.match_percent)}">${Number(o.match_percent)}%</strong>
@@ -62,26 +62,26 @@ function filterType(type) {
 
 async function loadApplyGuide() {
   const list = document.getElementById("apply-guide-list");
-  showLoading(list, "Building your application plan…");
+  showLoading(list, t("opp_plan_loading", "Building your application plan…"));
   try {
     const guide = await api("/api/opportunities/application-guide");
     clearState(list);
     list.innerHTML = guide.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("");
   } catch (err) {
-    showError(list, `Couldn't load your application plan. ${err.message}`, loadApplyGuide);
+    showError(list, t("opp_plan_failed", "Couldn't load your application plan. {msg}").replace("{msg}", err.message), loadApplyGuide);
   }
 }
 
 async function loadOpportunities() {
   const container = document.getElementById("opp-list");
   container.classList.remove("grid", "grid-3");
-  showLoading(container, "Matching roles to your skills…");
+  showLoading(container, t("opp_matching", "Matching roles to your skills…"));
   try {
     const res = await api(`/api/opportunities?include_other_fields=${includeOtherFields}`);
     allOpportunities = res.opportunities;
     render();
   } catch (err) {
-    showError(container, `Couldn't load matching roles. ${err.message}`, loadOpportunities);
+    showError(container, t("opp_load_failed", "Couldn't load matching roles. {msg}").replace("{msg}", err.message), loadOpportunities);
   }
   loadApplyGuide();
 }
@@ -101,7 +101,7 @@ async function init() {
     if (me.target_role) {
       document.getElementById("other-fields-toggle").style.display = "flex";
       const note = document.getElementById("field-note");
-      note.textContent = `Showing roles matched to your target role (${me.target_role}) first — tick the box above to also see roles outside that field.`;
+      note.textContent = t("opp_showing", "Showing roles matched to your target role ({role}) first — tick the box above to also see roles outside that field.").replace("{role}", me.target_role);
       note.style.display = "block";
     }
   } catch (e) { /* non-essential */ }

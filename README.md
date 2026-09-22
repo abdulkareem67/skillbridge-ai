@@ -97,6 +97,21 @@ skill extraction, gap analysis, roadmap, progress, opportunities, the advisor an
 the PDF reports — against a throwaway SQLite database, so it never touches real
 data. Run both before committing.
 
+## Adding a language
+
+UI text lives in `backend/app/locales/<code>.json`, keyed by `namespace.key`;
+templates read it with `t("nav.dashboard")` and the front-end with the same keys
+via `window.__I18N__`. English (`en.json`) is the source and the fallback.
+
+To add, say, Urdu: copy `en.json` to `ur.json`, translate the values (leave any
+you haven't done — they fall back to English), and it appears automatically. The
+language switcher shows once more than one locale exists; writing direction and
+the endonym come from `LOCALE_INFO` in `app/i18n.py`, which already lists `ur`,
+`ar`, `hi`, `bn` and `zh` as right-to-left-aware placeholders. No code change is
+needed. The legal pages (`privacy.html`, `terms.html`) keep their body text in
+English on purpose — they are placeholder drafts for a lawyer to replace, not
+copy to machine-translate.
+
 ## Deployment Notes
 
 * Any host that runs Python (Render, Railway, PythonAnywhere, Fly.io, a VPS) works. SQLite ships with the app for local use, but a host with an ephemeral filesystem (Vercel) needs a real database — set a Postgres connection string and the app uses it automatically.

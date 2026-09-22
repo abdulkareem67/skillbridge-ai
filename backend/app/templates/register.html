@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Register — SkillBridge AI{% endblock %}
+{% block title %}{{ t('register.title') }}{% endblock %}
 
 {% block nav %}
 <nav class="navbar">
   <div class="navbar-inner">
     {{ ui.brand() }}
     <div class="nav-actions">
+      {{ ui.language_switcher() }}
       {{ ui.theme_toggle() }}
-      <a href="/login" class="btn btn-ghost">Login</a>
+      <a href="/login" class="btn btn-ghost">{{ t('common.login') }}</a>
     </div>
   </div>
 </nav>
@@ -18,34 +19,32 @@
 {% import "_forms.html" as forms with context %}
 <div class="auth-wrap">
   <div class="glass auth-card fade-in">
-    <h1>Create your account</h1>
-    <p class="auth-lede">Free, and it takes about a minute.</p>
+    <h1>{{ t('register.heading') }}</h1>
+    <p class="auth-lede">{{ t('register.lede') }}</p>
 
     <p class="form-alert" id="register-alert" role="alert" hidden></p>
 
-    {{ forms.google_button("Sign up with Google") }}
+    {{ forms.google_button(t('auth.google_signup')) }}
 
     <form id="register-form" novalidate>
-      <label for="reg-name">Full name</label>
+      <label for="reg-name">{{ t('register.full_name') }}</label>
       {# One field, not first/last: plenty of people have a single name, or a
          family name that comes first, and splitting them forces a wrong answer. #}
       <input type="text" id="reg-name" name="name" autocomplete="name" maxlength="100" required />
 
-      <label for="reg-email">Email</label>
+      <label for="reg-email">{{ t('auth.email') }}</label>
       <input type="email" id="reg-email" name="email" autocomplete="email" required />
 
-      {{ forms.password_field("reg-password", "Password", "new-password", hint="At least 8 characters.", minlength=8) }}
+      {{ forms.password_field('reg-password', t('auth.password'), 'new-password', hint=t('auth.password_hint'), minlength=8) }}
 
       <label class="checkbox-row" for="reg-consent">
         <input type="checkbox" id="reg-consent" />
-        <span>I agree to the <a href="/terms">Terms of Service</a> and
-        <a href="/privacy">Privacy Policy</a>, including that my uploaded CV is
-        processed to extract skills.</span>
+        <span>{{ t('register.consent') }}<a href="/terms">{{ t('register.consent_terms') }}</a>{{ t('register.consent_and') }}<a href="/privacy">{{ t('register.consent_privacy') }}</a>{{ t('register.consent_tail') }}</span>
       </label>
 
-      <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      <button class="btn btn-primary btn-block" type="submit">{{ t('register.submit') }}</button>
     </form>
-    <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
+    <p class="auth-switch">{{ t('register.have_account') }}<a href="/login">{{ t('register.login_link') }}</a></p>
   </div>
 </div>
 {% endblock %}
@@ -67,9 +66,9 @@
   showAuthErrorFromUrl(alertEl);
 
   const rules = {
-    name: (v) => (v.trim() ? "" : "Enter your name."),
-    email: (v) => (!v.trim() ? "Enter your email address." : fields.email.checkValidity() ? "" : "That doesn't look like an email address."),
-    password: (v) => (v.length >= MIN_PASSWORD ? "" : `Use at least ${MIN_PASSWORD} characters (${v.length} so far).`),
+    name: (v) => (v.trim() ? "" : t("enter_name", "Enter your name.")),
+    email: (v) => (!v.trim() ? t("enter_email", "Enter your email address.") : fields.email.checkValidity() ? "" : t("invalid_email", "That doesn't look like an email address.")),
+    password: (v) => (v.length >= MIN_PASSWORD ? "" : t("password_min", "Use at least {min} characters ({have} so far).").replace("{min}", MIN_PASSWORD).replace("{have}", v.length)),
   };
 
   function check(name) {
@@ -89,7 +88,7 @@
   fields.password.addEventListener("input", () => {
     const met = fields.password.value.length >= MIN_PASSWORD;
     hint.classList.toggle("is-met", met);
-    hint.textContent = met ? "Looks good." : `At least ${MIN_PASSWORD} characters.`;
+    hint.textContent = met ? t("password_ok", "Looks good.") : t("password_min_short", "At least {min} characters.").replace("{min}", MIN_PASSWORD);
   });
 
   // Map FastAPI's per-field validation errors back onto the right inputs.
@@ -109,7 +108,7 @@
     const ok = ["name", "email", "password"].map(check).every(Boolean);
     if (!ok) { form.querySelector('[aria-invalid="true"]').focus(); return; }
     if (!consent.checked) {
-      alertEl.textContent = "Please agree to the Terms and Privacy Policy to continue.";
+      alertEl.textContent = t("consent_required", "Please agree to the Terms and Privacy Policy to continue.");
       alertEl.hidden = false;
       consent.focus();
       return;
@@ -129,7 +128,7 @@
         window.location.href = user.next || "/onboarding";
       } catch (err) {
         if (err.status === 400 && /already exists/i.test(err.message)) {
-          setFieldError(fields.email, "There's already an account with this email. Try logging in instead.");
+          setFieldError(fields.email, t("email_taken", "There's already an account with this email. Try logging in instead."));
           fields.email.focus();
         } else if (err.status === 422 && applyServerErrors(err.detail)) {
           form.querySelector('[aria-invalid="true"]').focus();
@@ -138,7 +137,7 @@
           alertEl.hidden = false;
         }
       }
-    }, "Creating account…");
+    }, t("creating_account", "Creating account…"));
   });
 })();
 </script>

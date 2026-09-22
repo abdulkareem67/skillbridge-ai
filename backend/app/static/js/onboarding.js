@@ -69,7 +69,7 @@
     const c = country.value.trim();
     const t = city.value.trim();
     if (!c && !t) {
-      setFieldError(country, "Enter a country, or choose “Skip” below.");
+      setFieldError(country, t("ob_need_country", "Enter a country, or choose “Skip” below."));
       country.focus();
       return;
     }
@@ -82,7 +82,7 @@
       } catch (err) {
         setFieldError(country, err.message);
       }
-    }, "Saving…");
+    }, t("ob_saving", "Saving…"));
   });
 
   document.getElementById("ob-skip-location").addEventListener("click", () => go(2));
@@ -102,12 +102,12 @@
 
   async function loadRoles() {
     if (rolesLoaded) return;
-    showLoading(rolesState, "Loading career tracks…");
+    showLoading(rolesState, t("ob_loading_tracks", "Loading career tracks…"));
     rolesForm.hidden = true;
     try {
       disciplines = (await api("/api/skills/disciplines")).disciplines;
       const names = Object.keys(disciplines);
-      if (!names.length) { showEmpty(rolesState, "No career tracks are configured yet."); return; }
+      if (!names.length) { showEmpty(rolesState, t("ob_no_tracks", "No career tracks are configured yet.")); return; }
       const current = names.find((d) => disciplines[d].includes(pendingRole)) || names[0];
       dSel.innerHTML = names.map((d) => `<option value="${escapeHtml(d)}" ${d === current ? "selected" : ""}>${escapeHtml(d)}</option>`).join("");
       dSel.onchange = () => fillRoles(dSel.value);
@@ -130,7 +130,7 @@
       } catch (err) {
         toast(err.message, "error");
       }
-    }, "Saving…");
+    }, t("ob_saving", "Saving…"));
   });
 
   /* ---- Step 3: skills --------------------------------------------------- */
@@ -145,7 +145,7 @@
   }
   // A link can't be `disabled`, so block it by hand until there is a skill.
   finish.addEventListener("click", (e) => {
-    if (!hasSkills) { e.preventDefault(); toast("Add at least one skill first.", "error"); }
+    if (!hasSkills) { e.preventDefault(); toast(t("ob_need_skill", "Add at least one skill first."), "error"); }
   });
 
   function showSkills(names, lead) {
@@ -158,16 +158,16 @@
   cvInput.addEventListener("change", async () => {
     const file = cvInput.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { showError(result, "That file is over 5 MB. Try a smaller PDF or a DOCX."); return; }
-    showLoading(result, `Reading ${file.name}…`);
+    if (file.size > 5 * 1024 * 1024) { showError(result, t("ob_too_big", "That file is over 5 MB. Try a smaller PDF or a DOCX.")); return; }
+    showLoading(result, t("ob_reading", "Reading {name}…").replace("{name}", file.name));
     const fd = new FormData();
     fd.append("file", file);
     try {
       const r = await api("/api/profile/cv-upload", { method: "POST", body: fd, timeout: 45000 });
       if (!r.extracted_count) {
-        showEmpty(result, "We couldn't find any skills we recognise in that file. If it's a scanned PDF, try a DOCX — or type a few skills above.");
+        showEmpty(result, t("ob_no_skills_found", "We couldn't find any skills we recognise in that file. If it's a scanned PDF, try a DOCX — or type a few skills above."));
       } else {
-        showSkills(r.skills.map((s) => s.skill_name), `Found ${r.extracted_count} skill${r.extracted_count === 1 ? "" : "s"} in your CV.`);
+        showSkills(r.skills.map((s) => s.skill_name), (r.extracted_count === 1 ? t("ob_found_skill", "Found {n} skill in your CV.") : t("ob_found_skills", "Found {n} skills in your CV.")).replace("{n}", r.extracted_count));
       }
     } catch (err) {
       showError(result, err.message);
@@ -178,23 +178,23 @@
 
   document.getElementById("ob-add-manual").addEventListener("click", (e) => {
     const skills = manual.value.split(",").map((s) => s.trim()).filter(Boolean);
-    if (!skills.length) { setFieldError(manual, "Type at least one skill."); manual.focus(); return; }
-    if (skills.length > 50) { setFieldError(manual, "That's more than 50 — add the most important ones first."); return; }
+    if (!skills.length) { setFieldError(manual, t("ob_type_a_skill", "Type at least one skill.")); manual.focus(); return; }
+    if (skills.length > 50) { setFieldError(manual, t("ob_too_many", "That's more than 50 — add the most important ones first.")); return; }
     setFieldError(manual, "");
     withBusy(e.currentTarget, async () => {
       try {
         const r = await api("/api/profile/skills/manual", { method: "POST", body: JSON.stringify({ skills }) });
         manual.value = "";
-        showSkills(r.added, `Added ${r.added.length} skill${r.added.length === 1 ? "" : "s"}.`);
+        showSkills(r.added, (r.added.length === 1 ? t("ob_added_skill", "Added {n} skill.") : t("ob_added_skills", "Added {n} skills.")).replace("{n}", r.added.length));
       } catch (err) {
         setFieldError(manual, err.message);
       }
-    }, "Adding…");
+    }, t("ob_adding", "Adding…"));
   });
 
   /* ---- Resume where they left off --------------------------------------- */
   async function start() {
-    showLoading(loading, "Loading your profile…");
+    showLoading(loading, t("ob_loading_profile", "Loading your profile…"));
     try {
       const me = await api("/api/profile/me");
       loading.innerHTML = "";

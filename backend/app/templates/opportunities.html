@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Opportunity Finder — SkillBridge AI{% endblock %}
+{% block title %}{{ t('opportunities.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>Opportunity Finder</h1>
-    <p>Example roles matched to your skills, each linking to live searches on the job boards used where you are.</p>
+    <h1>{{ t('opportunities.heading') }}</h1>
+    <p>{{ t('opportunities.subtitle') }}</p>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
     <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center">
       <div style="display:flex; gap:10px; flex-wrap:wrap">
-        <button class="btn btn-sm active-filter" data-type="All" onclick="filterType('All')">All</button>
-        <button class="btn btn-sm" data-type="Job" onclick="filterType('Job')">Jobs</button>
-        <button class="btn btn-sm" data-type="Internship" onclick="filterType('Internship')">Internships</button>
-        <button class="btn btn-sm" data-type="Freelance" onclick="filterType('Freelance')">Freelance</button>
-        <button class="btn btn-sm" data-type="Remote" onclick="filterType('Remote')">Remote</button>
+        <button class="btn btn-sm active-filter" data-type="All" onclick="filterType('All')">{{ t('opportunities.filter_all') }}</button>
+        <button class="btn btn-sm" data-type="Job" onclick="filterType('Job')">{{ t('opportunities.filter_jobs') }}</button>
+        <button class="btn btn-sm" data-type="Internship" onclick="filterType('Internship')">{{ t('opportunities.filter_internships') }}</button>
+        <button class="btn btn-sm" data-type="Freelance" onclick="filterType('Freelance')">{{ t('opportunities.filter_freelance') }}</button>
+        <button class="btn btn-sm" data-type="Remote" onclick="filterType('Remote')">{{ t('opportunities.filter_remote') }}</button>
       </div>
       <label id="other-fields-toggle" style="display:none; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-muted); cursor:pointer">
         <input type="checkbox" id="include-other-fields" style="width:auto" onchange="onIncludeOtherFieldsChange()" />
-        Also show opportunities outside my field
+        {{ t('opportunities.show_other') }}
       </label>
     </div>
     <p id="field-note" style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted); display:none"></p>
@@ -28,11 +28,11 @@
 
   <!-- Cards are injected here with level-3 headings, so the list needs a
        level-2 heading above them to keep the heading order unbroken. -->
-  <h2 class="visually-hidden">Matched roles</h2>
+  <h2 class="visually-hidden">{{ t('opportunities.matched_roles') }}</h2>
   <div class="grid grid-3" id="opp-list"></div>
 
   <div class="glass card" style="margin-top:24px">
-    <h2 style="margin-top:0">{{ ui.icon("clipboard-list") }} How to Apply — Based on Your CV</h2>
+    <h2 style="margin-top:0">{{ ui.icon("clipboard-list") }} {{ t('opportunities.how_to_apply') }}</h2>
     <ol id="apply-guide-list" style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8"></ol>
   </div>
 </div>

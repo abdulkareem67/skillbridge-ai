@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Login — SkillBridge AI{% endblock %}
+{% block title %}{{ t('login.title') }}{% endblock %}
 
 {% block nav %}
 <nav class="navbar">
   <div class="navbar-inner">
     {{ ui.brand() }}
     <div class="nav-actions">
+      {{ ui.language_switcher() }}
       {{ ui.theme_toggle() }}
-      <a href="/register" class="btn btn-ghost">Register</a>
+      <a href="/register" class="btn btn-ghost">{{ t('common.register') }}</a>
     </div>
   </div>
 </nav>
@@ -18,26 +19,25 @@
 {% import "_forms.html" as forms with context %}
 <div class="auth-wrap">
   <div class="glass auth-card fade-in">
-    <h1>Welcome back</h1>
-    <p class="auth-lede">Log in to continue your career journey.</p>
+    <h1>{{ t('login.heading') }}</h1>
+    <p class="auth-lede">{{ t('login.lede') }}</p>
     {% if accounts %}
     <p class="auth-switch auth-notice">
-      Already signed in as {{ accounts|length }} account{{ 's' if accounts|length > 1 else '' }} on this browser.
-      Logging in below adds another — or <a href="/dashboard">go to your dashboard</a>.
+      {{ t('login.already_plural', count=accounts|length) if accounts|length > 1 else t('login.already', count=accounts|length) }}<a href="/dashboard">{{ t('login.go_dashboard') }}</a>.
     </p>
     {% endif %}
 
     <p class="form-alert" id="login-alert" role="alert" hidden></p>
 
-    {{ forms.google_button("Continue with Google") }}
+    {{ forms.google_button(t('auth.google_continue')) }}
 
     <form id="login-form" novalidate>
-      <label for="login-email">Email</label>
+      <label for="login-email">{{ t('auth.email') }}</label>
       <input type="email" id="login-email" name="email" autocomplete="email" required />
-      {{ forms.password_field("login-password", "Password", "current-password") }}
-      <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      {{ forms.password_field('login-password', t('auth.password'), 'current-password') }}
+      <button class="btn btn-primary btn-block" type="submit">{{ t('login.submit') }}</button>
     </form>
-    <p class="auth-switch">Don't have an account? <a href="/register">Create one</a></p>
+    <p class="auth-switch">{{ t('login.no_account') }}<a href="/register">{{ t('login.create_one') }}</a></p>
   </div>
 </div>
 {% endblock %}
@@ -62,10 +62,10 @@
   function validate() {
     let ok = true;
     const value = email.value.trim();
-    if (!value) { setFieldError(email, "Enter your email address."); ok = false; }
-    else if (!email.checkValidity()) { setFieldError(email, "That doesn't look like an email address."); ok = false; }
+    if (!value) { setFieldError(email, t("enter_email", "Enter your email address.")); ok = false; }
+    else if (!email.checkValidity()) { setFieldError(email, t("invalid_email", "That doesn't look like an email address.")); ok = false; }
     else setFieldError(email, "");
-    if (!password.value) { setFieldError(password, "Enter your password."); ok = false; }
+    if (!password.value) { setFieldError(password, t("enter_password", "Enter your password.")); ok = false; }
     else setFieldError(password, "");
     return ok;
   }
@@ -92,7 +92,7 @@
         alertEl.hidden = false;
         if (err.status === 401) { password.value = ""; password.focus(); }
       }
-    }, "Logging in…");
+    }, t("logging_in", "Logging in…"));
   });
 })();
 </script>

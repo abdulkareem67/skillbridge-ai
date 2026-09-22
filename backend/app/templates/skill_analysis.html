@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Skill Analysis — SkillBridge AI{% endblock %}
+{% block title %}{{ t('analysis.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>AI Skill Gap Analysis</h1>
+    <h1>{{ t('analysis.heading') }}</h1>
     <p>Select a target role to compare your skills against real job requirements.</p>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end">
       <div style="flex:1; min-width:200px">
-        <label for="discipline-select">Field of Study</label>
+        <label for="discipline-select">{{ t('analysis.field') }}</label>
         <select id="discipline-select"></select>
       </div>
       <div style="flex:1; min-width:200px">
-        <label for="role-select">Target Role</label>
+        <label for="role-select">{{ t('analysis.target_role') }}</label>
         <select id="role-select"></select>
       </div>
-      <button class="btn btn-primary" style="margin-bottom:16px" id="analyze-btn" type="button" onclick="runAnalysis(this)">Analyze Skill Gap</button>
+      <button class="btn btn-primary" style="margin-bottom:16px" id="analyze-btn" type="button" onclick="runAnalysis(this)">{{ t('analysis.analyze_btn') }}</button>
     </div>
-    <p style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted)">Pick your field first (e.g. Civil Engineering, Business &amp; Finance) — then choose a role within it.</p>
+    <p style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted)">{{ t('analysis.pick_field') }}</p>
   </div>
 
   <div id="analysis-status" class="page-status"></div>
@@ -29,38 +29,38 @@
   <div id="results" style="display:none">
     <div class="grid grid-2" style="margin-bottom:24px">
       <div class="glass card" style="text-align:center">
-        <h2 style="margin-top:0">Match Score</h2>
+        <h2 style="margin-top:0">{{ t('analysis.match_score') }}</h2>
         <canvas id="chart-gap" height="220"></canvas>
         <div class="stat-value" id="match-percent" style="margin-top:10px">0%</div>
       </div>
       <div class="glass card">
-        <h2 style="margin-top:0">Progress Overview</h2>
+        <h2 style="margin-top:0">{{ t('analysis.progress_overview') }}</h2>
         <p style="color:var(--text-muted)" id="progress-summary"></p>
         <div class="progress-track" style="margin-bottom:20px">
           <div class="progress-fill" id="progress-fill" style="width:0%"></div>
         </div>
-        <a class="btn btn-primary btn-block" href="/roadmap">View Learning Roadmap →</a>
+        <a class="btn btn-primary btn-block" href="/roadmap">{{ t('analysis.view_roadmap') }}</a>
       </div>
     </div>
 
     <div class="grid grid-2" style="margin-bottom:24px">
       <div class="glass card">
-        <h2 style="margin-top:0">{{ ui.icon("check-circle") }} Strengths (Matched Skills)</h2>
+        <h2 style="margin-top:0">{{ ui.icon("check-circle") }} {{ t('analysis.strengths') }}</h2>
         <div id="matched-list"></div>
       </div>
       <div class="glass card">
-        <h2 style="margin-top:0">{{ ui.icon("alert-triangle") }} Missing Skills</h2>
+        <h2 style="margin-top:0">{{ ui.icon("alert-triangle") }} {{ t('analysis.missing') }}</h2>
         <div id="missing-list"></div>
       </div>
     </div>
 
     <div class="glass card">
-      <h2 style="margin-top:0">{{ ui.icon("graduation-cap") }} Recommended Certifications</h2>
+      <h2 style="margin-top:0">{{ ui.icon("graduation-cap") }} {{ t('analysis.recommended_certs') }}</h2>
       <div id="cert-list"></div>
     </div>
   </div>
 
-  <div id="no-results" class="empty-state">Choose a target role and click "Analyze Skill Gap" to see your results.</div>
+  <div id="no-results" class="empty-state">{{ t('analysis.no_results') }}</div>
 </div>
 {% endblock %}
 

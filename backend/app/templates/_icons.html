@@ -25,8 +25,23 @@
 
 {% macro theme_toggle() -%}
 <button class="icon-btn" id="theme-toggle" type="button"
-        title="Switch between light and dark theme"
-        aria-label="Switch between light and dark theme">{{ icon("moon", 18, cls="theme-icon-dark") }}{{ icon("sun", 18, cls="theme-icon-light") }}</button>
+        title="{{ t('common.theme_toggle') }}"
+        aria-label="{{ t('common.theme_toggle') }}">{{ icon("moon", 18, cls="theme-icon-dark") }}{{ icon("sun", 18, cls="theme-icon-light") }}</button>
+{%- endmacro %}
+
+{# The language menu appears only when there's more than one language to pick,
+   so an English-only build shows nothing. <details> needs no JavaScript. #}
+{% macro language_switcher() -%}
+{% if locales | length > 1 %}
+<details class="lang-switcher">
+  <summary class="icon-btn" title="{{ t('common.choose_language') }}" aria-label="{{ t('common.choose_language') }}">{{ icon("globe", 18) }}</summary>
+  <div class="lang-menu">
+    {% for code in locales %}
+    <a href="/set-language/{{ code }}" class="lang-item{{ ' is-active' if code == locale else '' }}" lang="{{ code }}" dir="{{ locale_info[code].dir }}">{{ locale_info[code].name }}</a>
+    {% endfor %}
+  </div>
+</details>
+{% endif %}
 {%- endmacro %}
 
 {% macro logo(size=26) -%}
@@ -185,6 +200,12 @@
   <symbol id="i-settings" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="3"/>
     <path d="M12 2.5a1 1 0 0 1 1 1v.7a8 8 0 0 1 1.9.8l.5-.5a1 1 0 0 1 1.4 0l1.7 1.7a1 1 0 0 1 0 1.4l-.5.5a8 8 0 0 1 .8 1.9h.7a1 1 0 0 1 1 1v2.4a1 1 0 0 1-1 1h-.7a8 8 0 0 1-.8 1.9l.5.5a1 1 0 0 1 0 1.4l-1.7 1.7a1 1 0 0 1-1.4 0l-.5-.5a8 8 0 0 1-1.9.8v.7a1 1 0 0 1-1 1h-2.4a1 1 0 0 1-1-1v-.7a8 8 0 0 1-1.9-.8l-.5.5a1 1 0 0 1-1.4 0l-1.7-1.7a1 1 0 0 1 0-1.4l.5-.5a8 8 0 0 1-.8-1.9h-.7a1 1 0 0 1-1-1v-2.4a1 1 0 0 1 1-1h.7a8 8 0 0 1 .8-1.9l-.5-.5a1 1 0 0 1 0-1.4l1.7-1.7a1 1 0 0 1 1.4 0l.5.5a8 8 0 0 1 1.9-.8v-.7a1 1 0 0 1 1-1z"/>
+  </symbol>
+
+  <symbol id="i-globe" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M3 12h18"/>
+    <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/>
   </symbol>
 
   <symbol id="i-zap" viewBox="0 0 24 24">

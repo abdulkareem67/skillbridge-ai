@@ -1,55 +1,55 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}CV Upload — SkillBridge AI{% endblock %}
+{% block title %}{{ t('cv.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>CV Upload & Skill Extraction</h1>
+    <h1>{{ t('cv.heading') }}</h1>
     <p>Upload your resume (PDF/DOCX) or enter skills manually — SkillBridge AI will extract and categorize them.</p>
   </div>
 
   <div class="grid grid-2">
     <div class="glass card">
-      <h2 style="margin-top:0">Upload Resume</h2>
+      <h2 style="margin-top:0">{{ t('cv.upload_resume') }}</h2>
       {# role=button + tabindex: this was a plain div, so it could only be used with a mouse. #}
       <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="dropzone-help" aria-label="Upload a CV">
         <input type="file" id="file-input" accept=".pdf,.docx" hidden />
         <p style="margin:0; font-size:2rem">{{ ui.icon("file-text") }}</p>
-        <p><strong>Click to upload</strong> or drag & drop</p>
-        <p style="color:var(--text-muted); font-size:0.85rem" id="dropzone-help">PDF or DOCX, up to 5 MB. We read it in memory and never store the file.</p>
+        <p><strong>{{ t('cv.click_upload') }}</strong>{{ t('cv.or_drag') }}</p>
+        <p style="color:var(--text-muted); font-size:0.85rem" id="dropzone-help">{{ t('cv.dropzone_help') }}</p>
       </div>
       <div id="upload-status" style="margin-top:14px" aria-live="polite"></div>
     </div>
 
     <div class="glass card">
-      <h2 style="margin-top:0">Add Skills Manually</h2>
-      <label for="manual-skill-input">Enter a skill and press Enter</label>
-      <input type="text" id="manual-skill-input" maxlength="80" placeholder="e.g. React, Python, Communication" />
+      <h2 style="margin-top:0">{{ t('cv.add_manual') }}</h2>
+      <label for="manual-skill-input">{{ t('cv.enter_skill') }}</label>
+      <input type="text" id="manual-skill-input" maxlength="80" placeholder="{{ t('cv.skill_placeholder') }}" />
       <div id="manual-chip-preview" class="suggestion-row"></div>
-      <button class="btn btn-primary btn-block" type="button" onclick="submitManualSkills(this)">Add Skills</button>
+      <button class="btn btn-primary btn-block" type="button" onclick="submitManualSkills(this)">{{ t('cv.add_skills') }}</button>
     </div>
   </div>
 
   <div class="glass card" style="margin-top:24px">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
-      <h2 style="margin:0">Your Skill Profile</h2>
-      <button class="btn btn-sm" type="button" onclick="clearAllSkills(this)">{{ ui.icon("trash") }} Clear All Skills</button>
+      <h2 style="margin:0">{{ t('cv.your_profile') }}</h2>
+      <button class="btn btn-sm" type="button" onclick="clearAllSkills(this)">{{ ui.icon("trash") }} {{ t('cv.clear_all') }}</button>
     </div>
     <div class="grid grid-4" id="category-lists" style="margin-top:14px"></div>
       </div>
 
   <div class="glass card" style="margin-top:24px">
-    <h2 style="margin-top:0">{{ ui.icon("edit") }} Resume Improvement Suggestions</h2>
+    <h2 style="margin-top:0">{{ ui.icon("edit") }} {{ t('cv.suggestions') }}</h2>
     <ul id="resume-tips-list" style="margin:0; padding-left:20px; color:var(--text-muted); line-height:1.8"></ul>
   </div>
 
   <div class="glass card" style="margin-top:24px">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
-      <h2 style="margin:0">{{ ui.icon("sparkles") }} Improved CV</h2>
-      <a class="btn btn-primary btn-sm is-disabled" id="download-cv-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} Download Improved CV (PDF)</a>
+      <h2 style="margin:0">{{ ui.icon("sparkles") }} {{ t('cv.improved_cv') }}</h2>
+      <a class="btn btn-primary btn-sm is-disabled" id="download-cv-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} {{ t('cv.download_cv') }}</a>
     </div>
-    <p style="color:var(--text-muted); margin-top:6px">A rewritten summary, cleaned-up skill sections, and project suggestions — generated from your current profile.</p>
+    <p style="color:var(--text-muted); margin-top:6px">{{ t('cv.improved_sub') }}</p>
     <div id="cv-preview" style="margin-top:14px"></div>
   </div>
 </div>

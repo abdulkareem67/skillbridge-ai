@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}SkillBridge AI — AI Career Navigator for Students and Graduates{% endblock %}
+{% block title %}{{ t('landing.title') }}{% endblock %}
 
 {% block nav %}
 <nav class="navbar">
   <div class="navbar-inner">
     {{ ui.brand() }}
     <div class="nav-actions">
+      {{ ui.language_switcher() }}
       {{ ui.theme_toggle() }}
-      <a href="/demo" class="btn btn-ghost">See a demo</a>
-      <a href="/login" class="btn btn-ghost">Login</a>
-      <a href="/register" class="btn btn-primary">Get Started</a>
+      <a href="/demo" class="btn btn-ghost">{{ t('landing.nav_demo') }}</a>
+      <a href="/login" class="btn btn-ghost">{{ t('common.login') }}</a>
+      <a href="/register" class="btn btn-primary">{{ t('common.get_started') }}</a>
     </div>
   </div>
 </nav>
@@ -19,18 +20,14 @@
 {% block content %}
 <section class="hero-split container fade-in">
   <div class="hero-copy">
-    <p class="eyebrow">Free · No credit card</p>
-    <h1>Upload your CV.<br />See exactly which skills<br /><span class="gradient-text">you're missing.</span></h1>
-    <p class="hero-lede">
-      Pick the job you want. SkillBridge AI compares your CV against what that role
-      actually asks for, then builds a free step-by-step roadmap to close the gap —
-      and points you at the job boards used where you live.
-    </p>
+    <p class="eyebrow">{{ t('landing.eyebrow') }}</p>
+    <h1>{{ t('landing.h1_line1') }}<br />{{ t('landing.h1_line2') }}<br /><span class="gradient-text">{{ t('landing.h1_line3') }}</span></h1>
+    <p class="hero-lede">{{ t('landing.hero_lede') }}</p>
     <div class="hero-actions">
-      <a href="/register" class="btn btn-primary btn-lg">Analyse my CV {{ ui.icon("arrow-right", 18) }}</a>
-      <a href="/demo" class="btn btn-ghost btn-lg">See an example report</a>
+      <a href="/register" class="btn btn-primary btn-lg">{{ t('landing.cta_analyse') }} {{ ui.icon("arrow-right", 18, cls="arrow-inline") }}</a>
+      <a href="/demo" class="btn btn-ghost btn-lg">{{ t('landing.cta_example') }}</a>
     </div>
-    <p class="hero-note">Your CV is read in memory to pull out skills, then discarded — we never store the file.</p>
+    <p class="hero-note">{{ t('landing.hero_note') }}</p>
   </div>
 
   {#
@@ -39,11 +36,11 @@
     and cannot go stale the way an exported image does.
   #}
   <div class="hero-mock" role="img"
-       aria-label="Preview of a skill report: 74 percent match for Data Analyst, with SQL, Power BI and Statistics still missing, and a three-phase roadmap.">
+       aria-label="{{ t('landing.mock_aria') }}">
     <div class="mock-window glass">
       <div class="mock-bar" aria-hidden="true">
         <span></span><span></span><span></span>
-        <p class="mock-title">Skill Analysis — Data Analyst</p>
+        <p class="mock-title">{{ t('landing.mock_title') }}</p>
       </div>
 
       <div class="mock-body">
@@ -53,15 +50,15 @@
             <circle cx="60" cy="60" r="50" class="mock-ring-fill"
                     stroke-dasharray="314" stroke-dashoffset="82" transform="rotate(-90 60 60)"/>
           </svg>
-          <div class="mock-score-text"><strong>74%</strong><span>match</span></div>
+          <div class="mock-score-text"><strong>74%</strong><span>{{ t('landing.mock_match') }}</span></div>
         </div>
 
         <div class="mock-lists">
-          <p class="mock-label">{{ ui.icon("check-circle", 14) }} You already have</p>
+          <p class="mock-label">{{ ui.icon("check-circle", 14) }} {{ t('landing.mock_have') }}</p>
           <ul class="mock-chips">
             <li class="is-have">Excel</li><li class="is-have">Python</li><li class="is-have">Communication</li>
           </ul>
-          <p class="mock-label">{{ ui.icon("alert-triangle", 14) }} Still missing</p>
+          <p class="mock-label">{{ ui.icon("alert-triangle", 14) }} {{ t('landing.mock_missing') }}</p>
           <ul class="mock-chips">
             <li class="is-missing">SQL</li><li class="is-missing">Power BI</li><li class="is-missing">Statistics</li>
           </ul>
@@ -69,11 +66,11 @@
       </div>
 
       <div class="mock-roadmap">
-        <p class="mock-label">{{ ui.icon("map", 14) }} Your roadmap</p>
+        <p class="mock-label">{{ ui.icon("map", 14) }} {{ t('landing.mock_roadmap') }}</p>
         <ol class="mock-phases">
-          <li class="is-done"><span>Beginner</span><div class="mock-track"><i style="width:100%"></i></div></li>
-          <li class="is-active"><span>Intermediate</span><div class="mock-track"><i style="width:45%"></i></div></li>
-          <li><span>Advanced</span><div class="mock-track"><i style="width:0"></i></div></li>
+          <li class="is-done"><span>{{ t('landing.phase_beginner') }}</span><div class="mock-track"><i style="width:100%"></i></div></li>
+          <li class="is-active"><span>{{ t('landing.phase_intermediate') }}</span><div class="mock-track"><i style="width:45%"></i></div></li>
+          <li><span>{{ t('landing.phase_advanced') }}</span><div class="mock-track"><i style="width:0"></i></div></li>
         </ol>
       </div>
     </div>
@@ -87,8 +84,8 @@
 #}
 <section class="container section" aria-labelledby="how-heading">
   <div class="section-head">
-    <h2 id="how-heading">How it works</h2>
-    <p>Four steps, about ten minutes.</p>
+    <h2 id="how-heading">{{ t('landing.how_heading') }}</h2>
+    <p>{{ t('landing.how_sub') }}</p>
   </div>
 
   <ol class="timeline">
@@ -96,32 +93,32 @@
       <div class="timeline-marker"><span class="timeline-num">1</span></div>
       <div class="timeline-body">
         <span class="timeline-icon">{{ ui.icon("file-text", 22) }}</span>
-        <h3>Upload your CV</h3>
-        <p>Drop in a PDF or DOCX. We read it, pull out your technical, soft and tool skills, and sort them for you.</p>
+        <h3>{{ t('landing.step1_h') }}</h3>
+        <p>{{ t('landing.step1_p') }}</p>
       </div>
     </li>
     <li class="timeline-step">
       <div class="timeline-marker"><span class="timeline-num">2</span></div>
       <div class="timeline-body">
         <span class="timeline-icon">{{ ui.icon("target", 22) }}</span>
-        <h3>Pick a target role</h3>
-        <p>Choose from {{ stats.career_tracks }} career tracks and see your match score, your strengths, and exactly what is missing.</p>
+        <h3>{{ t('landing.step2_h') }}</h3>
+        <p>{{ t('landing.step2_p', tracks=stats.career_tracks) }}</p>
       </div>
     </li>
     <li class="timeline-step">
       <div class="timeline-marker"><span class="timeline-num">3</span></div>
       <div class="timeline-body">
         <span class="timeline-icon">{{ ui.icon("map", 22) }}</span>
-        <h3>Follow your roadmap</h3>
-        <p>Beginner to advanced phases, each missing skill paired with a free course, a video and somewhere to practise.</p>
+        <h3>{{ t('landing.step3_h') }}</h3>
+        <p>{{ t('landing.step3_p') }}</p>
       </div>
     </li>
     <li class="timeline-step">
       <div class="timeline-marker"><span class="timeline-num">4</span></div>
       <div class="timeline-body">
         <span class="timeline-icon">{{ ui.icon("briefcase", 22) }}</span>
-        <h3>Apply with confidence</h3>
-        <p>See which roles fit your current skills, and search them on the job boards people actually use in your country.</p>
+        <h3>{{ t('landing.step4_h') }}</h3>
+        <p>{{ t('landing.step4_p') }}</p>
       </div>
     </li>
   </ol>
@@ -133,19 +130,19 @@
   <div class="grid grid-4">
     <div class="glass card stat-card">
       <div class="stat-value">{{ stats.career_tracks }}</div>
-      <div class="stat-label">Career Tracks</div>
+      <div class="stat-label">{{ t('landing.stat_tracks') }}</div>
     </div>
     <div class="glass card stat-card">
       <div class="stat-value">{{ stats.skills_tracked }}</div>
-      <div class="stat-label">Skills Tracked</div>
+      <div class="stat-label">{{ t('landing.stat_skills') }}</div>
     </div>
     <div class="glass card stat-card">
       <div class="stat-value">{{ stats.fields_of_study }}</div>
-      <div class="stat-label">Fields of Study</div>
+      <div class="stat-label">{{ t('landing.stat_fields') }}</div>
     </div>
     <div class="glass card stat-card">
       <div class="stat-value">100%</div>
-      <div class="stat-label">Free to Use</div>
+      <div class="stat-label">{{ t('landing.stat_free') }}</div>
     </div>
   </div>
 </section>
@@ -157,40 +154,40 @@
 #}
 <section class="container section" id="features" aria-labelledby="features-heading">
   <div class="section-head">
-    <h2 id="features-heading">And once you're in</h2>
-    <p>The parts that keep working after the first report.</p>
+    <h2 id="features-heading">{{ t('landing.features_heading') }}</h2>
+    <p>{{ t('landing.features_sub') }}</p>
   </div>
   <div class="grid grid-2">
     <div class="glass feature-card">
       <span class="feature-icon">{{ ui.icon("bot", 24) }}</span>
-      <h3>Career advisor on tap</h3>
-      <p>Ask what to learn next, how to word a CV line, which certifications are worth it, or how to prepare for an interview — answered against your own skill profile.</p>
+      <h3>{{ t('landing.feat1_h') }}</h3>
+      <p>{{ t('landing.feat1_p') }}</p>
     </div>
     <div class="glass feature-card">
       <span class="feature-icon">{{ ui.icon("bar-chart", 24) }}</span>
-      <h3>Progress you can see</h3>
-      <p>Tick skills off as you learn them and watch your match score climb. Your dashboard remembers where you left off.</p>
+      <h3>{{ t('landing.feat2_h') }}</h3>
+      <p>{{ t('landing.feat2_p') }}</p>
     </div>
     <div class="glass feature-card">
       <span class="feature-icon">{{ ui.icon("sparkles", 24) }}</span>
-      <h3>A stronger CV, written for you</h3>
-      <p>Get concrete rewrite suggestions and download an improved CV as a PDF, with your strongest matching skills moved to the top.</p>
+      <h3>{{ t('landing.feat3_h') }}</h3>
+      <p>{{ t('landing.feat3_p') }}</p>
     </div>
     <div class="glass feature-card">
       <span class="feature-icon">{{ ui.icon("compass", 24) }}</span>
-      <h3>Built for wherever you are</h3>
-      <p>Job searches, certifications and licensing advice follow your own country — not one market the site happened to be built around.</p>
+      <h3>{{ t('landing.feat4_h') }}</h3>
+      <p>{{ t('landing.feat4_p') }}</p>
     </div>
   </div>
 </section>
 
 <section class="container section">
   <div class="glass card cta-card fade-in">
-    <h2>Ready to close your skill gap?</h2>
-    <p>Create your free profile in under a minute — or look at a finished report first.</p>
+    <h2>{{ t('landing.cta_heading') }}</h2>
+    <p>{{ t('landing.cta_sub') }}</p>
     <div class="hero-actions cta-actions">
-      <a href="/register" class="btn btn-primary btn-lg">Create free account</a>
-      <a href="/demo" class="btn btn-ghost btn-lg">See an example report</a>
+      <a href="/register" class="btn btn-primary btn-lg">{{ t('landing.cta_create') }}</a>
+      <a href="/demo" class="btn btn-ghost btn-lg">{{ t('landing.cta_example') }}</a>
     </div>
   </div>
 </section>

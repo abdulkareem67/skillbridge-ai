@@ -1,50 +1,45 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Settings — SkillBridge AI{% endblock %}
+{% block title %}{{ t('settings.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container settings-page">
   <div class="page-header">
-    <h1>Settings</h1>
-    <p>Your account, and what happens to your data.</p>
+    <h1>{{ t('settings.heading') }}</h1>
+    <p>{{ t('settings.lede') }}</p>
   </div>
 
   <section class="glass card" aria-labelledby="account-h">
-    <h2 id="account-h">Account</h2>
+    <h2 id="account-h">{{ t('settings.account') }}</h2>
     <dl class="settings-account" id="account-summary">
-      <div><dt>Name</dt><dd data-field="name">…</dd></div>
-      <div><dt>Email</dt><dd data-field="email">…</dd></div>
-      <div><dt>Location</dt><dd data-field="location">…</dd></div>
-      <div><dt>Target role</dt><dd data-field="target_role">…</dd></div>
+      <div><dt>{{ t('settings.name') }}</dt><dd data-field="name">…</dd></div>
+      <div><dt>{{ t('settings.email') }}</dt><dd data-field="email">…</dd></div>
+      <div><dt>{{ t('settings.location') }}</dt><dd data-field="location">…</dd></div>
+      <div><dt>{{ t('settings.target_role') }}</dt><dd data-field="target_role">…</dd></div>
     </dl>
-    <a href="/onboarding" class="btn btn-sm">Edit in setup</a>
+    <a href="/onboarding" class="btn btn-sm">{{ t('settings.edit_setup') }}</a>
   </section>
 
   <section class="glass card" aria-labelledby="data-h">
-    <h2 id="data-h">{{ ui.icon("download") }} Your data</h2>
+    <h2 id="data-h">{{ ui.icon("download") }} {{ t('settings.your_data') }}</h2>
     <p class="settings-help">
-      Download everything we hold about you — your profile, skills, progress and
-      advisor messages — as a JSON file. Your password is never included; we only
-      keep a one-way hash of it.
+      {{ t('settings.export_help') }}
     </p>
-    <a href="/api/profile/export" class="btn btn-primary" download>Export my data</a>
+    <a href="/api/profile/export" class="btn btn-primary" download>{{ t('settings.export_btn') }}</a>
   </section>
 
   <section class="glass card danger-zone" aria-labelledby="delete-h">
-    <h2 id="delete-h">{{ ui.icon("alert-triangle") }} Delete account</h2>
+    <h2 id="delete-h">{{ ui.icon("alert-triangle") }} {{ t('settings.delete_account') }}</h2>
     <p class="settings-help">
-      This permanently removes your account and all of your data — profile, skills,
-      progress and advisor history. <strong>It cannot be undone.</strong>
+      {{ t('settings.delete_help_1') }}<strong>{{ t('settings.delete_help_undone') }}</strong>
     </p>
 
     <p class="form-alert" id="delete-alert" role="alert" hidden></p>
 
     <form id="delete-form" novalidate>
-      <label for="delete-confirm">Type your email address to confirm</label>
+      <label for="delete-confirm">{{ t('settings.delete_confirm_label') }}</label>
       <input type="email" id="delete-confirm" autocomplete="off" placeholder="you@example.com" />
-      <button type="submit" class="btn btn-danger" id="delete-btn" aria-disabled="true">
-        Permanently delete my account
-      </button>
+      <button type="submit" class="btn btn-danger" id="delete-btn" aria-disabled="true">{{ t('settings.delete_btn') }}</button>
     </form>
   </section>
 </div>
@@ -66,8 +61,8 @@
       accountEmail = me.email;
       summary.querySelector('[data-field="name"]').textContent = me.name;
       summary.querySelector('[data-field="email"]').textContent = me.email;
-      summary.querySelector('[data-field="location"]').textContent = me.location || "Not set";
-      summary.querySelector('[data-field="target_role"]').textContent = me.target_role || "Not set";
+      summary.querySelector('[data-field="location"]').textContent = me.location || t("not_set", "Not set");
+      summary.querySelector('[data-field="target_role"]').textContent = me.target_role || t("not_set", "Not set");
     } catch (err) {
       summary.innerHTML = "";
       showError(summary, err.message, loadAccount);
@@ -87,7 +82,7 @@
     e.preventDefault();
     alertEl.hidden = true;
     if (button.getAttribute("aria-disabled") === "true") return;
-    if (!confirm("Delete your account and all your data? This cannot be undone.")) return;
+    if (!confirm(t("delete_confirm_dialog", "Delete your account and all your data? This cannot be undone."))) return;
 
     withBusy(button, async () => {
       try {
@@ -100,7 +95,7 @@
         alertEl.textContent = err.message;
         alertEl.hidden = false;
       }
-    }, "Deleting…");
+    }, t("deleting", "Deleting…"));
   });
 
   loadAccount();

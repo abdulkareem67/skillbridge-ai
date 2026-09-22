@@ -91,12 +91,12 @@ async function ask(message) {
     appendBubble("assistant", res.reply);
   } catch (err) {
     typing.remove();
-    const row = appendBubble("assistant", `Sorry — I couldn't answer that. ${err.message}`);
+    const row = appendBubble("assistant", t("adv_sorry", "Sorry — I couldn't answer that. {msg}").replace("{msg}", err.message));
     row.classList.add("chat-error");
     const retry = document.createElement("button");
     retry.type = "button";
     retry.className = "btn btn-sm";
-    retry.textContent = "Ask again";
+    retry.textContent = t("adv_ask_again", "Ask again");
     retry.addEventListener("click", () => { row.remove(); userRow.remove(); ask(message); });
     row.querySelector(".chat-bubble").appendChild(retry);
   } finally {
@@ -114,23 +114,22 @@ document.getElementById("chat-form").addEventListener("submit", (e) => {
   ask(message);
 });
 
-const WELCOME =
-  "Hi! I'm your career advisor. Ask me anything about your career path, skills to learn, CV tips, or interview prep — or tap a suggestion below to get started.";
+const WELCOME = () => t("adv_welcome", "Hi! I'm your career advisor. Ask me anything about your career path, skills to learn, CV tips, or interview prep — or tap a suggestion below to get started.");
 
 async function loadHistory() {
   chatWindow.innerHTML = "";
-  showLoading(chatWindow, "Loading your conversation…");
+  showLoading(chatWindow, t("adv_loading", "Loading your conversation…"));
   let history;
   try {
     ({ history } = await api("/api/chatbot/history"));
   } catch (err) {
-    showError(chatWindow, `Couldn't load your earlier messages. ${err.message}`, loadHistory);
+    showError(chatWindow, t("adv_history_failed", "Couldn't load your earlier messages. {msg}").replace("{msg}", err.message), loadHistory);
     return;
   }
   chatWindow.innerHTML = "";
   clearState(chatWindow);
   if (!history.length) {
-    appendBubble("assistant", WELCOME);
+    appendBubble("assistant", WELCOME());
     return;
   }
   history.forEach((h) => appendBubble(h.role, h.message, false));

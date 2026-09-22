@@ -8,6 +8,15 @@ function escapeHtml(str) {
 
 const API_TIMEOUT_MS = 20000;
 
+// Client-side translation. The page injects window.__I18N__ (the "js" namespace
+// of the active locale, see i18n.js_bundle); this looks a key up there and falls
+// back to the English text passed as the second argument, so a missing key is
+// never a blank string.
+function t(key, fallback) {
+  const table = window.__I18N__ || {};
+  return (Object.prototype.hasOwnProperty.call(table, key) && table[key]) || fallback || key;
+}
+
 // FastAPI reports validation failures as a list of {loc, msg}. Turn that into
 // one readable sentence instead of showing "[object Object]".
 function describeError(detail, fallback) {
@@ -33,8 +42,8 @@ async function api(path, options = {}) {
   } catch (e) {
     const err = new Error(
       e.name === "AbortError"
-        ? "That took too long to respond. Check your connection and try again."
-        : "Couldn't reach the server. Check your connection and try again."
+        ? t("err_timeout", "That took too long to respond. Check your connection and try again.")
+        : t("err_network", "Couldn't reach the server. Check your connection and try again.")
     );
     err.network = true;
     throw err;
@@ -45,7 +54,7 @@ async function api(path, options = {}) {
   if (!res.ok) {
     let detail = null;
     try { detail = (await res.json()).detail; } catch (e) {}
-    const err = new Error(describeError(detail, res.status >= 500 ? "Something went wrong on our side. Please try again." : "Something went wrong."));
+    const err = new Error(describeError(detail, res.status >= 500 ? t("err_server", "Something went wrong on our side. Please try again.") : t("err_generic", "Something went wrong.")));
     err.status = res.status;
     err.detail = detail;
     // An expired session on a normal page means "sign in again". But the auth
@@ -73,7 +82,7 @@ function _stateBox(kind, message, extra = "") {
   return `<div class="state-box state-${kind}" role="${kind === "error" ? "alert" : "status"}">${lead}<div class="state-text"><p>${escapeHtml(message)}</p>${extra}</div></div>`;
 }
 
-function showLoading(el, message = "Loading…") {
+function showLoading(el, message = t("loading", "Loading…")) {
   if (!el) return;
   el.setAttribute("aria-busy", "true");
   el.innerHTML = _stateBox("loading", message);
@@ -89,7 +98,7 @@ function showEmpty(el, message, action = "") {
 function showError(el, message, onRetry) {
   if (!el) return;
   el.removeAttribute("aria-busy");
-  el.innerHTML = _stateBox("error", message, onRetry ? '<div class="state-actions"><button type="button" class="btn btn-sm" data-retry>Try again</button></div>' : "");
+  el.innerHTML = _stateBox("error", message, onRetry ? `<div class="state-actions"><button type="button" class="btn btn-sm" data-retry>${escapeHtml(t("try_again", "Try again"))}</button></div>` : "");
   if (onRetry) el.querySelector("[data-retry]").addEventListener("click", onRetry);
 }
 
@@ -149,7 +158,7 @@ function initPasswordToggles() {
       const show = input.type === "password";
       input.type = show ? "text" : "password";
       btn.setAttribute("aria-pressed", String(show));
-      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      btn.setAttribute("aria-label", show ? t("hide_password", "Hide password") : t("show_password", "Show password"));
       btn.innerHTML = icon(show ? "eye-off" : "eye", 18);
       input.focus();
     });
@@ -158,10 +167,10 @@ function initPasswordToggles() {
 
 // Messages for the ?error= codes the Google sign-in flow redirects back with.
 const AUTH_ERRORS = {
-  google_unavailable: "Google sign-in isn't set up on this site yet. Use your email and password instead.",
-  google_cancelled: "Google sign-in was cancelled.",
-  google_state: "That sign-in link had expired. Please try again.",
-  google_failed: "We couldn't finish signing you in with Google. Please try again.",
+  google_unavailable: t("google_unavailable", "Google sign-in isn't set up on this site yet. Use your email and password instead."),
+  google_cancelled: t("google_cancelled", "Google sign-in was cancelled."),
+  google_state: t("google_state", "That sign-in link had expired. Please try again."),
+  google_failed: t("google_failed", "We couldn't finish signing you in with Google. Please try again."),
 };
 
 function showAuthErrorFromUrl(el) {

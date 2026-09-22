@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from .auth import ENV_SECRET, IS_PRODUCTION, get_active_session, list_sessions
 from .database import USE_POSTGRES, connect, init_db
-from . import google_oauth
+from . import google_oauth, i18n
 from .demo_data import DEMO_PROFILES, build_demo_report, get_profile
 from .markets import MARKETS
 from .onboarding import needs_onboarding
@@ -82,6 +82,15 @@ async def setup_gate(request: Request, call_next):
 
 
 @app.middleware("http")
+async def detect_country(request: Request, call_next):
+    # Vercel resolves the visitor's country to an ISO code in this header. It's a
+    # best-effort default only — the person can always override it in onboarding
+    # or their profile, and nothing security-sensitive depends on it.
+    request.state.country = (request.headers.get("x-vercel-ip-country") or "").upper() or None
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
@@ -98,6 +107,8 @@ async def security_headers(request: Request, call_next):
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates.env.globals["t"] = i18n.translate
+templates.env.globals["locale_info"] = i18n.LOCALE_INFO
 
 app.include_router(auth_router.router)
 app.include_router(profile_router.router)
@@ -110,6 +121,7 @@ app.include_router(reports_router.router)
 MAIN_JS_PATH = BASE_DIR / "static" / "js" / "main.js"
 
 SITE_NAME = "SkillBridge AI"
+
 
 # One description per page, used for the meta description and the social cards.
 # Search results and shared links show these, so each one names what the page
@@ -153,6 +165,15 @@ def render(request: Request, template: str, **ctx):
     # Canonical/social URLs must be absolute and must not carry query strings,
     # which would otherwise fragment how a shared link is indexed.
     ctx.setdefault("canonical_url", str(request.url.replace(query=None, fragment=None)))
+
+    locale = i18n.negotiate_locale(request)
+    ctx.setdefault("locale", locale)
+    ctx.setdefault("locale_dir", i18n.direction(locale))
+    ctx.setdefault("locales", i18n.available_locales())
+    # A locale-bound t(), so templates call t("key") without repeating the locale.
+    ctx["t"] = lambda key, **kw: i18n.translate(key, locale, **kw)
+    ctx.setdefault("geo_country", getattr(request.state, "country", None))
+    ctx.setdefault("js_messages", i18n.js_bundle(locale))
     return templates.TemplateResponse(request, template, ctx)
 
 
@@ -180,6 +201,25 @@ def is_authenticated(request: Request) -> bool:
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/set-language/{code}")
+def set_language(code: str, request: Request):
+    """Remember the chosen language and return to the page they were on."""
+    referer = request.headers.get("referer", "")
+    dest = "/"
+    if referer:
+        from urllib.parse import urlparse
+        parsed = urlparse(referer)
+        if parsed.netloc == request.url.netloc and parsed.path:
+            dest = parsed.path
+    redirect = RedirectResponse(url=dest, status_code=303)
+    if i18n.is_supported(code):
+        redirect.set_cookie(
+            i18n.LOCALE_COOKIE, code, max_age=60 * 60 * 24 * 365,
+            httponly=False, samesite="lax",
+        )
+    return redirect
 
 
 @app.get("/")

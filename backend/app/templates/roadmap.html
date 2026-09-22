@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Learning Roadmap — SkillBridge AI{% endblock %}
+{% block title %}{{ t('roadmap.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px">
     <div>
-      <h1>Personalized Learning Roadmap</h1>
-      <p id="roadmap-role-text">Loading your roadmap...</p>
+      <h1>{{ t('roadmap.heading') }}</h1>
+      <p id="roadmap-role-text">{{ t('common.loading') }}</p>
     </div>
-    <a class="btn btn-primary is-disabled" id="download-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} Download PDF Report</a>
+    <a class="btn btn-primary is-disabled" id="download-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} {{ t('roadmap.download_pdf') }}</a>
   </div>
 
   {# Real buttons: these were <div onclick>, which a keyboard can't reach at all. #}
   <div class="phase-tabs" role="tablist" aria-label="Roadmap phase">
-    <button type="button" class="phase-tab active" role="tab" aria-selected="true" aria-controls="topics-list" data-phase="beginner" onclick="switchPhase('beginner')">Beginner</button>
-    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="intermediate" onclick="switchPhase('intermediate')">Intermediate (Projects)</button>
-    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="advanced" onclick="switchPhase('advanced')">Advanced (Interview Prep)</button>
+    <button type="button" class="phase-tab active" role="tab" aria-selected="true" aria-controls="topics-list" data-phase="beginner" onclick="switchPhase('beginner')">{{ t('roadmap.tab_beginner') }}</button>
+    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="intermediate" onclick="switchPhase('intermediate')">{{ t('roadmap.tab_intermediate') }}</button>
+    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="advanced" onclick="switchPhase('advanced')">{{ t('roadmap.tab_advanced') }}</button>
   </div>
 
   <div class="glass card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-      <h2 style="margin:0" id="phase-title">Beginner Phase</h2>
+      <h2 style="margin:0" id="phase-title">{{ t('roadmap.tab_beginner') }}</h2>
       <span style="color:var(--text-muted); font-size:0.85rem" id="phase-duration"></span>
     </div>
     <div id="topics-list" role="tabpanel"></div>

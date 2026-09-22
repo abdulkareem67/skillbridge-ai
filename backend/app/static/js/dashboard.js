@@ -29,12 +29,12 @@ async function saveRole(button) {
   await withBusy(button, async () => {
     try {
       await api("/api/profile/target-role", { method: "POST", body: JSON.stringify({ role }) });
-      toast("Target role updated");
+      toast(t("role_updated", "Target role updated"));
       await loadDashboard();
     } catch (err) {
       toast(err.message, "error");
     }
-  }, "Saving…");
+  }, t("saving", "Saving…"));
 }
 
 function renderMatchChart(pct) {
@@ -43,7 +43,7 @@ function renderMatchChart(pct) {
   matchChart = new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["Matched", "Missing"],
+      labels: [t("matched", "Matched"), t("missing", "Missing")],
       datasets: [{ data: [pct, 100 - pct], backgroundColor: ["#6d5bf8", "rgba(255,255,255,0.1)"], borderWidth: 0 }],
     },
     options: { cutout: "72%", plugins: { legend: { labels: { color: "#a5abc9" } } } },
@@ -97,14 +97,14 @@ async function loadDashboard() {
     me = await api("/api/profile/me");
   } catch (err) {
     STAT_IDS.forEach((id) => setStat(id, "—"));
-    showError(status, `Couldn't load your dashboard. ${err.message}`, loadDashboard);
+    showError(status, t("dash_load_failed", "Couldn't load your dashboard. {msg}").replace("{msg}", err.message), loadDashboard);
     return;
   }
 
   setStat("stat-total-skills", me.skills.length);
   document.getElementById("current-role-text").textContent = me.target_role
-    ? `Currently targeting: ${me.target_role}`
-    : "No target role selected yet.";
+    ? t("targeting", "Currently targeting: {role}").replace("{role}", me.target_role)
+    : t("no_role", "No target role selected yet.");
 
   const failed = [];
   const section = (label, fn) => fn().catch(() => failed.push(label));
@@ -127,7 +127,7 @@ async function loadDashboard() {
     section("learning progress", async () => {
       const text = document.getElementById("learning-progress-text");
       if (!me.target_role) {
-        text.textContent = "Set a target role to start tracking roadmap progress.";
+        text.textContent = t("set_role_hint", "Set a target role to start tracking roadmap progress.");
         return;
       }
       const [{ roadmap }, progress] = await Promise.all([api("/api/skills/roadmap"), api("/api/skills/progress")]);
@@ -135,7 +135,7 @@ async function loadDashboard() {
       const total = allTopics.length;
       const done = allTopics.filter((t) => (progress[t.skill] || (t.already_have ? "completed" : "not_started")) === "completed").length;
       const pct = total ? Math.round((100 * done) / total) : 0;
-      text.textContent = `${done} of ${total} roadmap skills completed for ${me.target_role}.`;
+      text.textContent = t("progress_done", "{done} of {total} roadmap skills completed for {role}.").replace("{done}", done).replace("{total}", total).replace("{role}", me.target_role);
       document.getElementById("learning-progress-fill").style.width = pct + "%";
     }),
     section("opportunities", async () => {
@@ -147,10 +147,10 @@ async function loadDashboard() {
   // Anything still showing the loading ellipsis belongs to a section that failed.
   STAT_IDS.forEach((id) => { if (document.getElementById(id).textContent === "…") setStat(id, "—"); });
   if (document.getElementById("learning-progress-text").textContent === "Loading…") {
-    document.getElementById("learning-progress-text").textContent = "Couldn't load your progress.";
+    document.getElementById("learning-progress-text").textContent = t("progress_load_failed", "Couldn't load your progress.");
   }
   if (failed.length) {
-    showError(status, `Some parts of your dashboard didn't load: ${failed.join(", ")}.`, loadDashboard);
+    showError(status, t("dash_partial", "Some parts of your dashboard didn't load: {parts}.").replace("{parts}", failed.join(", ")), loadDashboard);
   }
 }
 

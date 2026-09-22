@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Career Advisor — SkillBridge AI{% endblock %}
+{% block title %}{{ t('advisor.title') }}{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>Career Advisor</h1>
+    <h1>{{ t('advisor.heading') }}</h1>
     <p>Ask about career fit, what to learn next, CV tips, interview prep, or certifications.</p>
   </div>
 
@@ -20,18 +20,18 @@
     <div class="chat-window" id="chat-window"></div>
     <div style="padding:16px; border-top:1px solid var(--card-border)">
       <div class="suggestion-row">
-        <button class="btn btn-sm" onclick="ask(&quot;I don't know where to start&quot;)">{{ ui.icon("compass") }} Where to start</button>
-        <button class="btn btn-sm" onclick="ask('Which career is best for me?')">{{ ui.icon("target") }} Best career for me</button>
-        <button class="btn btn-sm" onclick="ask('What should I learn next?')">{{ ui.icon("book") }} What to learn next</button>
-        <button class="btn btn-sm" onclick="ask('How can I improve my CV?')">{{ ui.icon("file-text") }} Improve my CV</button>
-        <button class="btn btn-sm" onclick="ask('How do I apply for jobs?')">{{ ui.icon("briefcase") }} How to apply</button>
-        <button class="btn btn-sm" onclick="ask('How do I prepare for interviews?')">{{ ui.icon("mic") }} Interview prep</button>
-        <button class="btn btn-sm" onclick="ask('Which certifications are valuable?')">{{ ui.icon("award") }} Certifications</button>
+        <button class="btn btn-sm" onclick="ask(&quot;I don't know where to start&quot;)">{{ ui.icon("compass") }} {{ t('advisor.s_start') }}</button>
+        <button class="btn btn-sm" onclick="ask('Which career is best for me?')">{{ ui.icon("target") }} {{ t('advisor.s_best') }}</button>
+        <button class="btn btn-sm" onclick="ask('What should I learn next?')">{{ ui.icon("book") }} {{ t('advisor.s_learn') }}</button>
+        <button class="btn btn-sm" onclick="ask('How can I improve my CV?')">{{ ui.icon("file-text") }} {{ t('advisor.s_cv') }}</button>
+        <button class="btn btn-sm" onclick="ask('How do I apply for jobs?')">{{ ui.icon("briefcase") }} {{ t('advisor.s_apply') }}</button>
+        <button class="btn btn-sm" onclick="ask('How do I prepare for interviews?')">{{ ui.icon("mic") }} {{ t('advisor.s_interview') }}</button>
+        <button class="btn btn-sm" onclick="ask('Which certifications are valuable?')">{{ ui.icon("award") }} {{ t('advisor.s_certs') }}</button>
       </div>
       <form id="chat-form" class="chat-composer">
-        <label for="chat-input" class="visually-hidden">Ask the career advisor</label>
-        <input type="text" id="chat-input" maxlength="1000" placeholder="Ask about careers, skills, CV, interviews..." autocomplete="off" />
-        <button class="btn btn-primary chat-send-btn" type="submit" title="Send" aria-label="Send">{{ ui.icon("send") }}</button>
+        <label for="chat-input" class="visually-hidden">{{ t('advisor.placeholder') }}</label>
+        <input type="text" id="chat-input" maxlength="1000" placeholder="{{ t('advisor.placeholder') }}" autocomplete="off" />
+        <button class="btn btn-primary chat-send-btn" type="submit" title="{{ t('advisor.send') }}" aria-label="{{ t('advisor.send') }}">{{ ui.icon("send") }}</button>
       </form>
     </div>
   </div>

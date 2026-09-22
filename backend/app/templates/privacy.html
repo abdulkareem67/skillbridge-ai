@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}Privacy Policy — SkillBridge AI{% endblock %}
+{% block title %}{{ t('legal.privacy_title') }}{% endblock %}
 
 {% block nav %}
 <nav class="navbar">
   <div class="navbar-inner">
     {{ ui.brand() }}
     <div class="nav-actions">
+      {{ ui.language_switcher() }}
       {{ ui.theme_toggle() }}
-      <a href="/login" class="btn btn-ghost">Login</a>
+      <a href="/login" class="btn btn-ghost">{{ t('common.login') }}</a>
     </div>
   </div>
 </nav>

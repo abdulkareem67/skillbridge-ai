@@ -16,14 +16,14 @@ async function init() {
   const status = document.getElementById("analysis-status");
   const button = document.getElementById("analyze-btn");
   button.disabled = true;
-  showLoading(status, "Loading career tracks…");
+  showLoading(status, t("an_load_tracks", "Loading career tracks…"));
   let me;
   try {
     const [res, profile] = await Promise.all([api("/api/skills/disciplines"), api("/api/profile/me")]);
     disciplines = res.disciplines;
     me = profile;
   } catch (err) {
-    showError(status, `Couldn't load career tracks. ${err.message}`, init);
+    showError(status, t("an_tracks_failed", "Couldn't load career tracks. {msg}").replace("{msg}", err.message), init);
     return;
   }
   status.innerHTML = "";
@@ -41,7 +41,7 @@ async function init() {
 
   fillRoles(currentDiscipline, me.target_role);
   if (!me.skills.length) {
-    showEmpty(status, "You haven't added any skills yet, so every requirement will show as missing.",
+    showEmpty(status, t("an_no_skills", "You haven't added any skills yet, so every requirement will show as missing."),
       '<a class="btn btn-sm" href="/cv-upload">Add skills</a>');
   }
   if (me.target_role) runAnalysis(button);
@@ -60,17 +60,17 @@ async function runAnalysis(button) {
       return;
     }
     // Certifications are extra; if they fail, the analysis above still stands.
-    showLoading(certs, "Finding certifications…");
+    showLoading(certs, t("an_finding_certs", "Finding certifications…"));
     try {
       const { certifications } = await api(`/api/skills/certifications?role=${encodeURIComponent(role)}`);
       clearState(certs);
       certs.innerHTML = certifications.length
         ? certifications.map((c) => `<span class="chip">${icon("graduation-cap")} ${escapeHtml(c)}</span>`).join("")
-        : '<p style="color:var(--text-muted)">No specific certifications recommended for this role.</p>';
+        : `<p style="color:var(--text-muted)">${escapeHtml(t("an_no_certs", "No specific certifications recommended for this role."))}</p>`;
     } catch (err) {
-      showError(certs, `Couldn't load certifications. ${err.message}`);
+      showError(certs, t("an_certs_failed", "Couldn't load certifications. {msg}").replace("{msg}", err.message));
     }
-  }, "Analysing…");
+  }, t("an_analysing", "Analysing…"));
 }
 
 function renderResults(gap) {
@@ -79,22 +79,22 @@ function renderResults(gap) {
   document.getElementById("match-percent").textContent = gap.match_percent + "%";
   document.getElementById("progress-fill").style.width = gap.match_percent + "%";
   document.getElementById("progress-summary").textContent =
-    `You match ${gap.matched_skills.length} of ${gap.required_skills.length} required skills for ${gap.role}.`;
+    t("an_progress", "You match {matched} of {required} required skills for {role}.").replace("{matched}", gap.matched_skills.length).replace("{required}", gap.required_skills.length).replace("{role}", gap.role);
 
   document.getElementById("matched-list").innerHTML = gap.matched_skills.length
     ? gap.matched_skills.map((s) => `<span class="chip chip-matched">${icon("check")} ${escapeHtml(s)}</span>`).join("")
-    : '<p style="color:var(--text-muted)">No matched skills yet.</p>';
+    : `<p style="color:var(--text-muted)">${escapeHtml(t("an_no_matched", "No matched skills yet."))}</p>`;
 
   document.getElementById("missing-list").innerHTML = gap.missing_skills.length
     ? gap.missing_skills.map((s) => `<span class="chip chip-missing">${escapeHtml(s)}</span>`).join("")
-    : '<p style="color:var(--success-text)">You have all required skills!</p>';
+    : `<p style="color:var(--success-text)">${escapeHtml(t("an_all_skills", "You have all required skills!"))}</p>`;
 
   const ctx = document.getElementById("chart-gap");
   if (gapChart) gapChart.destroy();
   gapChart = new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["Matched", "Missing"],
+      labels: [t("matched", "Matched"), t("missing", "Missing")],
       datasets: [{ data: [gap.match_percent, 100 - gap.match_percent], backgroundColor: ["#34d399", "#fb7185"], borderWidth: 0 }],
     },
     options: { cutout: "70%", plugins: { legend: { position: "bottom", labels: { color: "#a5abc9" } } } },

@@ -14,7 +14,7 @@
          {% if minlength %}minlength="{{ minlength }}"{% endif %}
          {% if hint %}aria-describedby="{{ id }}-hint"{% endif %} />
   <button type="button" class="password-toggle" data-password-toggle
-          aria-controls="{{ id }}" aria-pressed="false" aria-label="Show password">{{ ui.icon("eye", 18) }}</button>
+          aria-controls="{{ id }}" aria-pressed="false" aria-label="{{ t('js.show_password') }}">{{ ui.icon("eye", 18) }}</button>
 </div>
 {% if hint %}<p class="field-hint" id="{{ id }}-hint">{{ hint }}</p>{% endif %}
 {%- endmacro %}
@@ -32,6 +32,6 @@
   </svg>
   {{ label }}
 </a>
-<p class="auth-divider"><span>or use your email</span></p>
+<p class="auth-divider"><span>{{ t('auth.or_email') }}</span></p>
 {% endif %}
 {%- endmacro %}
