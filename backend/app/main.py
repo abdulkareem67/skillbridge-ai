@@ -8,7 +8,10 @@ from fastapi.templating import Jinja2Templates
 
 from .auth import ENV_SECRET, IS_PRODUCTION, get_active_session, list_sessions
 from .database import USE_POSTGRES, connect, init_db
+from . import google_oauth
 from .demo_data import DEMO_PROFILES, build_demo_report, get_profile
+from .markets import MARKETS
+from .onboarding import needs_onboarding
 from .skills_data import platform_stats
 from .routers import (
     auth_router,
@@ -129,6 +132,7 @@ PAGE_DESCRIPTIONS = {
     "advisor.html": "Ask the career advisor what to learn next, how to improve your CV, and more.",
     "privacy.html": "How SkillBridge AI handles your CV, what we store, and how to delete it.",
     "terms.html": "The terms that apply when you use SkillBridge AI.",
+    "onboarding.html": "Set up your SkillBridge AI profile: where you are, the role you want, and your CV.",
     "demo.html": (
         "See a finished SkillBridge AI skill-gap report and learning roadmap "
         "before creating an account."
@@ -144,6 +148,7 @@ def render(request: Request, template: str, **ctx):
     ctx.setdefault("asset_v", int(MAIN_JS_PATH.stat().st_mtime))
     ctx.setdefault("site_name", SITE_NAME)
     ctx.setdefault("page_description", PAGE_DESCRIPTIONS.get(template, ""))
+    ctx.setdefault("google_enabled", google_oauth.is_enabled())
     # Canonical/social URLs must be absolute and must not carry query strings,
     # which would otherwise fragment how a shared link is indexed.
     ctx.setdefault("canonical_url", str(request.url.replace(query=None, fragment=None)))
@@ -217,10 +222,40 @@ def register_page(request: Request):
     return render(request, "register.html")
 
 
+def _onboarding_pending(request: Request) -> bool:
+    session = get_active_session(request)
+    if session is None:
+        return False
+    conn = connect()
+    try:
+        return needs_onboarding(conn, int(session["uid"]))
+    finally:
+        conn.close()
+
+
+# Offered as suggestions during onboarding. The field stays free text, so these
+# only speed things up for the markets we have job boards for.
+ONBOARDING_MARKETS = [
+    {"code": code, "name": m["name"], "cities": [c.title() for c in m["cities"] if c != m["name"].lower()]}
+    for code, m in MARKETS.items()
+    if code != "GLOBAL"
+]
+
+
+@app.get("/onboarding")
+def onboarding_page(request: Request):
+    if not is_authenticated(request):
+        return RedirectResponse("/login")
+    return render(request, "onboarding.html", markets=ONBOARDING_MARKETS)
+
+
 @app.get("/dashboard")
 def dashboard_page(request: Request):
     if not is_authenticated(request):
         return RedirectResponse("/login")
+    # A dashboard with no role and no skills is a page of zeros. Finish setup first.
+    if _onboarding_pending(request):
+        return RedirectResponse("/onboarding")
     return render(request, "dashboard.html")
 
 

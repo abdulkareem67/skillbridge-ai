@@ -54,3 +54,19 @@ def account(client):
     response = client.post("/api/auth/register", json=credentials)
     assert response.status_code == 200, response.text
     return credentials
+
+
+@pytest.fixture
+def fresh_client(client):
+    """A second browser: same app and database, its own cookie jar.
+
+    For tests that sign in and out as other people. Doing that on the shared
+    `client` would leave extra accounts in its multi-account session cookie and
+    change who the rest of the suite is signed in as.
+    """
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    with TestClient(app) as other:
+        yield other

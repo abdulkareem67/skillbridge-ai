@@ -15,40 +15,85 @@
 {% endblock %}
 
 {% block content %}
+{% import "_forms.html" as forms with context %}
 <div class="auth-wrap">
   <div class="glass auth-card fade-in">
     <h1>Welcome back</h1>
-    <p style="color:var(--text-muted); margin-top:-8px">Log in to continue your career journey.</p>
+    <p class="auth-lede">Log in to continue your career journey.</p>
     {% if accounts %}
-    <p class="auth-switch" style="margin-bottom:16px">
+    <p class="auth-switch auth-notice">
       Already signed in as {{ accounts|length }} account{{ 's' if accounts|length > 1 else '' }} on this browser.
       Logging in below adds another — or <a href="/dashboard">go to your dashboard</a>.
     </p>
     {% endif %}
-    <form id="login-form">
-      <label>Email</label>
-      <input type="email" name="email" required />
-      <label>Password</label>
-      <input type="password" name="password" required />
-      <button class="btn btn-primary btn-block" type="submit">Login</button>
+
+    <p class="form-alert" id="login-alert" role="alert" hidden></p>
+
+    {{ forms.google_button("Continue with Google") }}
+
+    <form id="login-form" novalidate>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" name="email" autocomplete="email" required />
+      {{ forms.password_field("login-password", "Password", "current-password") }}
+      <button class="btn btn-primary btn-block" type="submit">Log in</button>
     </form>
-    <p class="auth-switch">Don't have an account? <a href="/register">Register here</a></p>
+    <p class="auth-switch">Don't have an account? <a href="/register">Create one</a></p>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.getElementById("login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  try {
-    const user = await api("/api/auth/login", { method: "POST", body: JSON.stringify({ email: fd.get("email"), password: fd.get("password") }) });
-    claimAccountInThisTab(user.id);
-    window.location.href = "/dashboard";
-  } catch (err) {
-    toast(err.message, "error");
+(function () {
+  const form = document.getElementById("login-form");
+  const alertEl = document.getElementById("login-alert");
+  const email = document.getElementById("login-email");
+  const password = document.getElementById("login-password");
+
+  showAuthErrorFromUrl(alertEl);
+
+  // Only follow ?next= to a path on this site. Accepting any URL would let a
+  // crafted link bounce people to a look-alike page straight after they log in.
+  function safeNext() {
+    const next = new URLSearchParams(location.search).get("next");
+    return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
   }
-});
+
+  function validate() {
+    let ok = true;
+    const value = email.value.trim();
+    if (!value) { setFieldError(email, "Enter your email address."); ok = false; }
+    else if (!email.checkValidity()) { setFieldError(email, "That doesn't look like an email address."); ok = false; }
+    else setFieldError(email, "");
+    if (!password.value) { setFieldError(password, "Enter your password."); ok = false; }
+    else setFieldError(password, "");
+    return ok;
+  }
+
+  [email, password].forEach((el) => el.addEventListener("input", () => { if (el.hasAttribute("aria-invalid")) validate(); }));
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    alertEl.hidden = true;
+    if (!validate()) { form.querySelector('[aria-invalid="true"]').focus(); return; }
+
+    withBusy(form.querySelector('button[type="submit"]'), async () => {
+      try {
+        const user = await api("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email: email.value.trim(), password: password.value }),
+        });
+        claimAccountInThisTab(user.id);
+        window.location.href = safeNext() || user.next || "/dashboard";
+      } catch (err) {
+        // Deliberately one message for "no such account" and "wrong password":
+        // saying which would tell a stranger which emails are registered.
+        alertEl.textContent = err.message;
+        alertEl.hidden = false;
+        if (err.status === 401) { password.value = ""; password.focus(); }
+      }
+    }, "Logging in…");
+  });
+})();
 </script>
 {% endblock %}

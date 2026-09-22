@@ -135,7 +135,14 @@ def test_duplicate_email_is_rejected(client, account):
 
 def test_protected_pages_render_when_signed_in(client, account):
     for path in PROTECTED_PAGES:
-        assert client.get(path).status_code == 200, path
+        if path == "/dashboard":
+            continue  # covered below: a brand-new account is sent to onboarding first
+        assert client.get(path, follow_redirects=False).status_code == 200, path
+
+
+def test_new_account_is_onboarded_before_the_dashboard(client, account):
+    r = client.get("/dashboard", follow_redirects=False)
+    assert r.headers.get("location") == "/onboarding"
 
 
 # --------------------------------------------------------------------------- #
@@ -189,6 +196,11 @@ def test_target_role_then_gap_analysis_and_roadmap(client, account):
     roadmap = client.get("/api/skills/roadmap")
     assert roadmap.status_code == 200, roadmap.text
     assert roadmap.json()["role"] == role
+
+
+def test_dashboard_opens_once_set_up(client, account):
+    """By now the account has a role (above) and skills (CV upload)."""
+    assert client.get("/dashboard", follow_redirects=False).status_code == 200
 
 
 def test_unknown_role_is_rejected(client, account):

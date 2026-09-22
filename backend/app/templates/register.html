@@ -15,49 +15,121 @@
 {% endblock %}
 
 {% block content %}
+{% import "_forms.html" as forms with context %}
 <div class="auth-wrap">
   <div class="glass auth-card fade-in">
     <h1>Create your account</h1>
-    <p style="color:var(--text-muted); margin-top:-8px">Start mapping your career path today.</p>
-    <form id="register-form">
-      <label for="reg-name">Full Name</label>
-      <input type="text" id="reg-name" name="name" required />
+    <p class="auth-lede">Free, and it takes about a minute.</p>
+
+    <p class="form-alert" id="register-alert" role="alert" hidden></p>
+
+    {{ forms.google_button("Sign up with Google") }}
+
+    <form id="register-form" novalidate>
+      <label for="reg-name">Full name</label>
+      {# One field, not first/last: plenty of people have a single name, or a
+         family name that comes first, and splitting them forces a wrong answer. #}
+      <input type="text" id="reg-name" name="name" autocomplete="name" maxlength="100" required />
+
       <label for="reg-email">Email</label>
-      <input type="email" id="reg-email" name="email" required />
-      <label for="reg-location">City / Country</label>
-      <input type="text" id="reg-location" name="location" placeholder="e.g. Lahore, Dubai, London" />
-      <label for="reg-password">Password</label>
-      <!-- minlength matches RegisterRequest (8); it used to say 6, so the browser
-           accepted passwords the API then rejected with an unexplained error. -->
-      <input type="password" id="reg-password" name="password" minlength="8" required
-             aria-describedby="reg-password-hint" />
-      <p class="field-hint" id="reg-password-hint">At least 8 characters.</p>
-      <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+      <input type="email" id="reg-email" name="email" autocomplete="email" required />
+
+      {{ forms.password_field("reg-password", "Password", "new-password", hint="At least 8 characters.", minlength=8) }}
+
+      <button class="btn btn-primary btn-block" type="submit">Create account</button>
     </form>
     <p class="auth-switch legal-consent">
       By creating an account you agree to our <a href="/terms">Terms of Service</a>
       and <a href="/privacy">Privacy Policy</a>.
     </p>
-    <p class="auth-switch">Already have an account? <a href="/login">Login here</a></p>
+    <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.getElementById("register-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  try {
-    const user = await api("/api/auth/register", { method: "POST", body: JSON.stringify({
-      name: fd.get("name"), email: fd.get("email"), password: fd.get("password"),
-      location: fd.get("location") || null
-    })});
-    claimAccountInThisTab(user.id);
-    window.location.href = "/dashboard";
-  } catch (err) {
-    toast(err.message, "error");
+(function () {
+  const form = document.getElementById("register-form");
+  const alertEl = document.getElementById("register-alert");
+  const fields = {
+    name: document.getElementById("reg-name"),
+    email: document.getElementById("reg-email"),
+    password: document.getElementById("reg-password"),
+  };
+  const hint = document.getElementById("reg-password-hint");
+  const MIN_PASSWORD = 8;
+
+  showAuthErrorFromUrl(alertEl);
+
+  const rules = {
+    name: (v) => (v.trim() ? "" : "Enter your name."),
+    email: (v) => (!v.trim() ? "Enter your email address." : fields.email.checkValidity() ? "" : "That doesn't look like an email address."),
+    password: (v) => (v.length >= MIN_PASSWORD ? "" : `Use at least ${MIN_PASSWORD} characters (${v.length} so far).`),
+  };
+
+  function check(name) {
+    const message = rules[name](fields[name].value);
+    setFieldError(fields[name], message);
+    return !message;
   }
-});
+
+  // Validate a field once the person has left it, then keep it live — nagging
+  // about an empty field while they are still typing into it is just noise.
+  Object.keys(fields).forEach((name) => {
+    fields[name].addEventListener("blur", () => { if (fields[name].value) check(name); });
+    fields[name].addEventListener("input", () => { if (fields[name].hasAttribute("aria-invalid")) check(name); });
+  });
+
+  // Live requirement hint, independent of the error state.
+  fields.password.addEventListener("input", () => {
+    const met = fields.password.value.length >= MIN_PASSWORD;
+    hint.classList.toggle("is-met", met);
+    hint.textContent = met ? "Looks good." : `At least ${MIN_PASSWORD} characters.`;
+  });
+
+  // Map FastAPI's per-field validation errors back onto the right inputs.
+  function applyServerErrors(detail) {
+    if (!Array.isArray(detail)) return false;
+    let placed = false;
+    detail.forEach((d) => {
+      const field = d.loc && fields[d.loc[d.loc.length - 1]];
+      if (field) { setFieldError(field, d.msg.replace(/^Value error, /, "")); placed = true; }
+    });
+    return placed;
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    alertEl.hidden = true;
+    const ok = ["name", "email", "password"].map(check).every(Boolean);
+    if (!ok) { form.querySelector('[aria-invalid="true"]').focus(); return; }
+
+    withBusy(form.querySelector('button[type="submit"]'), async () => {
+      try {
+        const user = await api("/api/auth/register", {
+          method: "POST",
+          body: JSON.stringify({
+            name: fields.name.value.trim(),
+            email: fields.email.value.trim(),
+            password: fields.password.value,
+          }),
+        });
+        claimAccountInThisTab(user.id);
+        window.location.href = user.next || "/onboarding";
+      } catch (err) {
+        if (err.status === 400 && /already exists/i.test(err.message)) {
+          setFieldError(fields.email, "There's already an account with this email. Try logging in instead.");
+          fields.email.focus();
+        } else if (err.status === 422 && applyServerErrors(err.detail)) {
+          form.querySelector('[aria-invalid="true"]').focus();
+        } else {
+          alertEl.textContent = err.message;
+          alertEl.hidden = false;
+        }
+      }
+    }, "Creating account…");
+  });
+})();
 </script>
 {% endblock %}

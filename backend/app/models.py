@@ -54,3 +54,18 @@ class ProgressUpdateRequest(BaseModel):
         if v not in allowed:
             raise ValueError(f"status must be one of {sorted(allowed)}")
         return v
+
+
+class LocationRequest(BaseModel):
+    # Free text on purpose: "Lahore, Pakistan", "Nairobi" and "Remote" are all
+    # fine. It only steers which job boards we suggest, so a strict country
+    # picker would reject real answers for no benefit.
+    location: str = Field(min_length=1, max_length=100)
+
+    @field_validator("location")
+    @classmethod
+    def location_not_blank(cls, v: str) -> str:
+        v = " ".join(v.split())
+        if not v:
+            raise ValueError("Location cannot be blank")
+        return v

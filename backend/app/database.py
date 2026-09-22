@@ -206,6 +206,14 @@ CREATE TABLE IF NOT EXISTS app_config (
     config_key TEXT UNIQUE NOT NULL,
     config_value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bucket TEXT NOT NULL,
+    attempted_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_attempts_bucket ON login_attempts (bucket, attempted_at);
 """
 
 _POSTGRES_SCHEMA = """
@@ -249,6 +257,14 @@ CREATE TABLE IF NOT EXISTS app_config (
     config_key TEXT UNIQUE NOT NULL,
     config_value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id SERIAL PRIMARY KEY,
+    bucket TEXT NOT NULL,
+    attempted_at BIGINT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_attempts_bucket ON login_attempts (bucket, attempted_at);
 """
 
 

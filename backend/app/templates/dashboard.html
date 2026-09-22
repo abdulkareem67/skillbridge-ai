@@ -9,21 +9,23 @@
     <p>A quick snapshot of your skills, match score, and progress.</p>
   </div>
 
+  <div id="dash-status" class="page-status"></div>
+
   <div class="grid grid-4" style="margin-bottom:24px">
     <div class="glass card">
-      <div class="stat-value" id="stat-match">--%</div>
+      <div class="stat-value" id="stat-match">…</div>
       <div class="stat-label">Skill Match Score</div>
     </div>
     <div class="glass card">
-      <div class="stat-value" id="stat-total-skills">0</div>
+      <div class="stat-value" id="stat-total-skills">…</div>
       <div class="stat-label">Total Skills Logged</div>
     </div>
     <div class="glass card">
-      <div class="stat-value" id="stat-missing">0</div>
+      <div class="stat-value" id="stat-missing">…</div>
       <div class="stat-label">Missing Skills</div>
     </div>
     <div class="glass card">
-      <div class="stat-value" id="stat-opportunities">0</div>
+      <div class="stat-value" id="stat-opportunities">…</div>
       <div class="stat-label">Matched Opportunities</div>
     </div>
   </div>
@@ -41,7 +43,7 @@
 
   <div class="glass card" style="margin-bottom:24px">
     <h2 style="margin-top:0">Learning Progress</h2>
-    <p style="color:var(--text-muted)" id="learning-progress-text">Set a target role to start tracking roadmap progress.</p>
+    <p style="color:var(--text-muted)" id="learning-progress-text">Loading…</p>
     <div class="progress-track">
       <div class="progress-fill" id="learning-progress-fill" style="width:0%"></div>
     </div>
@@ -49,11 +51,11 @@
 
   <div class="glass card" style="margin-bottom:24px">
     <h2 style="margin-top:0">Target Role</h2>
-    <p style="color:var(--text-muted)" id="current-role-text">No target role selected yet.</p>
+    <p style="color:var(--text-muted)" id="current-role-text">Loading…</p>
     <div style="display:flex; gap:10px; flex-wrap:wrap">
       <select id="discipline-select" style="max-width:240px"></select>
       <select id="role-select" style="max-width:280px"></select>
-      <button class="btn btn-primary" onclick="saveRole()">Set Target Role</button>
+      <button class="btn btn-primary" id="save-role-btn" type="button" onclick="saveRole(this)">Set Target Role</button>
     </div>
   </div>
 

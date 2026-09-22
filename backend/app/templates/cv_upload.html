@@ -12,32 +12,32 @@
   <div class="grid grid-2">
     <div class="glass card">
       <h2 style="margin-top:0">Upload Resume</h2>
-      <div class="dropzone" id="dropzone">
+      {# role=button + tabindex: this was a plain div, so it could only be used with a mouse. #}
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="dropzone-help" aria-label="Upload a CV">
         <input type="file" id="file-input" accept=".pdf,.docx" hidden />
         <p style="margin:0; font-size:2rem">{{ ui.icon("file-text") }}</p>
         <p><strong>Click to upload</strong> or drag & drop</p>
-        <p style="color:var(--text-muted); font-size:0.85rem">PDF or DOCX, max ~5MB</p>
+        <p style="color:var(--text-muted); font-size:0.85rem" id="dropzone-help">PDF or DOCX, up to 5 MB. We read it in memory and never store the file.</p>
       </div>
-      <div id="upload-status" style="margin-top:14px"></div>
+      <div id="upload-status" style="margin-top:14px" aria-live="polite"></div>
     </div>
 
     <div class="glass card">
       <h2 style="margin-top:0">Add Skills Manually</h2>
-      <label>Enter a skill and press Enter</label>
-      <input type="text" id="manual-skill-input" placeholder="e.g. React, Python, Communication" />
+      <label for="manual-skill-input">Enter a skill and press Enter</label>
+      <input type="text" id="manual-skill-input" maxlength="80" placeholder="e.g. React, Python, Communication" />
       <div id="manual-chip-preview" class="suggestion-row"></div>
-      <button class="btn btn-primary btn-block" onclick="submitManualSkills()">Add Skills</button>
+      <button class="btn btn-primary btn-block" type="button" onclick="submitManualSkills(this)">Add Skills</button>
     </div>
   </div>
 
   <div class="glass card" style="margin-top:24px">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
       <h2 style="margin:0">Your Skill Profile</h2>
-      <button class="btn btn-sm" onclick="clearAllSkills()">{{ ui.icon("trash") }} Clear All Skills</button>
+      <button class="btn btn-sm" type="button" onclick="clearAllSkills(this)">{{ ui.icon("trash") }} Clear All Skills</button>
     </div>
     <div class="grid grid-4" id="category-lists" style="margin-top:14px"></div>
-    <div id="empty-skills" class="empty-state" style="display:none">No skills yet — upload a CV or add skills manually above.</div>
-  </div>
+      </div>
 
   <div class="glass card" style="margin-top:24px">
     <h2 style="margin-top:0">{{ ui.icon("edit") }} Resume Improvement Suggestions</h2>
@@ -46,8 +46,8 @@
 
   <div class="glass card" style="margin-top:24px">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
-      <h2 style="margin:0">{{ ui.icon("sparkles") }} AI-Improved CV</h2>
-      <a class="btn btn-primary btn-sm" id="download-cv-pdf" href="#" target="_blank">{{ ui.icon("download") }} Download Improved CV (PDF)</a>
+      <h2 style="margin:0">{{ ui.icon("sparkles") }} Improved CV</h2>
+      <a class="btn btn-primary btn-sm is-disabled" id="download-cv-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} Download Improved CV (PDF)</a>
     </div>
     <p style="color:var(--text-muted); margin-top:6px">A rewritten summary, cleaned-up skill sections, and project suggestions — generated from your current profile.</p>
     <div id="cv-preview" style="margin-top:14px"></div>

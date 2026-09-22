@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from ..auth import get_current_user_id
 from ..database import get_db
-from ..models import ManualSkillsRequest, TargetRoleRequest
+from ..models import LocationRequest, ManualSkillsRequest, TargetRoleRequest
 from ..resume_parser import extract_skills_from_text, extract_text
 from ..skills_data import SKILL_DICTIONARY, get_role_names
 
@@ -111,3 +111,10 @@ def set_target_role(payload: TargetRoleRequest, user_id: int = Depends(get_curre
     db.execute("UPDATE users SET target_role = ? WHERE id = ?", (payload.role, user_id))
     db.commit()
     return {"target_role": payload.role}
+
+
+@router.post("/location")
+def set_location(payload: LocationRequest, user_id: int = Depends(get_current_user_id), db: sqlite3.Connection = Depends(get_db)):
+    db.execute("UPDATE users SET location = ? WHERE id = ?", (payload.location, user_id))
+    db.commit()
+    return {"location": payload.location}

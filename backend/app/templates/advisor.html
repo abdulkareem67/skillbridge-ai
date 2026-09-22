@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
-{% block title %}AI Career Advisor — SkillBridge AI{% endblock %}
+{% block title %}Career Advisor — SkillBridge AI{% endblock %}
 
 {% block content %}
 <div class="page container">
   <div class="page-header fade-in">
-    <h1>AI Career Advisor</h1>
+    <h1>Career Advisor</h1>
     <p>Ask about career fit, what to learn next, CV tips, interview prep, or certifications.</p>
   </div>
 
@@ -29,7 +29,8 @@
         <button class="btn btn-sm" onclick="ask('Which certifications are valuable?')">{{ ui.icon("award") }} Certifications</button>
       </div>
       <form id="chat-form" class="chat-composer">
-        <input type="text" id="chat-input" placeholder="Ask about careers, skills, CV, interviews..." autocomplete="off" />
+        <label for="chat-input" class="visually-hidden">Ask the career advisor</label>
+        <input type="text" id="chat-input" maxlength="1000" placeholder="Ask about careers, skills, CV, interviews..." autocomplete="off" />
         <button class="btn btn-primary chat-send-btn" type="submit" title="Send" aria-label="Send">{{ ui.icon("send") }}</button>
       </form>
     </div>

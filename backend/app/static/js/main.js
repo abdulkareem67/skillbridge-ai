@@ -6,20 +6,170 @@ function escapeHtml(str) {
   return _escapeEl.innerHTML;
 }
 
+const API_TIMEOUT_MS = 20000;
+
+// FastAPI reports validation failures as a list of {loc, msg}. Turn that into
+// one readable sentence instead of showing "[object Object]".
+function describeError(detail, fallback) {
+  if (!detail) return fallback;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((d) => (d && d.msg ? d.msg.replace(/^Value error, /, "") : "")).filter(Boolean).join(" ") || fallback;
+  }
+  return fallback;
+}
+
 async function api(path, options = {}) {
-  const res = await fetch(API + path, {
-    credentials: "include",
-    headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
-    ...options,
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), options.timeout || API_TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(API + path, {
+      credentials: "include",
+      headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
+      signal: controller.signal,
+      ...options,
+    });
+  } catch (e) {
+    const err = new Error(
+      e.name === "AbortError"
+        ? "That took too long to respond. Check your connection and try again."
+        : "Couldn't reach the server. Check your connection and try again."
+    );
+    err.network = true;
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!res.ok) {
-    let detail = "Something went wrong";
-    try { detail = (await res.json()).detail || detail; } catch (e) {}
-    if (res.status === 401) { window.location.href = "/login"; }
-    throw new Error(detail);
+    let detail = null;
+    try { detail = (await res.json()).detail; } catch (e) {}
+    const err = new Error(describeError(detail, res.status >= 500 ? "Something went wrong on our side. Please try again." : "Something went wrong."));
+    err.status = res.status;
+    err.detail = detail;
+    // An expired session on a normal page means "sign in again". But the auth
+    // endpoints answer 401 for a *wrong password* — redirecting there reloaded
+    // the login page and threw away the very error the user needed to see.
+    if (res.status === 401 && !path.startsWith("/api/auth/")) {
+      window.location.href = "/login?next=" + encodeURIComponent(location.pathname);
+    }
+    throw err;
   }
   const ct = res.headers.get("content-type") || "";
   return ct.includes("application/json") ? res.json() : res;
+}
+
+/* ---------------------------------------------------------------------------
+   Loading, empty and error states.
+
+   Every async region renders one of three things while it isn't showing data,
+   so no page ever sits blank or silently shows zeros after a failure. They are
+   live regions, so a screen reader hears "Loading…" and then the outcome.
+   ------------------------------------------------------------------------- */
+function _stateBox(kind, message, extra = "") {
+  const iconName = { loading: null, empty: "compass", error: "alert-triangle" }[kind];
+  const lead = kind === "loading" ? '<span class="spinner" aria-hidden="true"></span>' : icon(iconName, 20);
+  return `<div class="state-box state-${kind}" role="${kind === "error" ? "alert" : "status"}">${lead}<div class="state-text"><p>${escapeHtml(message)}</p>${extra}</div></div>`;
+}
+
+function showLoading(el, message = "Loading…") {
+  if (!el) return;
+  el.setAttribute("aria-busy", "true");
+  el.innerHTML = _stateBox("loading", message);
+}
+
+// `action` is optional trusted HTML (a link or button we wrote ourselves).
+function showEmpty(el, message, action = "") {
+  if (!el) return;
+  el.removeAttribute("aria-busy");
+  el.innerHTML = _stateBox("empty", message, action ? `<div class="state-actions">${action}</div>` : "");
+}
+
+function showError(el, message, onRetry) {
+  if (!el) return;
+  el.removeAttribute("aria-busy");
+  el.innerHTML = _stateBox("error", message, onRetry ? '<div class="state-actions"><button type="button" class="btn btn-sm" data-retry>Try again</button></div>' : "");
+  if (onRetry) el.querySelector("[data-retry]").addEventListener("click", onRetry);
+}
+
+function clearState(el) {
+  if (el) el.removeAttribute("aria-busy");
+}
+
+// Disable a button for the length of an async action so it can't be double-
+// submitted, show that it is working, and always restore it afterwards.
+async function withBusy(button, fn, busyLabel) {
+  if (!button) return fn();
+  if (button.getAttribute("aria-busy") === "true") return;
+  const original = button.innerHTML;
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.innerHTML = `<span class="spinner spinner-sm" aria-hidden="true"></span>${escapeHtml(busyLabel || button.textContent.trim())}`;
+  try {
+    return await fn();
+  } finally {
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.innerHTML = original;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Forms: inline field errors and password visibility.
+   ------------------------------------------------------------------------- */
+function setFieldError(input, message) {
+  if (!input) return;
+  const id = input.id + "-error";
+  let el = document.getElementById(id);
+  if (!message) {
+    input.removeAttribute("aria-invalid");
+    if (el) el.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("p");
+    el.id = id;
+    el.className = "field-error";
+    // A password input shares a wrapper with its show/hide button; put the
+    // message after the wrapper, not wedged between the field and its button.
+    (input.closest(".password-field") || input).insertAdjacentElement("afterend", el);
+  }
+  el.textContent = message;
+  input.setAttribute("aria-invalid", "true");
+  const described = (input.getAttribute("aria-describedby") || "").split(" ").filter(Boolean);
+  if (!described.includes(id)) input.setAttribute("aria-describedby", [...described, id].join(" "));
+}
+
+function initPasswordToggles() {
+  document.querySelectorAll("[data-password-toggle]").forEach((btn) => {
+    const input = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!input) return;
+    btn.addEventListener("click", () => {
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-pressed", String(show));
+      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      btn.innerHTML = icon(show ? "eye-off" : "eye", 18);
+      input.focus();
+    });
+  });
+}
+
+// Messages for the ?error= codes the Google sign-in flow redirects back with.
+const AUTH_ERRORS = {
+  google_unavailable: "Google sign-in isn't set up on this site yet. Use your email and password instead.",
+  google_cancelled: "Google sign-in was cancelled.",
+  google_state: "That sign-in link had expired. Please try again.",
+  google_failed: "We couldn't finish signing you in with Google. Please try again.",
+};
+
+function showAuthErrorFromUrl(el) {
+  const code = new URLSearchParams(location.search).get("error");
+  if (el && code && AUTH_ERRORS[code]) {
+    el.textContent = AUTH_ERRORS[code];
+    el.hidden = false;
+  }
 }
 
 function toast(message, type = "success") {
@@ -133,11 +283,26 @@ async function loadUserBadge() {
   }
 }
 
+// A redirect-based sign-in (Google) lands with ?signed_in=<id>. Claim that
+// account for this tab *before* the reclaim check runs, or the tab would switch
+// straight back to whichever account it held before and undo the sign-in.
+function claimFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const uid = params.get("signed_in");
+  if (!uid) return;
+  if (String(window.__SB_ACTIVE_UID__) === uid) claimAccountInThisTab(uid);
+  params.delete("signed_in");
+  const query = params.toString();
+  history.replaceState(null, "", location.pathname + (query ? "?" + query : "") + location.hash);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initNav();
   initAccountSwitcher();
+  claimFromUrl();
   initAccountReclaim();
+  initPasswordToggles();
   loadUserBadge();
 });
 

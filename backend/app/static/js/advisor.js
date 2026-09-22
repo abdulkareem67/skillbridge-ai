@@ -70,8 +70,20 @@ function showTyping() {
   return row;
 }
 
+let waiting = false;
+
+// One question at a time: while a reply is pending, the composer and the
+// suggestion buttons are disabled, so a double-click can't send it twice.
+function setWaiting(on) {
+  waiting = on;
+  document.querySelectorAll("#chat-form button, .suggestion-row button").forEach((b) => { b.disabled = on; });
+  chatWindow.setAttribute("aria-busy", String(on));
+}
+
 async function ask(message) {
-  appendBubble("user", message);
+  if (waiting || !message) return;
+  setWaiting(true);
+  const userRow = appendBubble("user", message);
   const typing = showTyping();
   try {
     const res = await api("/api/chatbot/message", { method: "POST", body: JSON.stringify({ message }) });
@@ -79,26 +91,46 @@ async function ask(message) {
     appendBubble("assistant", res.reply);
   } catch (err) {
     typing.remove();
-    appendBubble("assistant", "Sorry, something went wrong: " + err.message);
+    const row = appendBubble("assistant", `Sorry — I couldn't answer that. ${err.message}`);
+    row.classList.add("chat-error");
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "btn btn-sm";
+    retry.textContent = "Ask again";
+    retry.addEventListener("click", () => { row.remove(); userRow.remove(); ask(message); });
+    row.querySelector(".chat-bubble").appendChild(retry);
+  } finally {
+    setWaiting(false);
+    document.getElementById("chat-input").focus();
   }
 }
 
 document.getElementById("chat-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("chat-input");
-  if (!input.value.trim()) return;
-  ask(input.value.trim());
+  const message = input.value.trim();
+  if (!message || waiting) return;
   input.value = "";
-  input.focus();
+  ask(message);
 });
 
+const WELCOME =
+  "Hi! I'm your career advisor. Ask me anything about your career path, skills to learn, CV tips, or interview prep — or tap a suggestion below to get started.";
+
 async function loadHistory() {
-  const { history } = await api("/api/chatbot/history");
+  chatWindow.innerHTML = "";
+  showLoading(chatWindow, "Loading your conversation…");
+  let history;
+  try {
+    ({ history } = await api("/api/chatbot/history"));
+  } catch (err) {
+    showError(chatWindow, `Couldn't load your earlier messages. ${err.message}`, loadHistory);
+    return;
+  }
+  chatWindow.innerHTML = "";
+  clearState(chatWindow);
   if (!history.length) {
-    appendBubble(
-      "assistant",
-      "Hi! I'm your AI Career Advisor. Ask me anything about your career path, skills to learn, CV tips, or interview prep — or tap a suggestion below to get started."
-    );
+    appendBubble("assistant", WELCOME);
     return;
   }
   history.forEach((h) => appendBubble(h.role, h.message, false));

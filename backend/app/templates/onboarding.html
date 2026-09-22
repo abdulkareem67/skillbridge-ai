@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% import "_icons.html" as ui with context %}
+{% block title %}Set up your profile — SkillBridge AI{% endblock %}
+
+{% block nav %}
+<nav class="navbar">
+  <div class="navbar-inner">
+    {{ ui.brand() }}
+    <div class="nav-actions">
+      {{ ui.theme_toggle() }}
+      <button class="btn btn-sm" type="button" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page container onboarding">
+  <h1 class="onboarding-title">Let's set up your profile</h1>
+  <p class="onboarding-lede">Three quick steps, then your first report is ready.</p>
+
+  <ol class="stepper" aria-label="Setup progress">
+    <li data-step-marker="1"><span class="stepper-num">1</span><span>Where you are</span></li>
+    <li data-step-marker="2"><span class="stepper-num">2</span><span>Target role</span></li>
+    <li data-step-marker="3"><span class="stepper-num">3</span><span>Your skills</span></li>
+  </ol>
+
+  <div class="glass card onboarding-card">
+    <div id="ob-loading"></div>
+
+    {# Step 1 — location #}
+    <section class="ob-step" data-step="1" hidden aria-labelledby="ob-h1">
+      <h2 id="ob-h1" tabindex="-1">{{ ui.icon("map-pin") }} Where are you job-hunting?</h2>
+      <p class="ob-help">We use this to point you at the job boards people actually use there. It's never shown to anyone.</p>
+
+      <label for="ob-country">Country</label>
+      <input id="ob-country" list="ob-countries" autocomplete="country-name" maxlength="60"
+             placeholder="Start typing — e.g. Pakistan, United Kingdom" />
+      <datalist id="ob-countries">
+        {% for m in markets %}<option value="{{ m.name }}"></option>{% endfor %}
+      </datalist>
+
+      <label for="ob-city">City <span class="optional">(optional)</span></label>
+      <input id="ob-city" list="ob-cities" autocomplete="address-level2" maxlength="40" placeholder="e.g. Lahore" />
+      <datalist id="ob-cities"></datalist>
+
+      <div class="ob-actions">
+        <button type="button" class="btn btn-primary" id="ob-save-location">Continue {{ ui.icon("arrow-right", 16) }}</button>
+        <button type="button" class="btn btn-ghost" id="ob-skip-location">Skip — use global job boards</button>
+      </div>
+    </section>
+
+    {# Step 2 — target role #}
+    <section class="ob-step" data-step="2" hidden aria-labelledby="ob-h2">
+      <h2 id="ob-h2" tabindex="-1">{{ ui.icon("target") }} What role are you aiming for?</h2>
+      <p class="ob-help">You can change this any time. Pick the closest match for now.</p>
+      <div id="ob-roles-state"></div>
+      <div id="ob-roles-form" hidden>
+        <label for="ob-discipline">Field of study</label>
+        <select id="ob-discipline"></select>
+        <label for="ob-role">Role</label>
+        <select id="ob-role"></select>
+      </div>
+      <div class="ob-actions">
+        <button type="button" class="btn btn-ghost" data-back="1">Back</button>
+        <button type="button" class="btn btn-primary" id="ob-save-role">Continue {{ ui.icon("arrow-right", 16) }}</button>
+      </div>
+    </section>
+
+    {# Step 3 — skills #}
+    <section class="ob-step" data-step="3" hidden aria-labelledby="ob-h3">
+      <h2 id="ob-h3" tabindex="-1">{{ ui.icon("file-text") }} Add your skills</h2>
+      <p class="ob-help">Upload your CV and we'll pull the skills out for you. We read it in memory and never store the file.</p>
+
+      <label class="dropzone ob-dropzone" for="ob-cv">
+        {{ ui.icon("upload", 26) }}
+        <strong>Choose a CV to upload</strong>
+        <span>PDF or DOCX, up to 5 MB</span>
+        <input type="file" id="ob-cv" accept=".pdf,.docx" class="visually-hidden" />
+      </label>
+
+      <p class="auth-divider"><span>or type a few skills</span></p>
+      <label for="ob-manual">Skills, separated by commas</label>
+      <input id="ob-manual" placeholder="e.g. Python, Excel, Communication" maxlength="600" />
+      <button type="button" class="btn btn-sm" id="ob-add-manual">Add these skills</button>
+
+      <div id="ob-skills-result" aria-live="polite"></div>
+
+      <div class="ob-actions">
+        <button type="button" class="btn btn-ghost" data-back="2">Back</button>
+        <a href="/dashboard" class="btn btn-primary" id="ob-finish" aria-disabled="true">See my report {{ ui.icon("arrow-right", 16) }}</a>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.__SB_MARKETS__ = {{ markets | tojson }};</script>
+<script src="/static/js/onboarding.js?v={{ asset_v }}"></script>
+{% endblock %}

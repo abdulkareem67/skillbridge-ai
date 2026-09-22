@@ -12,17 +12,19 @@
   <div class="glass card" style="margin-bottom:24px">
     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end">
       <div style="flex:1; min-width:200px">
-        <label>Field of Study</label>
+        <label for="discipline-select">Field of Study</label>
         <select id="discipline-select"></select>
       </div>
       <div style="flex:1; min-width:200px">
-        <label>Target Role</label>
+        <label for="role-select">Target Role</label>
         <select id="role-select"></select>
       </div>
-      <button class="btn btn-primary" style="margin-bottom:16px" onclick="runAnalysis()">Analyze Skill Gap</button>
+      <button class="btn btn-primary" style="margin-bottom:16px" id="analyze-btn" type="button" onclick="runAnalysis(this)">Analyze Skill Gap</button>
     </div>
     <p style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted)">Pick your field first (e.g. Civil Engineering, Business &amp; Finance) — then choose a role within it.</p>
   </div>
+
+  <div id="analysis-status" class="page-status"></div>
 
   <div id="results" style="display:none">
     <div class="grid grid-2" style="margin-bottom:24px">

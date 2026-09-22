@@ -9,13 +9,14 @@
       <h1>Personalized Learning Roadmap</h1>
       <p id="roadmap-role-text">Loading your roadmap...</p>
     </div>
-    <a class="btn btn-primary" id="download-pdf" href="#" target="_blank">{{ ui.icon("download") }} Download PDF Report</a>
+    <a class="btn btn-primary is-disabled" id="download-pdf" aria-disabled="true" target="_blank">{{ ui.icon("download") }} Download PDF Report</a>
   </div>
 
-  <div class="phase-tabs">
-    <div class="phase-tab active" data-phase="beginner" onclick="switchPhase('beginner')">Beginner</div>
-    <div class="phase-tab" data-phase="intermediate" onclick="switchPhase('intermediate')">Intermediate (Projects)</div>
-    <div class="phase-tab" data-phase="advanced" onclick="switchPhase('advanced')">Advanced (Interview Prep)</div>
+  {# Real buttons: these were <div onclick>, which a keyboard can't reach at all. #}
+  <div class="phase-tabs" role="tablist" aria-label="Roadmap phase">
+    <button type="button" class="phase-tab active" role="tab" aria-selected="true" aria-controls="topics-list" data-phase="beginner" onclick="switchPhase('beginner')">Beginner</button>
+    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="intermediate" onclick="switchPhase('intermediate')">Intermediate (Projects)</button>
+    <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="advanced" onclick="switchPhase('advanced')">Advanced (Interview Prep)</button>
   </div>
 
   <div class="glass card">
@@ -23,7 +24,7 @@
       <h2 style="margin:0" id="phase-title">Beginner Phase</h2>
       <span style="color:var(--text-muted); font-size:0.85rem" id="phase-duration"></span>
     </div>
-    <div id="topics-list"></div>
+    <div id="topics-list" role="tabpanel"></div>
   </div>
 </div>
 {% endblock %}

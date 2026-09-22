@@ -23,15 +23,18 @@ async function loadRoles(selectedRole) {
   fillRoles(currentDiscipline, selectedRole);
 }
 
-async function saveRole() {
+async function saveRole(button) {
   const role = document.getElementById("role-select").value;
-  try {
-    await api("/api/profile/target-role", { method: "POST", body: JSON.stringify({ role }) });
-    toast("Target role updated");
-    loadDashboard();
-  } catch (err) {
-    toast(err.message, "error");
-  }
+  if (!role) return;
+  await withBusy(button, async () => {
+    try {
+      await api("/api/profile/target-role", { method: "POST", body: JSON.stringify({ role }) });
+      toast("Target role updated");
+      await loadDashboard();
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  }, "Saving…");
 }
 
 function renderMatchChart(pct) {
@@ -68,41 +71,87 @@ function renderCategoryChart(categorized) {
   });
 }
 
+const STAT_IDS = ["stat-match", "stat-total-skills", "stat-missing", "stat-opportunities"];
+
+function setStat(id, value) {
+  const el = document.getElementById(id);
+  el.textContent = value;
+  el.parentElement.removeAttribute("aria-busy");
+}
+
+// Each section loads on its own. Previously a failure was swallowed with an
+// empty catch, so the page just showed a zero - indistinguishable from a real
+// zero. Now a failed section shows a dash and is named in one notice with a
+// retry, and the rest of the dashboard still loads.
 async function loadDashboard() {
-  const me = await api("/api/profile/me");
-  document.getElementById("stat-total-skills").textContent = me.skills.length;
-  await loadRoles(me.target_role);
+  const status = document.getElementById("dash-status");
+  status.innerHTML = "";
+  STAT_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    el.textContent = "…";
+    el.parentElement.setAttribute("aria-busy", "true");
+  });
 
-  const categorized = await api("/api/skills/categorized");
-  renderCategoryChart(categorized);
+  let me;
+  try {
+    me = await api("/api/profile/me");
+  } catch (err) {
+    STAT_IDS.forEach((id) => setStat(id, "—"));
+    showError(status, `Couldn't load your dashboard. ${err.message}`, loadDashboard);
+    return;
+  }
 
-  if (me.target_role) {
-    document.getElementById("current-role-text").textContent = `Currently targeting: ${me.target_role}`;
-    try {
-      const gap = await api(`/api/skills/gap-analysis`);
-      document.getElementById("stat-match").textContent = gap.match_percent + "%";
-      document.getElementById("stat-missing").textContent = gap.missing_skills.length;
+  setStat("stat-total-skills", me.skills.length);
+  document.getElementById("current-role-text").textContent = me.target_role
+    ? `Currently targeting: ${me.target_role}`
+    : "No target role selected yet.";
+
+  const failed = [];
+  const section = (label, fn) => fn().catch(() => failed.push(label));
+
+  await Promise.all([
+    section("career tracks", () => loadRoles(me.target_role)),
+    section("skill categories", async () => renderCategoryChart(await api("/api/skills/categorized"))),
+    section("match score", async () => {
+      if (!me.target_role) {
+        setStat("stat-match", "—");
+        setStat("stat-missing", "—");
+        renderMatchChart(0);
+        return;
+      }
+      const gap = await api("/api/skills/gap-analysis");
+      setStat("stat-match", gap.match_percent + "%");
+      setStat("stat-missing", gap.missing_skills.length);
       renderMatchChart(gap.match_percent);
-    } catch (e) {}
-
-    try {
-      const { roadmap } = await api(`/api/skills/roadmap`);
-      const progress = await api("/api/skills/progress");
+    }),
+    section("learning progress", async () => {
+      const text = document.getElementById("learning-progress-text");
+      if (!me.target_role) {
+        text.textContent = "Set a target role to start tracking roadmap progress.";
+        return;
+      }
+      const [{ roadmap }, progress] = await Promise.all([api("/api/skills/roadmap"), api("/api/skills/progress")]);
       const allTopics = [...roadmap.beginner.topics, ...roadmap.intermediate.topics, ...roadmap.advanced.topics];
       const total = allTopics.length;
       const done = allTopics.filter((t) => (progress[t.skill] || (t.already_have ? "completed" : "not_started")) === "completed").length;
       const pct = total ? Math.round((100 * done) / total) : 0;
-      document.getElementById("learning-progress-text").textContent = `${done} of ${total} roadmap skills completed for ${me.target_role}.`;
+      text.textContent = `${done} of ${total} roadmap skills completed for ${me.target_role}.`;
       document.getElementById("learning-progress-fill").style.width = pct + "%";
-    } catch (e) {}
-  } else {
-    renderMatchChart(0);
-  }
+    }),
+    section("opportunities", async () => {
+      const opps = await api("/api/opportunities");
+      setStat("stat-opportunities", opps.opportunities.filter((o) => o.match_percent >= 50).length);
+    }),
+  ]);
 
-  try {
-    const opps = await api("/api/opportunities");
-    document.getElementById("stat-opportunities").textContent = opps.opportunities.filter((o) => o.match_percent >= 50).length;
-  } catch (e) {}
+  // Anything still showing the loading ellipsis belongs to a section that failed.
+  STAT_IDS.forEach((id) => { if (document.getElementById(id).textContent === "…") setStat(id, "—"); });
+  if (document.getElementById("learning-progress-text").textContent === "Loading…") {
+    document.getElementById("learning-progress-text").textContent = "Couldn't load your progress.";
+  }
+  if (failed.length) {
+    showError(status, `Some parts of your dashboard didn't load: ${failed.join(", ")}.`, loadDashboard);
+  }
 }
 
 loadDashboard();
