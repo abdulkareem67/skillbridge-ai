@@ -16,6 +16,14 @@
         <strong>SkillBridge Advisor</strong>
         <span class="chat-status">Online · replies instantly</span>
       </div>
+      <div class="chat-actions">
+        <button type="button" class="btn btn-sm btn-ghost" id="export-chat-btn" onclick="exportChat()" title="Download conversation as a text file">
+          {{ ui.icon("download", 14) }} <span class="hide-mobile">Export</span>
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" id="clear-chat-btn" onclick="clearChatView()" title="Clear message view">
+          {{ ui.icon("trash", 14) }} <span class="hide-mobile">Clear</span>
+        </button>
+      </div>
     </div>
     <div class="chat-window" id="chat-window"></div>
     <div style="padding:16px; border-top:1px solid var(--card-border)">
@@ -39,5 +47,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/advisor.js"></script>
+<script src="/static/js/advisor.js?v={{ asset_v }}"></script>
 {% endblock %}

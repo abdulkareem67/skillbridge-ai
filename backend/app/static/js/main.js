@@ -181,12 +181,107 @@ function showAuthErrorFromUrl(el) {
   }
 }
 
+let _toastContainer = null;
+function getToastContainer() {
+  if (!_toastContainer || !document.body.contains(_toastContainer)) {
+    _toastContainer = document.getElementById("toast-container");
+    if (!_toastContainer) {
+      _toastContainer = document.createElement("div");
+      _toastContainer.id = "toast-container";
+      _toastContainer.className = "toast-container";
+      _toastContainer.setAttribute("aria-live", "polite");
+      document.body.appendChild(_toastContainer);
+    }
+  }
+  return _toastContainer;
+}
+
 function toast(message, type = "success") {
+  const container = getToastContainer();
   const el = document.createElement("div");
   el.className = `toast ${type}`;
-  el.textContent = message;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+  const iconName = type === "error" ? "alert-triangle" : type === "info" ? "compass" : "check-circle";
+  el.innerHTML = `${icon(iconName, 18)}<span style="flex:1">${escapeHtml(message)}</span><button type="button" class="modal-close" style="padding:2px" aria-label="${escapeHtml(t("close", "Close"))}">×</button>`;
+  
+  const dismiss = () => {
+    if (el.classList.contains("leaving")) return;
+    el.classList.add("leaving");
+    setTimeout(() => el.remove(), 260);
+  };
+
+  el.querySelector("button").addEventListener("click", dismiss);
+  container.appendChild(el);
+  setTimeout(dismiss, 3500);
+}
+
+async function copyToClipboard(text, successMsg) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    toast(successMsg || t("copied", "Copied to clipboard!"), "success");
+    return true;
+  } catch (err) {
+    toast(t("copy_failed", "Failed to copy text"), "error");
+    return false;
+  }
+}
+
+let _activeModal = null;
+function openModal({ title, bodyHtml, footerHtml = "" }) {
+  closeModal();
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.setAttribute("role", "dialog");
+  backdrop.setAttribute("aria-modal", "true");
+  backdrop.setAttribute("aria-labelledby", "modal-title");
+
+  backdrop.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-title">${escapeHtml(title)}</h3>
+        <button type="button" class="modal-close" id="modal-close-btn" aria-label="${escapeHtml(t("close", "Close"))}">×</button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      ${footerHtml ? `<div class="modal-footer">${footerHtml}</div>` : ""}
+    </div>
+  `;
+
+  const close = () => {
+    backdrop.classList.remove("is-open");
+    setTimeout(() => backdrop.remove(), 200);
+    document.removeEventListener("keydown", onKey);
+    _activeModal = null;
+  };
+
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+
+  backdrop.querySelector("#modal-close-btn").addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+  document.addEventListener("keydown", onKey);
+
+  document.body.appendChild(backdrop);
+  requestAnimationFrame(() => backdrop.classList.add("is-open"));
+  _activeModal = { close, element: backdrop };
+  return { close, element: backdrop };
+}
+
+function closeModal() {
+  if (_activeModal) _activeModal.close();
 }
 
 // Mirrors the Jinja `icon()` macro so markup built in JS pulls from the same
@@ -199,12 +294,35 @@ function icon(name, size = 16) {
 // the theme you'd switch *to*. Setting textContent here would delete them both.
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
+  // Charts paint with colours read at draw time, so they must redraw when the
+  // theme changes or they keep the old theme's (possibly unreadable) colours.
+  document.dispatchEvent(new CustomEvent("sb:themechange", { detail: { theme } }));
   const toggle = document.getElementById("theme-toggle");
   if (!toggle) return;
-  const next = theme === "dark" ? "light" : "dark";
-  const label = `Switch to ${next} theme`;
+  const label = theme === "dark"
+    ? t("theme_to_light", "Switch to light theme")
+    : t("theme_to_dark", "Switch to dark theme");
   toggle.setAttribute("aria-label", label);
   toggle.setAttribute("title", label);
+}
+
+// Chart colours taken from the active theme's CSS variables. They used to be
+// hard-coded for the dark theme, which put axis labels at 2.1:1 on the light
+// background. The *-text variants clear WCAG AA as text (4.5:1) and as chart
+// marks (3:1) in both themes.
+function chartTheme() {
+  const css = getComputedStyle(document.documentElement);
+  const v = (name) => css.getPropertyValue(name).trim();
+  const light = document.documentElement.getAttribute("data-theme") === "light";
+  return {
+    text: v("--text-muted"),
+    grid: light ? "rgba(22, 26, 46, 0.10)" : "rgba(238, 240, 251, 0.08)",
+    track: light ? "rgba(22, 26, 46, 0.18)" : "rgba(238, 240, 251, 0.16)",
+    accent: v("--accent-text"),
+    accent2: v("--accent-2-text"),
+    success: v("--success-text"),
+    danger: v("--danger-text"),
+  };
 }
 
 function initTheme() {

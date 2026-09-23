@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
 {% block title %}{{ t('dashboard.title') }}{% endblock %}
+{% block head %}
+{# Chart.js (~200 KB) is only needed where a <canvas> chart is drawn, so it is
+   loaded here rather than globally — every other page skips the download and
+   the third-party connection entirely. #}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 
 {% block content %}
 <div class="page container">
@@ -11,21 +19,39 @@
 
   <div id="dash-status" class="page-status"></div>
 
+  <!-- Dynamic Next Priority Action Banner -->
+  <div id="dash-next-action" class="dash-next-action glass" style="display:none">
+    <div style="display:flex; align-items:center; gap:16px">
+      <div class="feature-icon" style="margin:0; width:44px; height:44px; font-size:1.2rem; border-radius:12px; flex-shrink:0">
+        {{ ui.icon("sparkles", 20) }}
+      </div>
+      <div>
+        <h3 id="next-action-title" style="margin:0 0 4px; font-size:1.05rem">Recommended Next Step</h3>
+        <p id="next-action-desc" style="margin:0; font-size:0.85rem; color:var(--text-muted)">Loading your recommendation…</p>
+      </div>
+    </div>
+    <a id="next-action-btn" href="/roadmap" class="btn btn-primary btn-sm">Take Action {{ ui.icon("arrow-right", 14) }}</a>
+  </div>
+
   <div class="grid grid-4" style="margin-bottom:24px">
-    <div class="glass card">
-      <div class="stat-value" id="stat-match">…</div>
+    <div class="glass card dash-stat-card">
+      <div class="dash-stat-icon">{{ ui.icon("target", 36) }}</div>
+      <div class="stat-value" id="stat-match"><span class="skeleton skeleton-stat"></span></div>
       <div class="stat-label">{{ t('dashboard.stat_match') }}</div>
     </div>
-    <div class="glass card">
-      <div class="stat-value" id="stat-total-skills">…</div>
+    <div class="glass card dash-stat-card">
+      <div class="dash-stat-icon">{{ ui.icon("check-circle", 36) }}</div>
+      <div class="stat-value" id="stat-total-skills"><span class="skeleton skeleton-stat"></span></div>
       <div class="stat-label">{{ t('dashboard.stat_total') }}</div>
     </div>
-    <div class="glass card">
-      <div class="stat-value" id="stat-missing">…</div>
+    <div class="glass card dash-stat-card">
+      <div class="dash-stat-icon">{{ ui.icon("alert-triangle", 36) }}</div>
+      <div class="stat-value" id="stat-missing"><span class="skeleton skeleton-stat"></span></div>
       <div class="stat-label">{{ t('dashboard.stat_missing') }}</div>
     </div>
-    <div class="glass card">
-      <div class="stat-value" id="stat-opportunities">…</div>
+    <div class="glass card dash-stat-card">
+      <div class="dash-stat-icon">{{ ui.icon("briefcase", 36) }}</div>
+      <div class="stat-value" id="stat-opportunities"><span class="skeleton skeleton-stat"></span></div>
       <div class="stat-label">{{ t('dashboard.stat_opps') }}</div>
     </div>
   </div>
@@ -42,8 +68,11 @@
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
-    <h2 style="margin-top:0">{{ t('dashboard.learning_progress') }}</h2>
-    <p style="color:var(--text-muted)" id="learning-progress-text">{{ t('common.loading') }}</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px">
+      <h2 style="margin:0">{{ t('dashboard.learning_progress') }}</h2>
+      <a href="/roadmap" class="btn btn-sm btn-ghost">{{ ui.icon("map", 14) }} Open Full Roadmap</a>
+    </div>
+    <p style="color:var(--text-muted); margin-bottom:12px" id="learning-progress-text">{{ t('common.loading') }}</p>
     <div class="progress-track">
       <div class="progress-fill" id="learning-progress-fill" style="width:0%"></div>
     </div>
@@ -52,9 +81,9 @@
   <div class="glass card" style="margin-bottom:24px">
     <h2 style="margin-top:0">{{ t('dashboard.target_role') }}</h2>
     <p style="color:var(--text-muted)" id="current-role-text">{{ t('common.loading') }}</p>
-    <div style="display:flex; gap:10px; flex-wrap:wrap">
-      <select id="discipline-select" style="max-width:240px"></select>
-      <select id="role-select" style="max-width:280px"></select>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+      <select id="discipline-select" style="max-width:240px; margin-bottom:0" aria-label="Career Field"></select>
+      <select id="role-select" style="max-width:280px; margin-bottom:0" aria-label="Target Role"></select>
       <button class="btn btn-primary" id="save-role-btn" type="button" onclick="saveRole(this)">{{ t('dashboard.set_role') }}</button>
     </div>
   </div>
@@ -80,5 +109,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/dashboard.js?v={{ asset_v }}"></script>
 {% endblock %}

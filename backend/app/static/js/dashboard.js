@@ -4,7 +4,7 @@ let disciplines = {};
 function fillRoles(discipline, selectedRole) {
   const roles = disciplines[discipline] || [];
   const sel = document.getElementById("role-select");
-  sel.innerHTML = roles.map((r) => `<option value="${r}" ${r === selectedRole ? "selected" : ""}>${r}</option>`).join("");
+  sel.innerHTML = roles.map((r) => `<option value="${escapeHtml(r)}" ${r === selectedRole ? "selected" : ""}>${escapeHtml(r)}</option>`).join("");
 }
 
 async function loadRoles(selectedRole) {
@@ -16,7 +16,7 @@ async function loadRoles(selectedRole) {
 
   const dsel = document.getElementById("discipline-select");
   dsel.innerHTML = Object.keys(disciplines)
-    .map((d) => `<option value="${d}" ${d === currentDiscipline ? "selected" : ""}>${d}</option>`)
+    .map((d) => `<option value="${escapeHtml(d)}" ${d === currentDiscipline ? "selected" : ""}>${escapeHtml(d)}</option>`)
     .join("");
   dsel.onchange = () => fillRoles(dsel.value);
 
@@ -37,59 +37,104 @@ async function saveRole(button) {
   }, t("saving", "Saving…"));
 }
 
+let lastMatchPct = null;
+let lastCategorized = null;
+
+const CATEGORY_LABELS = {
+  technical: ["cat_technical", "Technical Skills"],
+  soft: ["cat_soft", "Soft Skills"],
+  tool: ["cat_tool", "Tools & Technologies"],
+  certification: ["cat_certification", "Certifications"],
+};
+function categoryLabel(key) {
+  const entry = CATEGORY_LABELS[key];
+  return entry ? t(entry[0], entry[1]) : key[0].toUpperCase() + key.slice(1);
+}
+
 function renderMatchChart(pct) {
+  lastMatchPct = pct;
+  const c = chartTheme();
   const ctx = document.getElementById("chart-match");
   if (matchChart) matchChart.destroy();
   matchChart = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: [t("matched", "Matched"), t("missing", "Missing")],
-      datasets: [{ data: [pct, 100 - pct], backgroundColor: ["#6d5bf8", "rgba(255,255,255,0.1)"], borderWidth: 0 }],
+      datasets: [{ data: [pct, 100 - pct], backgroundColor: [c.accent, c.track], borderWidth: 0 }],
     },
-    options: { cutout: "72%", plugins: { legend: { labels: { color: "#a5abc9" } } } },
+    options: {
+      cutout: "72%",
+      plugins: {
+        legend: { labels: { color: c.text } },
+        tooltip: {
+          callbacks: {
+            label: (item) => ` ${item.label}: ${item.raw}%`
+          }
+        }
+      }
+    },
   });
 }
 
 function renderCategoryChart(categorized) {
+  lastCategorized = categorized;
+  const c = chartTheme();
   const ctx = document.getElementById("chart-category");
-  const labels = Object.keys(categorized);
-  const data = labels.map((l) => categorized[l].length);
+  const keys = Object.keys(categorized);
+  const data = keys.map((k) => categorized[k].length);
   if (categoryChart) categoryChart.destroy();
   categoryChart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: labels.map((l) => l[0].toUpperCase() + l.slice(1)),
-      datasets: [{ label: "Skills", data, backgroundColor: "#22d3ee" }],
+      labels: keys.map(categoryLabel),
+      datasets: [{ label: t("skills_label", "Skills"), data, backgroundColor: c.accent2 }],
     },
     options: {
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: "#a5abc9" }, grid: { display: false } },
-        y: { ticks: { color: "#a5abc9", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.06)" } },
+        x: { ticks: { color: c.text }, grid: { display: false } },
+        y: { ticks: { color: c.text, stepSize: 1 }, grid: { color: c.grid } },
       },
     },
   });
 }
 
+document.addEventListener("sb:themechange", () => {
+  if (lastMatchPct !== null) renderMatchChart(lastMatchPct);
+  if (lastCategorized !== null) renderCategoryChart(lastCategorized);
+});
+
 const STAT_IDS = ["stat-match", "stat-total-skills", "stat-missing", "stat-opportunities"];
 
 function setStat(id, value) {
   const el = document.getElementById(id);
-  el.textContent = value;
-  el.parentElement.removeAttribute("aria-busy");
+  if (el) {
+    el.textContent = value;
+    el.parentElement.removeAttribute("aria-busy");
+  }
 }
 
-// Each section loads on its own. Previously a failure was swallowed with an
-// empty catch, so the page just showed a zero - indistinguishable from a real
-// zero. Now a failed section shows a dash and is named in one notice with a
-// retry, and the rest of the dashboard still loads.
+function setNextAction(title, desc, btnText, btnHref) {
+  const banner = document.getElementById("dash-next-action");
+  if (!banner) return;
+  document.getElementById("next-action-title").textContent = title;
+  document.getElementById("next-action-desc").textContent = desc;
+  const btn = document.getElementById("next-action-btn");
+  btn.textContent = btnText;
+  btn.href = btnHref;
+  banner.style.display = "flex";
+}
+
 async function loadDashboard() {
   const status = document.getElementById("dash-status");
-  status.innerHTML = "";
+  if (status) status.innerHTML = "";
+
   STAT_IDS.forEach((id) => {
     const el = document.getElementById(id);
-    el.textContent = "…";
-    el.parentElement.setAttribute("aria-busy", "true");
+    if (el) {
+      el.innerHTML = '<span class="skeleton skeleton-stat"></span>';
+      el.parentElement.setAttribute("aria-busy", "true");
+    }
   });
 
   let me;
@@ -105,6 +150,22 @@ async function loadDashboard() {
   document.getElementById("current-role-text").textContent = me.target_role
     ? t("targeting", "Currently targeting: {role}").replace("{role}", me.target_role)
     : t("no_role", "No target role selected yet.");
+
+  if (!me.skills.length) {
+    setNextAction(
+      "Upload your CV or Add Skills",
+      "Get started by uploading your resume or adding skills to unlock market gap analysis and role matches.",
+      "Upload CV",
+      "/cv-upload"
+    );
+  } else if (!me.target_role) {
+    setNextAction(
+      "Select a Target Career Role",
+      "Pick your desired career track below to calculate your skill readiness and unlock a tailored roadmap.",
+      "Set Role Below",
+      "#role-select"
+    );
+  }
 
   const failed = [];
   const section = (label, fn) => fn().catch(() => failed.push(label));
@@ -123,6 +184,22 @@ async function loadDashboard() {
       setStat("stat-match", gap.match_percent + "%");
       setStat("stat-missing", gap.missing_skills.length);
       renderMatchChart(gap.match_percent);
+
+      if (gap.missing_skills.length > 0) {
+        setNextAction(
+          `Priority Skill: ${gap.missing_skills[0]}`,
+          `Learning ${gap.missing_skills[0]} will accelerate your readiness for ${me.target_role} in the Pakistani job market.`,
+          "Start Learning",
+          "/roadmap"
+        );
+      } else {
+        setNextAction(
+          `Ready for ${me.target_role}!`,
+          `You have achieved a 100% skill match for this career track. Start applying to verified openings.`,
+          "Explore Openings",
+          "/opportunities"
+        );
+      }
     }),
     section("learning progress", async () => {
       const text = document.getElementById("learning-progress-text");
@@ -144,12 +221,15 @@ async function loadDashboard() {
     }),
   ]);
 
-  // Anything still showing the loading ellipsis belongs to a section that failed.
-  STAT_IDS.forEach((id) => { if (document.getElementById(id).textContent === "…") setStat(id, "—"); });
+  STAT_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && el.innerHTML.includes("skeleton")) setStat(id, "—");
+  });
+
   if (document.getElementById("learning-progress-text").textContent === "Loading…") {
     document.getElementById("learning-progress-text").textContent = t("progress_load_failed", "Couldn't load your progress.");
   }
-  if (failed.length) {
+  if (failed.length && status) {
     showError(status, t("dash_partial", "Some parts of your dashboard didn't load: {parts}.").replace("{parts}", failed.join(", ")), loadDashboard);
   }
 }

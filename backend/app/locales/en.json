@@ -276,7 +276,10 @@
     "adv_sorry": "Sorry — I couldn't answer that. {msg}",
     "adv_ask_again": "Ask again",
     "adv_loading": "Loading your conversation…",
-    "adv_history_failed": "Couldn't load your earlier messages. {msg}"
+    "adv_history_failed": "Couldn't load your earlier messages. {msg}",
+    "theme_to_light": "Switch to light theme",
+    "theme_to_dark": "Switch to dark theme",
+    "skills_label": "Skills"
   },
   "settings": {
     "title": "Settings — SkillBridge AI",

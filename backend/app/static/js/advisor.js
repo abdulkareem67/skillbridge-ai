@@ -41,17 +41,41 @@ function appendBubble(role, text, animate = true) {
   avatar.innerHTML = icon(role === "user" ? "user" : "bot", 18);
 
   const stack = document.createElement("div");
+  stack.style.display = "flex";
+  stack.style.flexDirection = "column";
+
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${role}`;
-  if (role === "assistant") bubble.innerHTML = formatReply(text);
-  else bubble.textContent = text;
 
   const time = document.createElement("div");
   time.className = "chat-time";
   time.textContent = timeNow();
 
-  stack.appendChild(bubble);
-  stack.appendChild(time);
+  if (role === "assistant") {
+    bubble.innerHTML = formatReply(text);
+    stack.appendChild(bubble);
+
+    const actionsRow = document.createElement("div");
+    actionsRow.style.display = "flex";
+    actionsRow.style.alignItems = "center";
+    actionsRow.style.gap = "8px";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "chat-copy-btn";
+    copyBtn.innerHTML = `${icon("copy", 12)} Copy`;
+    copyBtn.setAttribute("aria-label", "Copy response to clipboard");
+    copyBtn.addEventListener("click", () => copyToClipboard(text, "Response copied to clipboard!"));
+
+    actionsRow.appendChild(time);
+    actionsRow.appendChild(copyBtn);
+    stack.appendChild(actionsRow);
+  } else {
+    bubble.textContent = text;
+    stack.appendChild(bubble);
+    stack.appendChild(time);
+  }
+
   row.appendChild(avatar);
   row.appendChild(stack);
   chatWindow.appendChild(row);
@@ -101,18 +125,65 @@ async function ask(message) {
     row.querySelector(".chat-bubble").appendChild(retry);
   } finally {
     setWaiting(false);
-    document.getElementById("chat-input").focus();
+    const input = document.getElementById("chat-input");
+    if (input) input.focus();
   }
 }
 
-document.getElementById("chat-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const input = document.getElementById("chat-input");
-  const message = input.value.trim();
-  if (!message || waiting) return;
-  input.value = "";
-  ask(message);
-});
+function exportChat() {
+  const rows = Array.from(chatWindow.querySelectorAll(".chat-row"));
+  if (!rows.length) {
+    toast("No conversation to export", "info");
+    return;
+  }
+  const lines = [
+    "SkillBridge AI - Career Advisor Conversation",
+    "Exported: " + new Date().toLocaleString(),
+    "=".repeat(50),
+    ""
+  ];
+
+  rows.forEach((row) => {
+    const isUser = row.classList.contains("user");
+    const role = isUser ? "You" : "SkillBridge Advisor";
+    const bubble = row.querySelector(".chat-bubble");
+    const text = bubble ? (bubble.innerText || bubble.textContent).trim() : "";
+    if (text) {
+      lines.push(`[${role}]`);
+      lines.push(text);
+      lines.push("");
+    }
+  });
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SkillBridge_Advisor_Chat_${new Date().toISOString().slice(0, 10)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Conversation transcript exported!", "success");
+}
+
+function clearChatView() {
+  chatWindow.innerHTML = "";
+  appendBubble("assistant", WELCOME());
+  toast("Chat view cleared", "info");
+}
+
+const form = document.getElementById("chat-form");
+if (form) {
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("chat-input");
+    const message = input.value.trim();
+    if (!message || waiting) return;
+    input.value = "";
+    ask(message);
+  });
+}
 
 const WELCOME = () => t("adv_welcome", "Hi! I'm your career advisor. Ask me anything about your career path, skills to learn, CV tips, or interview prep — or tap a suggestion below to get started.");
 

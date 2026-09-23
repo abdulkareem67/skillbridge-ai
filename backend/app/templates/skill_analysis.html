@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% import "_icons.html" as ui with context %}
 {% block title %}{{ t('analysis.title') }}{% endblock %}
+{% block head %}
+{# Chart.js (~200 KB) is only needed where a <canvas> chart is drawn, so it is
+   loaded here rather than globally — every other page skips the download and
+   the third-party connection entirely. #}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 
 {% block content %}
 <div class="page container">
@@ -27,28 +35,62 @@
   <div id="analysis-status" class="page-status"></div>
 
   <div id="results" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span id="readiness-badge" class="readiness-status readiness-mid">Calculating readiness…</span>
+        <span id="target-role-badge" style="font-size:0.9rem; color:var(--text-muted)"></span>
+      </div>
+      <div style="display:flex; gap:10px">
+        <button type="button" class="btn btn-sm btn-ghost" id="copy-summary-btn" onclick="copyGapSummary()">
+          {{ ui.icon("copy", 14) }} Copy Summary
+        </button>
+        <a class="btn btn-sm btn-ghost" href="/opportunities">
+          {{ ui.icon("briefcase", 14) }} View Matching Jobs
+        </a>
+      </div>
+    </div>
+
     <div class="grid grid-2" style="margin-bottom:24px">
       <div class="glass card" style="text-align:center">
         <h2 style="margin-top:0">{{ t('analysis.match_score') }}</h2>
         <canvas id="chart-gap" height="220"></canvas>
         <div class="stat-value" id="match-percent" style="margin-top:10px">0%</div>
       </div>
-      <div class="glass card">
-        <h2 style="margin-top:0">{{ t('analysis.progress_overview') }}</h2>
-        <p style="color:var(--text-muted)" id="progress-summary"></p>
-        <div class="progress-track" style="margin-bottom:20px">
-          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      <div class="glass card" style="display:flex; flex-direction:column; justify-content:space-between">
+        <div>
+          <h2 style="margin-top:0">{{ t('analysis.progress_overview') }}</h2>
+          <p style="color:var(--text-muted)" id="progress-summary"></p>
+          <div class="progress-track" style="margin-bottom:20px">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+          </div>
+          <p id="analysis-advice" style="font-size:0.88rem; color:var(--text-muted); line-height:1.6"></p>
         </div>
         <a class="btn btn-primary btn-block" href="/roadmap">{{ t('analysis.view_roadmap') }}</a>
       </div>
     </div>
 
+    <!-- Skill Filter & Search Toolbar -->
+    <div class="glass card" style="margin-bottom:24px; padding:16px 20px">
+      <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:space-between; align-items:center">
+        <div class="search-bar-wrap" style="max-width:360px">
+          {{ ui.icon("search", 16) }}
+          <input type="text" id="skill-search" placeholder="Filter skills by keyword…" autocomplete="off" />
+          <button type="button" class="search-clear-btn" id="skill-search-clear" aria-label="Clear">×</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button type="button" class="btn btn-sm btn-primary" data-skill-filter="all" onclick="filterSkills('all')">All Skills</button>
+          <button type="button" class="btn btn-sm" data-skill-filter="matched" onclick="filterSkills('matched')">Matched (<span id="matched-count">0</span>)</button>
+          <button type="button" class="btn btn-sm" data-skill-filter="missing" onclick="filterSkills('missing')">Missing (<span id="missing-count">0</span>)</button>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-2" style="margin-bottom:24px">
-      <div class="glass card">
+      <div class="glass card" id="card-matched">
         <h2 style="margin-top:0">{{ ui.icon("check-circle") }} {{ t('analysis.strengths') }}</h2>
         <div id="matched-list"></div>
       </div>
-      <div class="glass card">
+      <div class="glass card" id="card-missing">
         <h2 style="margin-top:0">{{ ui.icon("alert-triangle") }} {{ t('analysis.missing') }}</h2>
         <div id="missing-list"></div>
       </div>
@@ -65,5 +107,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/analysis.js"></script>
+<script src="/static/js/analysis.js?v={{ asset_v }}"></script>
 {% endblock %}

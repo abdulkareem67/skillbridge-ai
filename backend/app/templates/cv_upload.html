@@ -26,6 +26,18 @@
       <h2 style="margin-top:0">{{ t('cv.add_manual') }}</h2>
       <label for="manual-skill-input">{{ t('cv.enter_skill') }}</label>
       <input type="text" id="manual-skill-input" maxlength="80" placeholder="{{ t('cv.skill_placeholder') }}" />
+      <div style="margin-bottom:12px">
+        <span style="font-size:0.78rem; color:var(--text-muted); font-weight:600">POPULAR SUGGESTIONS:</span>
+        <div class="quick-skills-group">
+          <span class="chip quick-skill-chip" onclick="addPending('Python')">+ Python</span>
+          <span class="chip quick-skill-chip" onclick="addPending('SQL')">+ SQL</span>
+          <span class="chip quick-skill-chip" onclick="addPending('JavaScript')">+ JavaScript</span>
+          <span class="chip quick-skill-chip" onclick="addPending('React')">+ React</span>
+          <span class="chip quick-skill-chip" onclick="addPending('Excel')">+ Excel</span>
+          <span class="chip quick-skill-chip" onclick="addPending('Git')">+ Git</span>
+          <span class="chip quick-skill-chip" onclick="addPending('Communication')">+ Communication</span>
+        </div>
+      </div>
       <div id="manual-chip-preview" class="suggestion-row"></div>
       <button class="btn btn-primary btn-block" type="button" onclick="submitManualSkills(this)">{{ t('cv.add_skills') }}</button>
     </div>
@@ -56,5 +68,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/upload.js"></script>
+<script src="/static/js/upload.js?v={{ asset_v }}"></script>
 {% endblock %}

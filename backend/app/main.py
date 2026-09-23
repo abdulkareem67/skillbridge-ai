@@ -81,6 +81,8 @@ async def setup_gate(request: Request, call_next):
     return await call_next(request)
 
 
+
+
 @app.middleware("http")
 async def detect_country(request: Request, call_next):
     # Vercel resolves the visitor's country to an ISO code in this header. It's a

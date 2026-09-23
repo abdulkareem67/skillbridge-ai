@@ -10,18 +10,24 @@
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
-    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center">
-      <div style="display:flex; gap:10px; flex-wrap:wrap">
-        <button class="btn btn-sm active-filter" data-type="All" onclick="filterType('All')">{{ t('opportunities.filter_all') }}</button>
-        <button class="btn btn-sm" data-type="Job" onclick="filterType('Job')">{{ t('opportunities.filter_jobs') }}</button>
-        <button class="btn btn-sm" data-type="Internship" onclick="filterType('Internship')">{{ t('opportunities.filter_internships') }}</button>
-        <button class="btn btn-sm" data-type="Freelance" onclick="filterType('Freelance')">{{ t('opportunities.filter_freelance') }}</button>
-        <button class="btn btn-sm" data-type="Remote" onclick="filterType('Remote')">{{ t('opportunities.filter_remote') }}</button>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:12px">
+      <div class="search-bar-wrap" style="max-width:420px">
+        {{ ui.icon("search", 16) }}
+        <input type="text" id="opp-search" placeholder="Search by role, company, skills, or location…" autocomplete="off" />
+        <button type="button" class="search-clear-btn" id="opp-search-clear" aria-label="Clear search">×</button>
       </div>
       <label id="other-fields-toggle" style="display:none; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-muted); cursor:pointer">
-        <input type="checkbox" id="include-other-fields" style="width:auto" onchange="onIncludeOtherFieldsChange()" />
+        <input type="checkbox" id="include-other-fields" style="width:auto; margin:0" onchange="onIncludeOtherFieldsChange()" />
         {{ t('opportunities.show_other') }}
       </label>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+      <button class="btn btn-sm active-filter" data-type="All" onclick="filterType('All')">{{ t('opportunities.filter_all') }}</button>
+      <button class="btn btn-sm" data-type="Job" onclick="filterType('Job')">{{ t('opportunities.filter_jobs') }}</button>
+      <button class="btn btn-sm" data-type="Internship" onclick="filterType('Internship')">{{ t('opportunities.filter_internships') }}</button>
+      <button class="btn btn-sm" data-type="Freelance" onclick="filterType('Freelance')">{{ t('opportunities.filter_freelance') }}</button>
+      <button class="btn btn-sm" data-type="Remote" onclick="filterType('Remote')">{{ t('opportunities.filter_remote') }}</button>
+      <button class="btn btn-sm" data-type="Saved" onclick="filterType('Saved')">{{ ui.icon("bookmark", 14) }} Saved <span class="badge-pill" id="saved-count">0</span></button>
     </div>
     <p id="field-note" style="margin:10px 0 0; font-size:0.82rem; color:var(--text-muted); display:none"></p>
   </div>
@@ -39,5 +45,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/opportunities.js"></script>
+<script src="/static/js/opportunities.js?v={{ asset_v }}"></script>
 {% endblock %}
