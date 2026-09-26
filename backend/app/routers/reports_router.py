@@ -1,11 +1,14 @@
 import io
+import re
 import sqlite3
+from urllib.parse import quote
+from xml.sax.saxutils import escape
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
@@ -15,6 +18,28 @@ from ..skills_data import is_valid_role
 from ..skills_engine import analyze_gap, build_roadmap, categorize_all, generate_improved_cv
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
+
+
+def _para(text, style) -> Paragraph:
+    """A Paragraph of plain text.
+
+    ReportLab reads Paragraph text as markup, so a name like "Ali <b" or a skill
+    containing "&" broke the PDF with a 500. Everything we put on the page is
+    data, never formatting, so it is always escaped.
+    """
+    return Paragraph(escape(str(text)), style)
+
+
+def _download_headers(stem: str) -> dict:
+    """Content-Disposition that works for any name.
+
+    HTTP headers are Latin-1, so an Urdu or Arabic name in the filename raised
+    UnicodeEncodeError and the download failed. Browsers read the UTF-8
+    `filename*` form; the plain `filename` is an ASCII-only fallback.
+    """
+    ascii_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("_") or "SkillBridge"
+    utf8_name = quote(stem.replace("/", "-") + ".pdf", safe="")
+    return {"Content-Disposition": f"attachment; filename=\"{ascii_stem}.pdf\"; filename*=UTF-8''{utf8_name}"}
 
 
 def _load_cv_context(db: sqlite3.Connection, user_id: int):
@@ -43,20 +68,20 @@ def improved_cv_pdf(user_id: int = Depends(get_current_user_id), db: sqlite3.Con
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph(name, styles["Title"]))
+    story.append(_para(name, styles["Title"]))
     if user and user["target_role"]:
-        story.append(Paragraph(f"Target Role: {user['target_role']}", styles["Normal"]))
+        story.append(_para(f"Target Role: {user['target_role']}", styles["Normal"]))
     story.append(Spacer(1, 10))
 
-    story.append(Paragraph("Professional Summary", styles["Heading2"]))
-    story.append(Paragraph(cv["summary"], styles["Normal"]))
+    story.append(_para("Professional Summary", styles["Heading2"]))
+    story.append(_para(cv["summary"], styles["Normal"]))
     story.append(Spacer(1, 12))
 
     def skill_section(title, items):
         if not items:
             return
-        story.append(Paragraph(title, styles["Heading2"]))
-        story.append(Paragraph(", ".join(items), styles["Normal"]))
+        story.append(_para(title, styles["Heading2"]))
+        story.append(_para(", ".join(items), styles["Normal"]))
         story.append(Spacer(1, 10))
 
     skill_section("Technical Skills", cv["technical_skills"])
@@ -65,21 +90,21 @@ def improved_cv_pdf(user_id: int = Depends(get_current_user_id), db: sqlite3.Con
     skill_section("Certifications", cv["certifications"])
 
     if cv["project_suggestions"]:
-        story.append(Paragraph("Suggested Projects to Add", styles["Heading2"]))
+        story.append(_para("Suggested Projects to Add", styles["Heading2"]))
         for tip in cv["project_suggestions"]:
-            story.append(Paragraph(f"- {tip}", styles["Normal"]))
+            story.append(_para(f"- {tip}", styles["Normal"]))
         story.append(Spacer(1, 10))
 
-    story.append(Paragraph("AI Recommendations to Strengthen This CV", styles["Heading2"]))
+    story.append(_para("AI Recommendations to Strengthen This CV", styles["Heading2"]))
     for tip in cv["recommendations"]:
-        story.append(Paragraph(f"- {tip}", styles["Normal"]))
+        story.append(_para(f"- {tip}", styles["Normal"]))
 
     doc.build(story)
     buf.seek(0)
     return StreamingResponse(
         buf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=SkillBridge_Improved_CV_{name.replace(' ', '_')}.pdf"},
+        headers=_download_headers(f"SkillBridge_Improved_CV_{name.replace(' ', '_')}"),
     )
 
 
@@ -103,14 +128,14 @@ def roadmap_pdf(role: str | None = Query(default=None, max_length=100), user_id:
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph("SkillBridge AI — Career Roadmap Report", styles["Title"]))
+    story.append(_para("SkillBridge AI — Career Roadmap Report", styles["Title"]))
     story.append(Spacer(1, 8))
-    story.append(Paragraph(f"Candidate: {user['name'] if user else ''}", styles["Normal"]))
-    story.append(Paragraph(f"Target Role: {target}", styles["Normal"]))
-    story.append(Paragraph(f"Skill Match Score: {gap['match_percent']}%", styles["Normal"]))
+    story.append(_para(f"Candidate: {user['name'] if user else ''}", styles["Normal"]))
+    story.append(_para(f"Target Role: {target}", styles["Normal"]))
+    story.append(_para(f"Skill Match Score: {gap['match_percent']}%", styles["Normal"]))
     story.append(Spacer(1, 12))
 
-    story.append(Paragraph("Skill Gap Analysis", styles["Heading2"]))
+    story.append(_para("Skill Gap Analysis", styles["Heading2"]))
     data = [["Matched Skills", "Missing Skills"]]
     max_len = max(len(gap["matched_skills"]), len(gap["missing_skills"]), 1)
     matched, missing = gap["matched_skills"], gap["missing_skills"]
@@ -129,14 +154,15 @@ def roadmap_pdf(role: str | None = Query(default=None, max_length=100), user_id:
     story.append(table)
     story.append(Spacer(1, 16))
 
-    story.append(Paragraph("Learning Roadmap", styles["Heading2"]))
+    story.append(_para("Learning Roadmap", styles["Heading2"]))
+    course_style = ParagraphStyle("course", parent=styles["Normal"], leftIndent=14)
     for phase_name in ("beginner", "intermediate", "advanced"):
         phase = roadmap[phase_name]
-        story.append(Paragraph(f"{phase_name.capitalize()} Phase ({phase['duration']})", styles["Heading3"]))
+        story.append(_para(f"{phase_name.capitalize()} Phase ({phase['duration']})", styles["Heading3"]))
         for topic in phase["topics"]:
             status = "(already have)" if topic["already_have"] else ""
-            story.append(Paragraph(f"- {topic['skill']} {status}", styles["Normal"]))
-            story.append(Paragraph(f"&nbsp;&nbsp;&nbsp;Course: {topic['resource']['course']}", styles["Normal"]))
+            story.append(_para(f"- {topic['skill']} {status}", styles["Normal"]))
+            story.append(_para(f"Course: {topic['resource']['course']}", course_style))
         story.append(Spacer(1, 8))
 
     doc.build(story)
@@ -144,5 +170,5 @@ def roadmap_pdf(role: str | None = Query(default=None, max_length=100), user_id:
     return StreamingResponse(
         buf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=SkillBridge_Roadmap_{target.replace(' ', '_')}.pdf"},
+        headers=_download_headers(f"SkillBridge_Roadmap_{target.replace(' ', '_')}"),
     )

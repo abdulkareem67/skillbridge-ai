@@ -103,9 +103,15 @@ def translate(key: str, locale: str = DEFAULT_LOCALE, **variables) -> str:
 def negotiate_locale(request) -> str:
     """Pick the locale for this request.
 
-    Order: an explicit cookie the person set, then the browser's Accept-Language,
-    then English. Only ever returns a locale we actually have a file for.
+    Order: a ?lang= in the URL (what the hreflang alternates link to), then an
+    explicit cookie the person set, then the browser's Accept-Language, then
+    English. Only ever returns a locale we actually have a file for.
     """
+    query = getattr(request, "query_params", None)
+    requested = query.get("lang") if query is not None else None
+    if is_supported(requested):
+        return requested
+
     cookie = request.cookies.get(LOCALE_COOKIE)
     if is_supported(cookie):
         return cookie

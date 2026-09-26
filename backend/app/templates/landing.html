@@ -6,10 +6,10 @@
 <nav class="navbar">
   <div class="navbar-inner">
     {{ ui.brand() }}
-    <div class="nav-actions">
+    <div class="nav-actions nav-actions-public">
       {{ ui.language_switcher() }}
       {{ ui.theme_toggle() }}
-      <a href="/demo" class="btn btn-ghost">{{ t('landing.nav_demo') }}</a>
+      <a href="/demo" class="btn btn-ghost nav-wide-only">{{ t('landing.nav_demo') }}</a>
       <a href="/login" class="btn btn-ghost">{{ t('common.login') }}</a>
       <a href="/register" class="btn btn-primary">{{ t('common.get_started') }}</a>
     </div>

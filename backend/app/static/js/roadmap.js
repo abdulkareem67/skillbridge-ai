@@ -23,8 +23,8 @@ function updateRoadmapProgress() {
   const summaryText = document.getElementById("roadmap-progress-summary");
 
   if (bar) bar.style.width = pct + "%";
-  if (pctText) pctText.textContent = pct + "% Completed";
-  if (summaryText) summaryText.textContent = `${completed} of ${total} roadmap skills mastered`;
+  if (pctText) pctText.textContent = t("rm_pct_done", "{pct}% completed").replace("{pct}", pct);
+  if (summaryText) summaryText.textContent = t("rm_mastered", "{done} of {total} roadmap skills completed").replace("{done}", completed).replace("{total}", total);
 }
 
 async function loadRoadmap() {
@@ -124,7 +124,7 @@ async function toggleDone(box) {
     await api("/api/skills/progress", { method: "POST", body: JSON.stringify({ skill_name: skill, status }) });
     renderPhase();
     updateRoadmapProgress();
-    toast(box.checked ? `Marked "${skill}" as completed!` : `Marked "${skill}" as in-progress`, "success");
+    toast((box.checked ? t("rm_marked_done", "Marked “{skill}” as completed") : t("rm_marked_undone", "Marked “{skill}” as not started")).replace("{skill}", skill), "success");
   } catch (err) {
     if (previous === undefined) delete progressMap[skill]; else progressMap[skill] = previous;
     box.checked = !box.checked;

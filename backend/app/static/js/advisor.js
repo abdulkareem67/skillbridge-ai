@@ -63,9 +63,9 @@ function appendBubble(role, text, animate = true) {
     const copyBtn = document.createElement("button");
     copyBtn.type = "button";
     copyBtn.className = "chat-copy-btn";
-    copyBtn.innerHTML = `${icon("copy", 12)} Copy`;
-    copyBtn.setAttribute("aria-label", "Copy response to clipboard");
-    copyBtn.addEventListener("click", () => copyToClipboard(text, "Response copied to clipboard!"));
+    copyBtn.innerHTML = `${icon("copy", 12)} ${escapeHtml(t("adv_copy", "Copy"))}`;
+    copyBtn.setAttribute("aria-label", t("adv_copy_aria", "Copy this reply"));
+    copyBtn.addEventListener("click", () => copyToClipboard(text, t("adv_copied", "Reply copied to clipboard!")));
 
     actionsRow.appendChild(time);
     actionsRow.appendChild(copyBtn);
@@ -133,19 +133,19 @@ async function ask(message) {
 function exportChat() {
   const rows = Array.from(chatWindow.querySelectorAll(".chat-row"));
   if (!rows.length) {
-    toast("No conversation to export", "info");
+    toast(t("adv_nothing_export", "There's no conversation to export yet."), "info");
     return;
   }
   const lines = [
-    "SkillBridge AI - Career Advisor Conversation",
-    "Exported: " + new Date().toLocaleString(),
+    t("adv_export_title", "SkillBridge AI — Career advisor conversation"),
+    t("adv_exported_on", "Exported: {date}").replace("{date}", new Date().toLocaleString()),
     "=".repeat(50),
     ""
   ];
 
   rows.forEach((row) => {
     const isUser = row.classList.contains("user");
-    const role = isUser ? "You" : "SkillBridge Advisor";
+    const role = isUser ? t("adv_you", "You") : t("adv_advisor", "SkillBridge Advisor");
     const bubble = row.querySelector(".chat-bubble");
     const text = bubble ? (bubble.innerText || bubble.textContent).trim() : "";
     if (text) {
@@ -164,13 +164,24 @@ function exportChat() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  toast("Conversation transcript exported!", "success");
+  toast(t("adv_exported", "Conversation exported"), "success");
 }
 
-function clearChatView() {
-  chatWindow.innerHTML = "";
-  appendBubble("assistant", WELCOME());
-  toast("Chat view cleared", "info");
+// Deletes the stored history too. It used to only empty the screen, so the
+// "cleared" conversation came straight back on the next page load.
+async function clearChatView(button) {
+  if (!chatWindow.querySelector(".chat-row.user")) return;
+  if (!confirm(t("adv_clear_confirm", "Delete this conversation? Your earlier messages will be removed for good."))) return;
+  await withBusy(button, async () => {
+    try {
+      await api("/api/chatbot/history", { method: "DELETE" });
+      chatWindow.innerHTML = "";
+      appendBubble("assistant", WELCOME());
+      toast(t("adv_cleared", "Conversation cleared"), "info");
+    } catch (err) {
+      toast(t("adv_clear_failed", "Couldn't clear the conversation. {msg}").replace("{msg}", err.message), "error");
+    }
+  });
 }
 
 const form = document.getElementById("chat-form");

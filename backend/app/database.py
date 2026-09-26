@@ -51,6 +51,15 @@ def _discover_database_url() -> str | None:
 DATABASE_URL = _discover_database_url()
 USE_POSTGRES = bool(DATABASE_URL)
 
+# The "row already exists" error from whichever database is in use, so callers
+# can turn a lost race on a UNIQUE column into a clean 400 instead of a 500.
+if USE_POSTGRES:
+    import psycopg
+
+    INTEGRITY_ERRORS: tuple[type[Exception], ...] = (sqlite3.IntegrityError, psycopg.IntegrityError)
+else:
+    INTEGRITY_ERRORS = (sqlite3.IntegrityError,)
+
 # SQLite fallback for local development. The path can be overridden with
 # SKILLBRIDGE_DB_PATH (used on read-only hosts where only /tmp is writable).
 _default_db = Path(__file__).resolve().parent.parent / "data" / "skillbridge.db"

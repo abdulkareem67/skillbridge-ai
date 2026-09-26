@@ -95,12 +95,12 @@ function render() {
     showEmpty(
       container,
       searchQuery.trim()
-        ? `No ${what} matched "${searchQuery}". Try a different keyword or clear your search.`
+        ? t("opp_no_search", "No {what} matched “{q}”. Try a different keyword or clear your search.").replace("{what}", what).replace("{q}", searchQuery.trim())
         : allOpportunities.length
         ? t("opp_none_filter", "No {what} match your skills yet. Try another filter, or add more skills to widen your matches.").replace("{what}", what)
         : t("opp_none", "No roles match your skills yet. Add more skills to unlock matches."),
       searchQuery.trim()
-        ? `<button type="button" class="btn btn-sm" onclick="clearSearch()">Clear search</button>`
+        ? `<button type="button" class="btn btn-sm" onclick="clearSearch()">${escapeHtml(t("opp_clear_search", "Clear search"))}</button>`
         : `<a class="btn btn-sm" href="/cv-upload">${escapeHtml(t("opp_add_skills", "Add skills"))}</a>`
     );
     return;
@@ -112,6 +112,7 @@ function render() {
     const isSaved = savedIds.includes(oppId);
     const pct = Number(o.match_percent);
     const color = badgeColor(pct);
+    const bookmarkLabel = isSaved ? t("opp_bookmark_remove", "Remove from saved") : t("opp_bookmark_add", "Save this role");
 
     return `
     <div class="glass opp-card">
@@ -125,8 +126,8 @@ function render() {
         </div>
         <button type="button" class="opp-bookmark-btn ${isSaved ? "is-saved" : ""}" 
                 onclick="toggleBookmark('${escapeHtml(oppId)}', event)"
-                title="${isSaved ? "Remove from bookmarks" : "Save opportunity"}"
-                aria-label="${isSaved ? "Remove bookmark" : "Save bookmark"}">
+                title="${escapeHtml(bookmarkLabel)}"
+                aria-label="${escapeHtml(bookmarkLabel)}" aria-pressed="${isSaved}">
           ${icon(isSaved ? "bookmark-fill" : "bookmark", 16)}
         </button>
       </div>
@@ -135,13 +136,13 @@ function render() {
         <span class="opp-type">${escapeHtml(o.type)}</span>
         ${o.field ? `<span class="opp-type opp-field">${escapeHtml(o.field)}</span>` : ""}
         <span class="opp-type" style="background:rgba(255,255,255,0.06); color:var(--text-muted)">
-          ${icon("map-pin", 12)} ${escapeHtml(o.location || "Pakistan")}
+          ${icon("map-pin", 12)} ${escapeHtml(o.location || t("opp_remote", "Remote"))}
         </span>
       </div>
 
       <div style="margin-bottom:14px">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; margin-bottom:6px">
-          <span style="color:var(--text-muted)">Skill Match</span>
+          <span style="color:var(--text-muted)">${escapeHtml(t("opp_skill_match", "Skill match"))}</span>
           <strong style="color:${color}">${pct}%</strong>
         </div>
         <div class="progress-track" role="img" aria-label="${escapeHtml(t("opp_match_aria", "{pct}% skill match").replace("{pct}", pct))}">
@@ -150,7 +151,7 @@ function render() {
       </div>
 
       <div style="margin-bottom:16px; flex:1">
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; font-weight:600">REQUIRED SKILLS</div>
+        <div class="opp-section-label">${escapeHtml(t("opp_required_skills", "Required skills"))}</div>
         <div>
           ${o.skills.map((s) => {
             const matched = o.matched_skills && o.matched_skills.includes(s);
@@ -161,7 +162,7 @@ function render() {
 
       <div class="opp-card-footer">
         <button type="button" class="btn btn-sm btn-ghost" onclick="showOppBreakdown(${allOpportunities.indexOf(o)})" style="padding:6px 10px">
-          ${icon("target", 14)} Breakdown
+          ${icon("target", 14)} ${escapeHtml(t("opp_breakdown", "Breakdown"))}
         </button>
         ${renderApplyAction(o, idx)}
       </div>
@@ -256,11 +257,11 @@ function showOppBreakdown(idx) {
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
         <div>
           <h4 style="margin:0 0 4px; font-size:1.15rem">${escapeHtml(o.title)}</h4>
-          <p style="margin:0; color:var(--text-muted)">${escapeHtml(o.company)} • ${escapeHtml(o.location || "Remote")}</p>
+          <p style="margin:0; color:var(--text-muted)">${escapeHtml(o.company)} • ${escapeHtml(o.location || t("opp_remote", "Remote"))}</p>
         </div>
         <div style="text-align:right">
           <div style="font-size:1.5rem; font-weight:800; color:${color}">${pct}%</div>
-          <div style="font-size:0.75rem; color:var(--text-muted)">Skill Match</div>
+          <div style="font-size:0.75rem; color:var(--text-muted)">${escapeHtml(t("opp_skill_match", "Skill match"))}</div>
         </div>
       </div>
       <div class="progress-track" style="margin-bottom:16px">
@@ -270,30 +271,30 @@ function showOppBreakdown(idx) {
 
     <div style="margin-bottom:16px">
       <h5 style="margin:0 0 8px; color:var(--success-text); display:flex; align-items:center; gap:6px">
-        ${icon("check-circle", 16)} Skills You Have (${matched.length})
+        ${icon("check-circle", 16)} ${escapeHtml(t("opp_you_have", "Skills you have ({n})").replace("{n}", matched.length))}
       </h5>
       <div>
         ${matched.length
           ? matched.map((s) => `<span class="chip chip-matched">${escapeHtml(s)}</span>`).join("")
-          : `<p style="color:var(--text-muted); margin:0">No overlapping skills yet.</p>`}
+          : `<p style="color:var(--text-muted); margin:0">${escapeHtml(t("opp_no_overlap", "No overlapping skills yet."))}</p>`}
       </div>
     </div>
 
     <div style="margin-bottom:20px">
       <h5 style="margin:0 0 8px; color:var(--warning-text); display:flex; align-items:center; gap:6px">
-        ${icon("alert-triangle", 16)} Skills to Highlight or Learn (${missing.length})
+        ${icon("alert-triangle", 16)} ${escapeHtml(t("opp_to_learn", "Skills to highlight or learn ({n})").replace("{n}", missing.length))}
       </h5>
       <div>
         ${missing.length
           ? missing.map((s) => `<span class="chip chip-missing">${escapeHtml(s)}</span>`).join("")
-          : `<p style="color:var(--success-text); margin:0">You have all required skills for this position!</p>`}
+          : `<p style="color:var(--success-text); margin:0">${escapeHtml(t("opp_has_all", "You have all the required skills for this role!"))}</p>`}
       </div>
     </div>
 
     ${applyLinks.length ? `
     <div style="margin-bottom:20px">
       <h5 style="margin:0 0 8px; color:var(--text); display:flex; align-items:center; gap:6px">
-        ${icon("briefcase", 16)} Search Live Openings (${applyLinks.length} job boards)
+        ${icon("briefcase", 16)} ${escapeHtml(t("opp_search_live", "Search live openings ({n} job boards)").replace("{n}", applyLinks.length))}
       </h5>
       <div style="display:flex; flex-wrap:wrap; gap:8px">
         ${applyLinks.map((l) => `
@@ -306,20 +307,20 @@ function showOppBreakdown(idx) {
     ` : ""}
 
     <div style="padding:14px; background:var(--card-bg); border-radius:var(--radius-md); border:1px solid var(--card-border)">
-      <strong style="display:block; margin-bottom:4px; font-size:0.88rem">${icon("sparkles", 14)} Application Tip</strong>
+      <strong style="display:block; margin-bottom:4px; font-size:0.88rem">${icon("sparkles", 14)} ${escapeHtml(t("opp_tip_title", "Application tip"))}</strong>
       <p style="margin:0; font-size:0.82rem; color:var(--text-muted); line-height:1.5">
-        Tailor your CV to emphasize <strong>${matched.slice(0, 3).join(", ") || "relevant projects"}</strong> in your experience bullet points before submitting.
+        ${escapeHtml(t("opp_tip", "Tailor your CV to lead with {skills} in your experience bullet points before you apply.").replace("{skills}", matched.slice(0, 3).join(", ") || t("opp_tip_fallback", "your most relevant projects")))}
       </p>
     </div>
   `;
 
   const footerHtml = `
-    <a href="/roadmap" class="btn btn-ghost btn-sm">${icon("map", 14)} View Learning Roadmap</a>
-    ${applyLinks.length ? `<a href="${escapeHtml(applyLinks[0].url)}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">${icon("link", 14)} Search on ${escapeHtml(applyLinks[0].label.replace(/^Search on /i, ""))}</a>` : ""}
+    <a href="/roadmap" class="btn btn-ghost btn-sm">${icon("map", 14)} ${escapeHtml(t("opp_view_roadmap", "View learning roadmap"))}</a>
+    ${applyLinks.length ? `<a href="${escapeHtml(applyLinks[0].url)}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">${icon("link", 14)} ${escapeHtml(t("opp_search_on_board", "Search on {board}").replace("{board}", applyLinks[0].label.replace(/^Search on /i, "")))}</a>` : ""}
   `;
 
   openModal({
-    title: "Opportunity Skill Match Breakdown",
+    title: t("opp_modal_title", "Skill match breakdown"),
     bodyHtml,
     footerHtml,
   });

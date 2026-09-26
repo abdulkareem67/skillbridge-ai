@@ -11,6 +11,7 @@ us nothing about where they are still gets working job-board links.
 Markets are identified by ISO 3166-1 alpha-2 codes so the same keys can later be
 matched against a geo-IP country header.
 """
+import re
 from urllib.parse import quote_plus
 
 # Boards that work anywhere. `{q}` is the url-encoded role title, `{loc}` the
@@ -133,7 +134,9 @@ def market_for_location(location: str | None) -> str:
     for code, market in MARKETS.items():
         if code == DEFAULT_MARKET:
             continue
-        if any(city in needle for city in market["cities"]):
+        # Whole words only: a plain substring test put "Milwaukee" and "Ukraine"
+        # in the UK because both contain "uk".
+        if any(re.search(r"(?<![a-z])" + re.escape(city) + r"(?![a-z])", needle) for city in market["cities"]):
             return code
     return DEFAULT_MARKET
 

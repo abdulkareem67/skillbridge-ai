@@ -26,14 +26,14 @@
         {{ ui.icon("sparkles", 20) }}
       </div>
       <div>
-        <h3 id="next-action-title" style="margin:0 0 4px; font-size:1.05rem">Recommended Next Step</h3>
-        <p id="next-action-desc" style="margin:0; font-size:0.85rem; color:var(--text-muted)">Loading your recommendation…</p>
+        <h3 id="next-action-title" style="margin:0 0 4px; font-size:1.05rem">{{ t('dashboard.next_step') }}</h3>
+        <p id="next-action-desc" style="margin:0; font-size:0.85rem; color:var(--text-muted)">{{ t('dashboard.next_loading') }}</p>
       </div>
     </div>
-    <a id="next-action-btn" href="/roadmap" class="btn btn-primary btn-sm">Take Action {{ ui.icon("arrow-right", 14) }}</a>
+    <a id="next-action-btn" href="/roadmap" class="btn btn-primary btn-sm">{{ t('dashboard.take_action') }} {{ ui.icon("arrow-right", 14) }}</a>
   </div>
 
-  <div class="grid grid-4" style="margin-bottom:24px">
+  <div class="grid grid-4 dash-stats" style="margin-bottom:24px">
     <div class="glass card dash-stat-card">
       <div class="dash-stat-icon">{{ ui.icon("target", 36) }}</div>
       <div class="stat-value" id="stat-match"><span class="skeleton skeleton-stat"></span></div>
@@ -59,18 +59,18 @@
   <div class="grid grid-2" style="margin-bottom:24px">
     <div class="glass card">
       <h2 style="margin-top:0">{{ t('dashboard.chart_match') }}</h2>
-      <canvas id="chart-match" height="220"></canvas>
+      <div class="chart-box"><canvas id="chart-match"></canvas></div>
     </div>
     <div class="glass card">
       <h2 style="margin-top:0">{{ t('dashboard.chart_category') }}</h2>
-      <canvas id="chart-category" height="220"></canvas>
+      <div class="chart-box"><canvas id="chart-category"></canvas></div>
     </div>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px">
       <h2 style="margin:0">{{ t('dashboard.learning_progress') }}</h2>
-      <a href="/roadmap" class="btn btn-sm btn-ghost">{{ ui.icon("map", 14) }} Open Full Roadmap</a>
+      <a href="/roadmap" class="btn btn-sm btn-ghost">{{ ui.icon("map", 14) }} {{ t('dashboard.open_roadmap') }}</a>
     </div>
     <p style="color:var(--text-muted); margin-bottom:12px" id="learning-progress-text">{{ t('common.loading') }}</p>
     <div class="progress-track">
@@ -81,9 +81,9 @@
   <div class="glass card" style="margin-bottom:24px">
     <h2 style="margin-top:0">{{ t('dashboard.target_role') }}</h2>
     <p style="color:var(--text-muted)" id="current-role-text">{{ t('common.loading') }}</p>
-    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
-      <select id="discipline-select" style="max-width:240px; margin-bottom:0" aria-label="Career Field"></select>
-      <select id="role-select" style="max-width:280px; margin-bottom:0" aria-label="Target Role"></select>
+    <div class="role-picker" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center">
+      <select id="discipline-select" style="max-width:240px; margin-bottom:0" aria-label="{{ t('dashboard.field_aria') }}"></select>
+      <select id="role-select" style="max-width:280px; margin-bottom:0" aria-label="{{ t('dashboard.role_aria') }}"></select>
       <button class="btn btn-primary" id="save-role-btn" type="button" onclick="saveRole(this)">{{ t('dashboard.set_role') }}</button>
     </div>
   </div>

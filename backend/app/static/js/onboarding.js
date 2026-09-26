@@ -66,15 +66,17 @@
   country.addEventListener("input", refreshCities);
 
   document.getElementById("ob-save-location").addEventListener("click", (e) => {
+    // Not `t`: that name is the translation helper, and shadowing it here made
+    // every t(...) call below throw, so this button silently did nothing.
     const c = country.value.trim();
-    const t = city.value.trim();
-    if (!c && !t) {
+    const town = city.value.trim();
+    if (!c && !town) {
       setFieldError(country, t("ob_need_country", "Enter a country, or choose “Skip” below."));
       country.focus();
       return;
     }
     setFieldError(country, "");
-    const location = c && t ? `${t}, ${c}` : c || t;
+    const location = c && town ? `${town}, ${c}` : c || town;
     withBusy(e.currentTarget, async () => {
       try {
         await api("/api/profile/location", { method: "POST", body: JSON.stringify({ location }) });

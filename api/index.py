@@ -12,8 +12,11 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
 
-# On Vercel only /tmp is writable, so point the SQLite database there.
-# NOTE: /tmp is ephemeral — data does not persist across cold starts.
+# Production data lives in Postgres (Neon, connected through Vercel Storage);
+# database.py picks it up from the environment. This SQLite path is only the
+# fallback when no database is connected — /tmp is the one writable directory
+# on Vercel, and it is wiped on cold starts, so main.py serves a setup page
+# rather than running on it.
 os.environ.setdefault("SKILLBRIDGE_DB_PATH", "/tmp/skillbridge.db")
 
 from app.main import app  # noqa: E402  (import after sys.path/env setup)

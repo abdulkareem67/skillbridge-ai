@@ -14,7 +14,7 @@
 <div class="page container">
   <div class="page-header fade-in">
     <h1>{{ t('analysis.heading') }}</h1>
-    <p>Select a target role to compare your skills against real job requirements.</p>
+    <p>{{ t('analysis.subtitle') }}</p>
   </div>
 
   <div class="glass card" style="margin-bottom:24px">
@@ -37,15 +37,15 @@
   <div id="results" style="display:none">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px">
       <div style="display:flex; align-items:center; gap:10px">
-        <span id="readiness-badge" class="readiness-status readiness-mid">Calculating readiness…</span>
+        <span id="readiness-badge" class="readiness-status readiness-mid">{{ t('analysis.calculating') }}</span>
         <span id="target-role-badge" style="font-size:0.9rem; color:var(--text-muted)"></span>
       </div>
       <div style="display:flex; gap:10px">
         <button type="button" class="btn btn-sm btn-ghost" id="copy-summary-btn" onclick="copyGapSummary()">
-          {{ ui.icon("copy", 14) }} Copy Summary
+          {{ ui.icon("copy", 14) }} {{ t('analysis.copy_summary') }}
         </button>
         <a class="btn btn-sm btn-ghost" href="/opportunities">
-          {{ ui.icon("briefcase", 14) }} View Matching Jobs
+          {{ ui.icon("briefcase", 14) }} {{ t('analysis.view_jobs') }}
         </a>
       </div>
     </div>
@@ -53,7 +53,7 @@
     <div class="grid grid-2" style="margin-bottom:24px">
       <div class="glass card" style="text-align:center">
         <h2 style="margin-top:0">{{ t('analysis.match_score') }}</h2>
-        <canvas id="chart-gap" height="220"></canvas>
+        <div class="chart-box"><canvas id="chart-gap"></canvas></div>
         <div class="stat-value" id="match-percent" style="margin-top:10px">0%</div>
       </div>
       <div class="glass card" style="display:flex; flex-direction:column; justify-content:space-between">
@@ -74,13 +74,13 @@
       <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:space-between; align-items:center">
         <div class="search-bar-wrap" style="max-width:360px">
           {{ ui.icon("search", 16) }}
-          <input type="text" id="skill-search" placeholder="Filter skills by keyword…" autocomplete="off" />
-          <button type="button" class="search-clear-btn" id="skill-search-clear" aria-label="Clear">×</button>
+          <input type="text" id="skill-search" placeholder="{{ t('analysis.filter_placeholder') }}" aria-label="{{ t('analysis.filter_placeholder') }}" autocomplete="off" />
+          <button type="button" class="search-clear-btn" id="skill-search-clear" aria-label="{{ t('analysis.clear_filter') }}">×</button>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap">
-          <button type="button" class="btn btn-sm btn-primary" data-skill-filter="all" onclick="filterSkills('all')">All Skills</button>
-          <button type="button" class="btn btn-sm" data-skill-filter="matched" onclick="filterSkills('matched')">Matched (<span id="matched-count">0</span>)</button>
-          <button type="button" class="btn btn-sm" data-skill-filter="missing" onclick="filterSkills('missing')">Missing (<span id="missing-count">0</span>)</button>
+          <button type="button" class="btn btn-sm btn-primary" data-skill-filter="all" onclick="filterSkills('all')">{{ t('analysis.all_skills') }}</button>
+          <button type="button" class="btn btn-sm" data-skill-filter="matched" onclick="filterSkills('matched')">{{ t('analysis.matched') }} (<span id="matched-count">0</span>)</button>
+          <button type="button" class="btn btn-sm" data-skill-filter="missing" onclick="filterSkills('missing')">{{ t('analysis.missing_short') }} (<span id="missing-count">0</span>)</button>
         </div>
       </div>
     </div>

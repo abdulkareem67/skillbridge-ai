@@ -63,6 +63,9 @@ function renderMatchChart(pct) {
       datasets: [{ data: [pct, 100 - pct], backgroundColor: [c.accent, c.track], borderWidth: 0 }],
     },
     options: {
+      // The .chart-box sets the height; without this Chart.js keeps its own
+      // aspect ratio and a doughnut fills the whole height of a phone screen.
+      maintainAspectRatio: false,
       cutout: "72%",
       plugins: {
         legend: { labels: { color: c.text } },
@@ -90,6 +93,9 @@ function renderCategoryChart(categorized) {
       datasets: [{ label: t("skills_label", "Skills"), data, backgroundColor: c.accent2 }],
     },
     options: {
+      // The .chart-box sets the height; without this Chart.js keeps its own
+      // aspect ratio and a doughnut fills the whole height of a phone screen.
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { color: c.text }, grid: { display: false } },
@@ -153,16 +159,16 @@ async function loadDashboard() {
 
   if (!me.skills.length) {
     setNextAction(
-      "Upload your CV or Add Skills",
-      "Get started by uploading your resume or adding skills to unlock market gap analysis and role matches.",
-      "Upload CV",
+      t("na_upload_title", "Upload your CV or add skills"),
+      t("na_upload_desc", "Start by uploading your CV or adding skills to unlock your gap analysis and role matches."),
+      t("na_upload_btn", "Upload CV"),
       "/cv-upload"
     );
   } else if (!me.target_role) {
     setNextAction(
-      "Select a Target Career Role",
-      "Pick your desired career track below to calculate your skill readiness and unlock a tailored roadmap.",
-      "Set Role Below",
+      t("na_role_title", "Choose a target role"),
+      t("na_role_desc", "Pick the career you're aiming for below to see how ready you are and get a tailored roadmap."),
+      t("na_role_btn", "Choose a role"),
       "#role-select"
     );
   }
@@ -171,9 +177,9 @@ async function loadDashboard() {
   const section = (label, fn) => fn().catch(() => failed.push(label));
 
   await Promise.all([
-    section("career tracks", () => loadRoles(me.target_role)),
-    section("skill categories", async () => renderCategoryChart(await api("/api/skills/categorized"))),
-    section("match score", async () => {
+    section(t("dash_part_tracks", "career tracks"), () => loadRoles(me.target_role)),
+    section(t("dash_part_categories", "skill categories"), async () => renderCategoryChart(await api("/api/skills/categorized"))),
+    section(t("dash_part_match", "match score"), async () => {
       if (!me.target_role) {
         setStat("stat-match", "—");
         setStat("stat-missing", "—");
@@ -185,23 +191,26 @@ async function loadDashboard() {
       setStat("stat-missing", gap.missing_skills.length);
       renderMatchChart(gap.match_percent);
 
+      // No country here: the user may be job-hunting anywhere, and this used
+      // to name one country's job market to everybody.
       if (gap.missing_skills.length > 0) {
+        const skill = gap.missing_skills[0];
         setNextAction(
-          `Priority Skill: ${gap.missing_skills[0]}`,
-          `Learning ${gap.missing_skills[0]} will accelerate your readiness for ${me.target_role} in the Pakistani job market.`,
-          "Start Learning",
+          t("na_priority_title", "Priority skill: {skill}").replace("{skill}", skill),
+          t("na_priority_desc", "Learning {skill} is the biggest single step towards {role} right now.").replace("{skill}", skill).replace("{role}", me.target_role),
+          t("na_priority_btn", "Start learning"),
           "/roadmap"
         );
       } else {
         setNextAction(
-          `Ready for ${me.target_role}!`,
-          `You have achieved a 100% skill match for this career track. Start applying to verified openings.`,
-          "Explore Openings",
+          t("na_ready_title", "Ready for {role}!").replace("{role}", me.target_role),
+          t("na_ready_desc", "You have every skill we track for this role. Start applying — the Opportunities page links to live job boards in your country."),
+          t("na_ready_btn", "Explore openings"),
           "/opportunities"
         );
       }
     }),
-    section("learning progress", async () => {
+    section(t("dash_part_progress", "learning progress"), async () => {
       const text = document.getElementById("learning-progress-text");
       if (!me.target_role) {
         text.textContent = t("set_role_hint", "Set a target role to start tracking roadmap progress.");
@@ -215,7 +224,7 @@ async function loadDashboard() {
       text.textContent = t("progress_done", "{done} of {total} roadmap skills completed for {role}.").replace("{done}", done).replace("{total}", total).replace("{role}", me.target_role);
       document.getElementById("learning-progress-fill").style.width = pct + "%";
     }),
-    section("opportunities", async () => {
+    section(t("dash_part_opps", "opportunities"), async () => {
       const opps = await api("/api/opportunities");
       setStat("stat-opportunities", opps.opportunities.filter((o) => o.match_percent >= 50).length);
     }),
@@ -226,7 +235,7 @@ async function loadDashboard() {
     if (el && el.innerHTML.includes("skeleton")) setStat(id, "—");
   });
 
-  if (document.getElementById("learning-progress-text").textContent === "Loading…") {
+  if (failed.includes(t("dash_part_progress", "learning progress"))) {
     document.getElementById("learning-progress-text").textContent = t("progress_load_failed", "Couldn't load your progress.");
   }
   if (failed.length && status) {

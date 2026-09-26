@@ -6,22 +6,22 @@
 <div class="page container">
   <div class="page-header fade-in">
     <h1>{{ t('advisor.heading') }}</h1>
-    <p>Ask about career fit, what to learn next, CV tips, interview prep, or certifications.</p>
+    <p>{{ t('advisor.subtitle') }}</p>
   </div>
 
   <div class="glass card" style="padding:0; overflow:hidden">
     <div class="chat-header">
       <div class="chat-avatar">{{ ui.icon("bot") }}</div>
       <div class="chat-header-meta">
-        <strong>SkillBridge Advisor</strong>
-        <span class="chat-status">Online · replies instantly</span>
+        <strong>{{ t('advisor.name') }}</strong>
+        <span class="chat-status">{{ t('advisor.status') }}</span>
       </div>
       <div class="chat-actions">
-        <button type="button" class="btn btn-sm btn-ghost" id="export-chat-btn" onclick="exportChat()" title="Download conversation as a text file">
-          {{ ui.icon("download", 14) }} <span class="hide-mobile">Export</span>
+        <button type="button" class="btn btn-sm btn-ghost" id="export-chat-btn" onclick="exportChat()" title="{{ t('advisor.export_title') }}" aria-label="{{ t('advisor.export_title') }}">
+          {{ ui.icon("download", 14) }} <span class="hide-mobile">{{ t('advisor.export') }}</span>
         </button>
-        <button type="button" class="btn btn-sm btn-ghost" id="clear-chat-btn" onclick="clearChatView()" title="Clear message view">
-          {{ ui.icon("trash", 14) }} <span class="hide-mobile">Clear</span>
+        <button type="button" class="btn btn-sm btn-ghost" id="clear-chat-btn" onclick="clearChatView(this)" title="{{ t('advisor.clear_title') }}" aria-label="{{ t('advisor.clear_title') }}">
+          {{ ui.icon("trash", 14) }} <span class="hide-mobile">{{ t('advisor.clear') }}</span>
         </button>
       </div>
     </div>

@@ -94,6 +94,20 @@ def extract_text(filename: str, content: bytes) -> str:
     raise CVParseError("That file type isn't supported. Please upload a PDF or DOCX file.")
 
 
+# Aliases that are fine when someone types them as a skill ("rest" -> REST APIs)
+# but are ordinary words or unrelated abbreviations in running CV text: "the
+# rest of the team", "lean", "tax", "DL" (a driving licence). Matching them in
+# prose invented skills the person never claimed.
+_AMBIGUOUS_IN_PROSE = {
+    "rest", "lean", "tax", "dl", "tf", "py", "od", "dynamics", "express",
+    "spring", "automation", "comptia", "estimation",
+}
+
+# Acronyms that only mean the skill when written in capitals: "ML" is machine
+# learning, "ml" is millilitres; "TS" is TypeScript.
+_UPPERCASE_ONLY = {"ml", "ts"}
+
+
 def extract_skills_from_text(text: str) -> list[dict]:
     """Match resume text against the skill dictionary and return categorized hits.
 
@@ -105,8 +119,14 @@ def extract_skills_from_text(text: str) -> list[dict]:
     found = []
     for canonical, (category, aliases) in SKILL_DICTIONARY.items():
         for alias in aliases:
-            pattern = r"(?<![a-z0-9])" + re.escape(alias.lower()) + r"(?![a-z0-9])"
-            if re.search(pattern, lowered):
+            alias = alias.lower()
+            if alias in _AMBIGUOUS_IN_PROSE:
+                continue
+            if alias in _UPPERCASE_ONLY:
+                hit = re.search(r"(?<![A-Za-z0-9])" + re.escape(alias.upper()) + r"(?![A-Za-z0-9])", text)
+            else:
+                hit = re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", lowered)
+            if hit:
                 found.append({"skill_name": canonical, "category": category})
                 break
     return found

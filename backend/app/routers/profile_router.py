@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Request, Response, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from .. import rate_limit
@@ -151,8 +152,10 @@ def export_my_data(user_id: int = Depends(get_current_user_id), db: sqlite3.Conn
         "progress": [dict(p) for p in progress],
         "advisor_messages": [dict(c) for c in chats],
     }
+    # jsonable_encoder, not the raw dict: Postgres hands timestamps back as
+    # datetime objects (SQLite gives strings), which json.dumps can't encode.
     return JSONResponse(
-        content=data,
+        content=jsonable_encoder(data),
         headers={"Content-Disposition": 'attachment; filename="skillbridge-my-data.json"'},
     )
 

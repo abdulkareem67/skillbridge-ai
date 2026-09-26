@@ -179,25 +179,35 @@ def render(request: Request, template: str, **ctx):
     return templates.TemplateResponse(request, template, ctx)
 
 
-def is_authenticated(request: Request) -> bool:
-    """A valid session cookie is not enough — the account it names must still
+def _account_state(request: Request) -> tuple[bool, bool]:
+    """(signed_in, onboarding_pending) for the active session, in one connection.
+
+    A valid session cookie is not enough — the account it names must still
     exist in the database. On an ephemeral SQLite host the users table can be
     wiped while an old cookie lives on, and without this check that stale
-    cookie would wave someone straight into the dashboard."""
+    cookie would wave someone straight into the dashboard.
+
+    Both answers come from the same connection: opening a new one per check
+    cost an extra round trip to the database on every page load.
+    """
     session = get_active_session(request)
     if session is None:
-        return False
+        return False, False
     try:
         conn = connect()
         try:
-            row = conn.execute(
-                "SELECT 1 FROM users WHERE id = ?", (int(session["uid"]),)
-            ).fetchone()
+            uid = int(session["uid"])
+            if conn.execute("SELECT 1 FROM users WHERE id = ?", (uid,)).fetchone() is None:
+                return False, False
+            return True, needs_onboarding(conn, uid)
         finally:
             conn.close()
     except Exception:
-        return False
-    return row is not None
+        return False, False
+
+
+def is_authenticated(request: Request) -> bool:
+    return _account_state(request)[0]
 
 
 @app.get("/health")
@@ -265,17 +275,6 @@ def register_page(request: Request):
     return render(request, "register.html")
 
 
-def _onboarding_pending(request: Request) -> bool:
-    session = get_active_session(request)
-    if session is None:
-        return False
-    conn = connect()
-    try:
-        return needs_onboarding(conn, int(session["uid"]))
-    finally:
-        conn.close()
-
-
 # Offered as suggestions during onboarding. The field stays free text, so these
 # only speed things up for the markets we have job boards for.
 ONBOARDING_MARKETS = [
@@ -301,10 +300,11 @@ def settings_page(request: Request):
 
 @app.get("/dashboard")
 def dashboard_page(request: Request):
-    if not is_authenticated(request):
+    signed_in, onboarding_pending = _account_state(request)
+    if not signed_in:
         return RedirectResponse("/login")
     # A dashboard with no role and no skills is a page of zeros. Finish setup first.
-    if _onboarding_pending(request):
+    if onboarding_pending:
         return RedirectResponse("/onboarding")
     return render(request, "dashboard.html")
 

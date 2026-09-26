@@ -339,7 +339,25 @@ function toggleTheme() {
 function initNav() {
   const burger = document.getElementById("hamburger");
   const links = document.getElementById("nav-links");
-  if (burger && links) burger.addEventListener("click", () => links.classList.toggle("open"));
+  if (burger && links) {
+    const setOpen = (open) => {
+      links.classList.toggle("open", open);
+      burger.setAttribute("aria-expanded", String(open));
+      burger.innerHTML = icon(open ? "x" : "menu", 20);
+    };
+    burger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(!links.classList.contains("open"));
+    });
+    // A menu that only the same button can close traps people on a phone.
+    links.addEventListener("click", (e) => { if (e.target.closest("a, button")) setOpen(false); });
+    document.addEventListener("click", (e) => {
+      if (links.classList.contains("open") && !links.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && links.classList.contains("open")) { setOpen(false); burger.focus(); }
+    });
+  }
 
   const path = window.location.pathname;
   document.querySelectorAll(".nav-links a").forEach((a) => {
@@ -402,9 +420,11 @@ function initAccountReclaim() {
 async function loadUserBadge() {
   const badge = document.getElementById("user-badge");
   if (!badge) return;
+  const menuUser = document.getElementById("nav-menu-user");
   try {
     const me = await api("/api/profile/me");
     badge.textContent = me.name.split(" ")[0];
+    if (menuUser) menuUser.textContent = me.email;
   } catch (e) {
     badge.textContent = "";
   }

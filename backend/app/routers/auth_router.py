@@ -16,7 +16,7 @@ from ..auth import (
     switch_active_session,
     verify_password,
 )
-from ..database import get_db
+from ..database import INTEGRITY_ERRORS, get_db
 from ..models import LoginRequest, RegisterRequest
 from ..onboarding import next_page
 
@@ -46,11 +46,16 @@ def register(payload: RegisterRequest, request: Request, response: Response, db:
     if _find_user(db, email):
         raise HTTPException(status_code=400, detail="An account with this email already exists")
 
-    cur = db.execute(
-        "INSERT INTO users (name, email, password_hash, location) VALUES (?, ?, ?, ?)",
-        (payload.name, email, hash_password(payload.password), payload.location),
-    )
-    db.commit()
+    try:
+        cur = db.execute(
+            "INSERT INTO users (name, email, password_hash, location) VALUES (?, ?, ?, ?)",
+            (payload.name, email, hash_password(payload.password), payload.location),
+        )
+        db.commit()
+    except INTEGRITY_ERRORS:
+        # Two sign-ups for one address raced past the check above; the loser
+        # gets the same answer as if it had arrived second.
+        raise HTTPException(status_code=400, detail="An account with this email already exists") from None
     user_id = cur.lastrowid
     add_session(request, response, user_id, email)
     return {"id": user_id, "name": payload.name, "email": email, "next": "/onboarding"}

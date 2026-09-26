@@ -15,8 +15,8 @@
   <!-- Overall Roadmap Progress Meter -->
   <div class="glass card" style="margin-bottom:20px; padding:16px 20px" id="roadmap-progress-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
-      <strong id="roadmap-progress-pct" style="font-size:0.95rem">0% Completed</strong>
-      <span id="roadmap-progress-summary" style="font-size:0.85rem; color:var(--text-muted)">Tracking progress…</span>
+      <strong id="roadmap-progress-pct" style="font-size:0.95rem">{{ t('roadmap.pct_zero') }}</strong>
+      <span id="roadmap-progress-summary" style="font-size:0.85rem; color:var(--text-muted)">{{ t('roadmap.tracking') }}</span>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="roadmap-progress-fill" style="width:0%"></div>
@@ -24,7 +24,7 @@
   </div>
 
   {# Real buttons: these were <div onclick>, which a keyboard can't reach at all. #}
-  <div class="phase-tabs" role="tablist" aria-label="Roadmap phase">
+  <div class="phase-tabs" role="tablist" aria-label="{{ t('roadmap.phase_aria') }}">
     <button type="button" class="phase-tab active" role="tab" aria-selected="true" aria-controls="topics-list" data-phase="beginner" onclick="switchPhase('beginner')">{{ t('roadmap.tab_beginner') }}</button>
     <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="intermediate" onclick="switchPhase('intermediate')">{{ t('roadmap.tab_intermediate') }}</button>
     <button type="button" class="phase-tab" role="tab" aria-selected="false" aria-controls="topics-list" data-phase="advanced" onclick="switchPhase('advanced')">{{ t('roadmap.tab_advanced') }}</button>

@@ -48,7 +48,7 @@ async function init() {
   fillRoles(currentDiscipline, me.target_role);
   if (!me.skills.length) {
     showEmpty(status, t("an_no_skills", "You haven't added any skills yet, so every requirement will show as missing."),
-      '<a class="btn btn-sm" href="/cv-upload">Add skills</a>');
+      `<a class="btn btn-sm" href="/cv-upload">${escapeHtml(t("an_add_skills", "Add skills"))}</a>`);
   }
   if (me.target_role) runAnalysis(button);
 }
@@ -91,23 +91,23 @@ function renderResults(gap) {
     t("an_progress", "You match {matched} of {required} required skills for {role}.").replace("{matched}", gap.matched_skills.length).replace("{required}", gap.required_skills.length).replace("{role}", gap.role);
 
   const roleBadge = document.getElementById("target-role-badge");
-  if (roleBadge) roleBadge.textContent = "Target: " + gap.role;
+  if (roleBadge) roleBadge.textContent = t("an_target", "Target: {role}").replace("{role}", gap.role);
 
   const badge = document.getElementById("readiness-badge");
   const advice = document.getElementById("analysis-advice");
   if (badge) {
     if (gap.match_percent >= 80) {
       badge.className = "readiness-status readiness-high";
-      badge.innerHTML = `${icon("check-circle", 14)} High Readiness · Ready to Apply`;
-      if (advice) advice.textContent = "You have the majority of core requirements for this role. Focus on polishing your portfolio, practicing interview questions, and actively applying to open opportunities.";
+      badge.innerHTML = `${icon("check-circle", 14)} ${escapeHtml(t("an_ready_high", "High readiness · Ready to apply"))}`;
+      if (advice) advice.textContent = t("an_advice_high", "You have most of the core requirements for this role. Polish your portfolio, practise interview questions, and start applying.");
     } else if (gap.match_percent >= 50) {
       badge.className = "readiness-status readiness-mid";
-      badge.innerHTML = `${icon("sparkles", 14)} Intermediate · Strong Foundation`;
-      if (advice) advice.textContent = "You match the core foundational skills. Bridging 2 or 3 of your top missing skills will significantly elevate your chances in job screenings.";
+      badge.innerHTML = `${icon("sparkles", 14)} ${escapeHtml(t("an_ready_mid", "Intermediate · Strong foundation"))}`;
+      if (advice) advice.textContent = t("an_advice_mid", "You have the foundations. Closing two or three of your top missing skills will noticeably improve your chances in job screenings.");
     } else {
       badge.className = "readiness-status readiness-low";
-      badge.innerHTML = `${icon("compass", 14)} Skill Building Phase`;
-      if (advice) advice.textContent = "You are in the learning phase for this career track. Follow the personalized roadmap to methodically acquire the beginner and intermediate skills.";
+      badge.innerHTML = `${icon("compass", 14)} ${escapeHtml(t("an_ready_low", "Skill-building phase"))}`;
+      if (advice) advice.textContent = t("an_advice_low", "You're in the learning phase for this career. Follow your roadmap to pick up the beginner and intermediate skills one at a time.");
     }
   }
 
@@ -143,11 +143,11 @@ function renderSkillLists() {
 
   document.getElementById("matched-list").innerHTML = matched.length
     ? matched.map((s) => `<span class="chip chip-matched">${icon("check", 14)} ${escapeHtml(s)}</span>`).join("")
-    : `<p style="color:var(--text-muted)">${q ? "No matched skills matching search." : escapeHtml(t("an_no_matched", "No matched skills yet."))}</p>`;
+    : `<p style="color:var(--text-muted)">${escapeHtml(q ? t("an_no_matched_search", "No matched skills fit your search.") : t("an_no_matched", "No matched skills yet."))}</p>`;
 
   document.getElementById("missing-list").innerHTML = missing.length
     ? missing.map((s) => `<span class="chip chip-missing">${escapeHtml(s)}</span>`).join("")
-    : `<p style="color:var(--success-text)">${q ? "No missing skills matching search." : escapeHtml(t("an_all_skills", "You have all required skills!"))}</p>`;
+    : `<p style="color:var(--success-text)">${escapeHtml(q ? t("an_no_missing_search", "No missing skills fit your search.") : t("an_all_skills", "You have all required skills!"))}</p>`;
 }
 
 function filterSkills(type) {
@@ -185,15 +185,15 @@ function initSkillSearch() {
 function copyGapSummary() {
   if (!currentGapData) return;
   const { role, match_percent, matched_skills, missing_skills } = currentGapData;
+  const none = t("an_copy_none", "None");
   const text = [
-    `SkillBridge AI Career Analysis for ${role}`,
-    `Match Score: ${match_percent}%`,
-    `Skills Matched (${matched_skills.length}): ${matched_skills.join(", ") || "None"}`,
-    `Skills to Learn (${missing_skills.length}): ${missing_skills.join(", ") || "None"}`,
-    `Analysis generated via SkillBridge AI`
+    t("an_copy_title", "SkillBridge AI career analysis for {role}").replace("{role}", role),
+    t("an_copy_score", "Match score: {pct}%").replace("{pct}", match_percent),
+    t("an_copy_matched", "Skills matched ({n}): {list}").replace("{n}", matched_skills.length).replace("{list}", matched_skills.join(", ") || none),
+    t("an_copy_missing", "Skills to learn ({n}): {list}").replace("{n}", missing_skills.length).replace("{list}", missing_skills.join(", ") || none),
   ].join("\n");
 
-  copyToClipboard(text, "Career analysis copied to clipboard!");
+  copyToClipboard(text, t("an_copied", "Career analysis copied to clipboard!"));
 }
 
 let lastGapPct = null;
@@ -210,6 +210,9 @@ function renderGapChart(pct) {
       datasets: [{ data: [pct, 100 - pct], backgroundColor: [c.success, c.danger], borderWidth: 0 }],
     },
     options: {
+      // The .chart-box sets the height; without this Chart.js keeps its own
+      // aspect ratio and a doughnut fills the whole height of a phone screen.
+      maintainAspectRatio: false,
       cutout: "70%",
       plugins: {
         legend: { position: "bottom", labels: { color: c.text } },

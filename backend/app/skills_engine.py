@@ -299,7 +299,13 @@ def _intent_ml(message: str) -> str | None:
     return None
 
 
-def chatbot_reply(message: str, user_skills: list[str], role: str | None, gap: dict | None) -> str:
+def chatbot_reply(
+    message: str,
+    user_skills: list[str],
+    role: str | None,
+    gap: dict | None,
+    location: str | None = None,
+) -> str:
     msg = message.lower()
     # 1) Exact keyword match — instant and always correct when it fires.
     # 2) Fine-tuned model — understands novel phrasings/typos (if trained & installed).
@@ -327,10 +333,13 @@ def chatbot_reply(message: str, user_skills: list[str], role: str | None, gap: d
                 "(4) ask me anytime you're stuck on what to do next.")
 
     if intent == "how_to_apply":
+        # Name the boards for *their* market; this used to say Rozee.pk to everyone.
+        boards = [label for label, _ in get_market(market_for_location(location))["boards"]]
+        boards = list(dict.fromkeys(boards + ["LinkedIn"]))
         return ("Go to the Opportunities page — I've built a 'How to Apply Based on Your CV' section there with a "
                 "step-by-step plan using your actual match scores: which roles to apply to first, how to reorder your "
                 "CV to lead with the right skills, a short cover-message template, and application tracking tips. "
-                "Each listing also has direct search links on Rozee.pk, LinkedIn, and Indeed.")
+                f"Each listing also has direct search links on {', '.join(boards[:-1])} and {boards[-1]}.")
 
     if intent == "about":
         return (f"SkillBridge AI compares your skills against real job-market requirements for {len(ROLES)} career tracks "
@@ -385,7 +394,7 @@ def chatbot_reply(message: str, user_skills: list[str], role: str | None, gap: d
                 "(5) do a mock interview with a friend or on Pramp.")
 
     if intent == "certifications":
-        certs = recommend_certifications(role)
+        certs = recommend_certifications(role, location)
         if role:
             return f"For {role}, the most valuable certification(s) to pursue are: {', '.join(certs)}. Most have free study material — check the Roadmap page for direct links."
         return ("Valuable certifications by field: Software/Cloud -> AWS Certified Cloud Practitioner; "

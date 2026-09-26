@@ -6,14 +6,14 @@
 <div class="page container">
   <div class="page-header fade-in">
     <h1>{{ t('cv.heading') }}</h1>
-    <p>Upload your resume (PDF/DOCX) or enter skills manually — SkillBridge AI will extract and categorize them.</p>
+    <p>{{ t('cv.subtitle') }}</p>
   </div>
 
   <div class="grid grid-2">
     <div class="glass card">
       <h2 style="margin-top:0">{{ t('cv.upload_resume') }}</h2>
       {# role=button + tabindex: this was a plain div, so it could only be used with a mouse. #}
-      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="dropzone-help" aria-label="Upload a CV">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="dropzone-help" aria-label="{{ t('cv.upload_aria') }}">
         <input type="file" id="file-input" accept=".pdf,.docx" hidden />
         <p style="margin:0; font-size:2rem">{{ ui.icon("file-text") }}</p>
         <p><strong>{{ t('cv.click_upload') }}</strong>{{ t('cv.or_drag') }}</p>
@@ -27,7 +27,7 @@
       <label for="manual-skill-input">{{ t('cv.enter_skill') }}</label>
       <input type="text" id="manual-skill-input" maxlength="80" placeholder="{{ t('cv.skill_placeholder') }}" />
       <div style="margin-bottom:12px">
-        <span style="font-size:0.78rem; color:var(--text-muted); font-weight:600">POPULAR SUGGESTIONS:</span>
+        <span class="opp-section-label">{{ t('cv.popular') }}</span>
         <div class="quick-skills-group">
           <span class="chip quick-skill-chip" onclick="addPending('Python')">+ Python</span>
           <span class="chip quick-skill-chip" onclick="addPending('SQL')">+ SQL</span>

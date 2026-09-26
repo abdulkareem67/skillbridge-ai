@@ -37,7 +37,7 @@ SkillBridge AI helps reduce the gap between education and industry by providing 
 ## Tech Stack (built entirely with tools already installed on this machine)
 
 * **Backend:** Python 3.14, FastAPI, Uvicorn
-* **Database:** SQLite (zero-config, file-based — no server install required)
+* **Database:** Postgres in production (Neon, via Vercel Storage); SQLite locally (zero-config, file-based). `database.py` picks whichever is configured.
 * **Auth:** JWT (PyJWT) + bcrypt password hashing, HttpOnly cookies
 * **CV Parsing:** pypdf (PDF), python-docx (DOCX)
 * **PDF Reports:** ReportLab
@@ -121,5 +121,9 @@ copy to machine-translate.
   * `SKILLBRIDGE_SECRET` — *optional.* Signs session JWTs. If unset, the app generates a strong random secret on first run and stores it in the database, so sessions stay valid across restarts. Set it only to control the value yourself: `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
   * `SKILLBRIDGE_SECURE_COOKIES=true` — only needed outside Vercel. Marks the login cookie `Secure` so it is never sent over plain HTTP; on Vercel this turns on automatically.
 * `GET /health` returns `{"status": "ok"}` — point your host's health check at it.
-* SQLite runs in WAL mode for better concurrent read/write behavior under multiple requests; for real horizontal scaling (multiple server instances), swap `sqlite3` in `database.py` for MongoDB/Postgres — the router layer only touches `database.py`, so the rest of the app is unaffected.
+* Locally, SQLite runs in WAL mode for better concurrent read/write behaviour. In production the same queries run on Postgres through a small compatibility layer in `database.py`, which is the only module the routers use to talk to the database.
 * To add real generative AI (OpenAI/Gemini) for CV parsing or the chatbot, add your API key as an env var and call it inside `resume_parser.py` / `skills_engine.chatbot_reply()`.
+
+## License
+
+Proprietary — all rights reserved. This code may not be copied, modified or reused without written permission. See [LICENSE](LICENSE).

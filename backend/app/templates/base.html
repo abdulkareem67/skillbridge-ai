@@ -52,6 +52,13 @@
         <a href="/roadmap">{{ t('nav.roadmap') }}</a>
         <a href="/opportunities">{{ t('nav.opportunities') }}</a>
         <a href="/advisor">{{ t('nav.advisor') }}</a>
+        {# Phones only: the account controls live in the menu, because seven
+           buttons in a 360px bar pushed the page wider than the screen. #}
+        <div class="nav-menu-account">
+          <span class="nav-menu-user" id="nav-menu-user"></span>
+          <a href="/settings">{{ ui.icon("settings", 16) }} {{ t('common.settings') }}</a>
+          <button type="button" onclick="logout()">{{ ui.icon("log-out", 16) }} {{ t('common.logout') }}</button>
+        </div>
       </div>
       <div class="nav-actions">
         {{ ui.language_switcher() }}
@@ -69,10 +76,10 @@
           </div>
         </div>
         {% endif %}
-        <span id="user-badge" style="font-size:0.85rem;color:var(--text-muted)"></span>
+        <span id="user-badge" class="nav-user-badge nav-wide-only"></span>
         {{ ui.theme_toggle() }}
-        <a href="/settings" class="icon-btn" title="{{ t('common.settings') }}" aria-label="{{ t('common.settings') }}">{{ ui.icon("settings", 18) }}</a>
-        <button class="btn btn-sm" type="button" onclick="logout()">{{ t('common.logout') }}</button>
+        <a href="/settings" class="icon-btn nav-wide-only" title="{{ t('common.settings') }}" aria-label="{{ t('common.settings') }}">{{ ui.icon("settings", 18) }}</a>
+        <button class="btn btn-sm nav-wide-only" type="button" onclick="logout()">{{ t('common.logout') }}</button>
         <button class="hamburger" id="hamburger" type="button" aria-label="{{ t('common.open_menu') }}" aria-expanded="false" aria-controls="nav-links">{{ ui.icon("menu", 20) }}</button>
       </div>
     </div>
